@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="PT-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Chamadas - SABAE</title>
+    <link rel="shortcut icon" href="./assets/imagens/logos/sabae.png" type="image/x-icon">
+    <link rel="stylesheet" href="./assets/estilos/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+    <div id="loader" class="loader-container">
+        <img src="./assets/imagens/logos/sabae.png" alt="" style="width: 150px;">
+        <div class="spinner"></div>
+        <p>Um momento...</p>
+    </div>
+
+    <header class="pwa-header">
+        <div class="header-left">
+            <button class="header-menu" id="btnVoltar">
+                <i class="ri-arrow-left-line" style="font-size: 24px;"></i>
+            </button>
+            <img src="./assets/imagens/logos/sabae.png" alt="SABAE Logo" class="header-logo"
+                style="width: 50px; height: 50px; border-radius: 10px;">
+            <span class="header-title">Registrar Chamadas</span>
+        </div>
+        <span class="header-datetime" id="headerDateTime">--:--</span>
+    </header>
+
+    <div class="user-info-bar">
+        <button class="btn-sair" id="btnSair">Desconectar <i class="ri-plug-line"></i></button>
+        <div class="user-info-content">
+            <span class="user-icon"><img src="./assets/imagens/ico/User_icon_2.svg" alt="" style="width: 30px;"></span>
+            <span class="user-name" id="nomeUsuarioHeader">Usuário</span>
+        </div>
+    </div>
+
+    <main style="flex-direction: column;">
+        <div class="conteudo-principal">
+            <h1>Registrar Chamadas</h1>
+
+            <!-- Seleção de Sala - Dropdown Customizado -->
+            <div style="margin: 20px 0;">
+                <label for="salaDropdown" style="font-weight: bold; display: block; margin-bottom: 10px;">Selecione a
+                    Sala:</label>
+                <div id="salaDropdown" class="custom-dropdown">
+                    <button class="dropdown-toggle" id="dropdownToggle">
+                        <span class="dropdown-label">-- Carregando salas --</span>
+                        <i class="ri-arrow-down-s-line"></i>
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <div class="dropdown-item loading">Carregando salas...</div>
+                    </div>
+                </div>
+                <input type="hidden" id="salaDropdownValue" value="">
+            </div>
+        </div>
+    </main>
+
+    <script src="./assets/lógica/supabase-config.js"></script>
+    <script src="./assets/lógica/auth.js"></script>
+    <script src="./assets/lógica/google-sheets-client.js"></script>
+    <script src="./assets/lógica/script.js"></script>
+
+    <script>
+        // Botão voltar
+        document.getElementById('btnVoltar').addEventListener('click', () => {
+            window.history.back();
+        });
+
+        // Atualizar data e hora
+        function atualizarDataHora() {
+            const agora = new Date();
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const ano = agora.getFullYear();
+            const horas = String(agora.getHours()).padStart(2, '0');
+            const minutos = String(agora.getMinutes()).padStart(2, '0');
+
+            const dataHora = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+            document.getElementById('headerDateTime').textContent = dataHora;
+        }
+
+        function agendarProximaAtualizacao() {
+            const agora = new Date();
+            const proximoSegundo = (1000 - agora.getMilliseconds());
+
+            setTimeout(() => {
+                atualizarDataHora();
+                setInterval(atualizarDataHora, 1000);
+            }, proximoSegundo);
+        }
+
+        agendarProximaAtualizacao();
+
+        // Carregar salas disponíveis ao inicializar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('usuarioLogado') === 'true') {
+                carregarSalasNoDropdown('#salaDropdown');
+            }
+        });
+
+        // Listener para quando a sala é selecionada
+        document.getElementById('salaDropdown').addEventListener('change', (e) => {
+            const salaSelecionada = e.target.value;
+            if (salaSelecionada) {
+                console.log(`Sala selecionada: ${salaSelecionada}`);
+                // Aqui você pode adicionar lógica para carregar alunos da sala selecionada
+            }
+        });
+    </script>
+
+</body>
+
+</html>

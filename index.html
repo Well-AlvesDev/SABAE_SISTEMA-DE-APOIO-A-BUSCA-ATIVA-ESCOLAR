@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="PT-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SABAE - SISTEMA DE APOIO À BUSCA ATIVA ESCOLAR</title>
+    <link rel="shortcut icon" href="./assets/imagens/logos/sabae.png" type="image/x-icon">
+    <link rel="stylesheet" href="./assets/estilos/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+    <div id="loader" class="loader-container">
+        <img src="./assets/imagens/logos/sabae.png" alt="" style="width: 150px;">
+        <div class="spinner"></div>
+        <p>Um momento...</p>
+    </div>
+
+
+    <header class="pwa-header">
+        <div class="header-left">
+            <img src="./assets/imagens/logos/sabae.png" alt="SABAE Logo" class="header-logo"
+                style="width: 50px; height: 50px; border-radius: 10px;">
+            <span class="header-title">SABAE</span>
+        </div>
+        <span class="header-datetime" id="headerDateTime">--:--</span>
+    </header>
+
+    <div class="user-info-bar">
+        <button class="btn-sair" id="btnSair">Desconectar <i class="ri-plug-line"></i></button>
+        <div class="user-info-content">
+            <span class="user-icon"><img src="./assets/imagens/ico/User_icon_2.svg" alt="" style="width: 30px;"></span>
+            <span class="user-name" id="nomeUsuarioHeader">Usuário</span>
+        </div>
+    </div>
+
+    <!-- Registro de Atividades -->
+    <section class="registro-de-atividades">
+        <div class="aprest" style="margin-bottom: 10px;">
+            <h1>Sistema de Apoio à Busca Ativa Escolar</h1>
+        </div>
+        <div class="atividades-container">
+            <h2><img src="./assets/imagens/ico/databaseprocess_basededatos_12922 (1).png" alt=""
+                    style="width: 30px; margin-left: 10px; vertical-align: middle;"> Registro de Atividades</h2>
+            <div class="atividades-list" id="atividadesList">
+                <div class="atividade-item loading">
+                    <span>Carregando atividades...</span>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <main>
+        <a href="./chamada.html" class="btn-registrar-chamadas">
+            <img src="./assets/imagens/ico/User-library.svg" alt="Registrar Chamadas" class="btn-registrar-icon">
+            <span class="btn-registrar-text">Registrar Chamada</span>
+        </a>
+    </main>
+
+    <script src="./assets/lógica/supabase-config.js"></script>
+    <script src="./assets/lógica/auth.js"></script>
+    <script src="./assets/lógica/atividades.js"></script>
+    <script src="./assets/lógica/script.js"></script>
+
+    <!-- Script para atualizar data e hora -->
+    <script>
+        function atualizarDataHora() {
+            const agora = new Date();
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const ano = agora.getFullYear();
+            const horas = String(agora.getHours()).padStart(2, '0');
+            const minutos = String(agora.getMinutes()).padStart(2, '0');
+
+            const dataHora = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+            document.getElementById('headerDateTime').textContent = dataHora;
+        }
+
+        function agendarProximaAtualizacao() {
+            const agora = new Date();
+            // Calcula quantos milissegundos faltam para o próximo segundo
+            const proximoSegundo = (1000 - agora.getMilliseconds());
+
+            setTimeout(() => {
+                atualizarDataHora();
+                // Após a primeira atualização sincronizada, atualiza a cada segundo
+                setInterval(atualizarDataHora, 1000);
+            }, proximoSegundo);
+        }
+
+        // Atualizar ao carregar (sincronizado com o segundo exato)
+        agendarProximaAtualizacao();
+    </script>
+
+</html>
