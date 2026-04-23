@@ -58,6 +58,44 @@
                 </div>
                 <input type="hidden" id="salaDropdownValue" value="">
             </div>
+
+            <!-- Seleção de Mês e Dia -->
+            <div style="margin: 20px 0;">
+                <label style="font-weight: bold; display: block; margin-bottom: 10px;">Selecione a Data:</label>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <!-- Seletor de Mês -->
+                    <div style="flex: 1; min-width: 150px;">
+                        <label for="mesSeletor"
+                            style="font-size: 12px; color: #666; display: block; margin-bottom: 5px;">Mês:</label>
+                        <div id="mesDropdown" class="custom-dropdown">
+                            <button class="dropdown-toggle" id="mesToggle">
+                                <span class="dropdown-label">-- Selecione o mês --</span>
+                                <i class="ri-arrow-down-s-line"></i>
+                            </button>
+                            <div class="dropdown-menu" id="mesMenu">
+                                <!-- Será preenchido por JavaScript -->
+                            </div>
+                        </div>
+                        <input type="hidden" id="mesValue" value="">
+                    </div>
+
+                    <!-- Seletor de Dia -->
+                    <div style="flex: 1; min-width: 150px;">
+                        <label for="diaSeletor"
+                            style="font-size: 12px; color: #666; display: block; margin-bottom: 5px;">Dia:</label>
+                        <div id="diaDropdown" class="custom-dropdown">
+                            <button class="dropdown-toggle" id="diaToggle">
+                                <span class="dropdown-label">-- Selecione o dia --</span>
+                                <i class="ri-arrow-down-s-line"></i>
+                            </button>
+                            <div class="dropdown-menu" id="diaMenu">
+                                <!-- Será preenchido por JavaScript -->
+                            </div>
+                        </div>
+                        <input type="hidden" id="diaValue" value="">
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -97,20 +135,96 @@
 
         agendarProximaAtualizacao();
 
-        // Carregar salas disponíveis ao inicializar a página
-        document.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem('usuarioLogado') === 'true') {
-                carregarSalasNoDropdown('#salaDropdown');
-            }
-        });
+        // ========== INICIALIZAR DROPDOWNS DE MÊS E DIA ==========
+        function getDiasDoMes(mesIndex) {
+            const ano = new Date().getFullYear();
+            // Usar o último dia do mês para saber quantos dias tem
+            return new Date(ano, mesIndex + 1, 0).getDate();
+        }
 
-        // Listener para quando a sala é selecionada
-        document.getElementById('salaDropdown').addEventListener('change', (e) => {
-            const salaSelecionada = e.target.value;
-            if (salaSelecionada) {
-                console.log(`Sala selecionada: ${salaSelecionada}`);
-                // Aqui você pode adicionar lógica para carregar alunos da sala selecionada
+        function atualizarDropdownDias(mesIndex) {
+            const diasDoMes = getDiasDoMes(mesIndex);
+            const diaAtual = new Date().getDate();
+            const diaMenu = document.getElementById('diaMenu');
+            const diaToggle = document.getElementById('diaToggle');
+            const diaValue = document.getElementById('diaValue');
+
+            // Limpar menu de dias
+            diaMenu.innerHTML = '';
+
+            // Popular dropdown de dia com o número correto
+            for (let i = 1; i <= diasDoMes; i++) {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = String(i).padStart(2, '0');
+                item.dataset.value = i;
+
+                // Se estamos no mês atual, marcar o dia atual como selecionado
+                if (mesIndex === new Date().getMonth() && i === diaAtual) {
+                    item.classList.add('selected');
+                }
+
+                diaMenu.appendChild(item);
             }
+
+            // Se o dia selecionado é maior que os dias do novo mês, resetar para o primeiro dia
+            const diaValueNumero = parseInt(diaValue.value) || diaAtual;
+            if (diaValueNumero > diasDoMes) {
+                diaToggle.querySelector('.dropdown-label').textContent = '01';
+                diaValue.value = 1;
+            } else if (mesIndex === new Date().getMonth()) {
+                // Se for o mês atual, manter o dia atual
+                diaToggle.querySelector('.dropdown-label').textContent = String(diaAtual).padStart(2, '0');
+                diaValue.value = diaAtual;
+            }
+        }
+
+        function inicializarDropdownsMesEDia() {
+            const agora = new Date();
+            const mesAtual = agora.getMonth();
+            const diaAtual = agora.getDate();
+
+            const meses = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+
+            // Popular dropdown de mês
+            const mesMenu = document.getElementById('mesMenu');
+            mesMenu.innerHTML = '';
+            meses.forEach((mes, index) => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = mes;
+                item.dataset.value = mes;
+                if (index === mesAtual) {
+                    item.classList.add('selected');
+                }
+                mesMenu.appendChild(item);
+            });
+
+            // Inicializar com valores padrão (atual)
+            document.getElementById('mesToggle').querySelector('.dropdown-label').textContent = meses[mesAtual];
+            document.getElementById('mesValue').value = meses[mesAtual];
+
+            // Inicializar dias com a quantidade correta para o mês atual
+            atualizarDropdownDias(mesAtual);
+
+            // Adicionar listener para quando o mês mudar
+            const mesDropdown = document.getElementById('mesDropdown');
+            mesDropdown.addEventListener('dropdownChange', (e) => {
+                const mesSelecionado = Array.from(mesMenu.querySelectorAll('.dropdown-item')).findIndex(
+                    item => item.textContent === e.detail.value
+                );
+                if (mesSelecionado !== -1) {
+                    atualizarDropdownDias(mesSelecionado);
+                }
+            });
+        }
+
+        // Executar inicialização assim que o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarDropdownsMesEDia();
         });
     </script>
 

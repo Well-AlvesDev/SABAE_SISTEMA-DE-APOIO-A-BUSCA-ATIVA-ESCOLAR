@@ -442,7 +442,7 @@ main {
 }
 
 .dropdown-menu.active {
-    max-height: 400px;
+    max-height: 235px;
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -517,7 +517,7 @@ main {
     }
 
     .dropdown-menu.active {
-        max-height: 400px;
+        max-height: 235px;
         overflow-y: auto;
     }
 
