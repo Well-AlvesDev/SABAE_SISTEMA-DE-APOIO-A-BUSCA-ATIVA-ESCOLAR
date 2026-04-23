@@ -41,7 +41,7 @@
 
     <main style="flex-direction: column;">
         <div class="conteudo-principal">
-            <h1>Registrar Chamadas</h1>
+            <h1>Registrar Chamada</h1>
 
             <!-- Seleção de Sala - Dropdown Customizado -->
             <div style="margin: 20px 0;">
@@ -96,8 +96,32 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Botão Iniciar Registro -->
+            <div style="margin: 30px 0; text-align: center;">
+                <button id="btnIniciarRegistro" class="btn-iniciar-registro">
+                    <i class="ri-check-line"></i> Iniciar Registro
+                </button>
+            </div>
         </div>
     </main>
+
+    <!-- Modal de Chamada -->
+    <div id="modalChamada" class="modal-chamada" style="display: none;">
+        <div class="modal-chamada-content">
+            <div class="modal-chamada-header">
+                <h2 id="modalChamadaTitulo">Registrar Chamada</h2>
+                <button id="btnFecharModal" class="btn-fechar-modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <div class="modal-chamada-body">
+                <div id="listaChamada" class="lista-chamada">
+                    <!-- Alunos serão adicionados aqui dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="./assets/lógica/supabase-config.js"></script>
     <script src="./assets/lógica/auth.js"></script>
