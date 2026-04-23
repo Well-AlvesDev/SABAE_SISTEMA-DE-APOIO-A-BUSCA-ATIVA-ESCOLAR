@@ -216,7 +216,7 @@ body {
     background: linear-gradient(135deg, #3e73bf 0%, #2c5aa0 100%);
     color: white;
     margin: 0;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 600;
 }
 
@@ -262,6 +262,7 @@ body {
 .atividade-usuario {
     font-weight: 600;
     color: #3e73bf;
+    font-size: 14px;
     min-width: 120px;
     white-space: nowrap;
     overflow: hidden;
@@ -306,7 +307,7 @@ body {
 
     .atividades-container h2 {
         padding: 15px;
-        font-size: 18px;
+        font-size: 16px;
     }
 }
 
@@ -323,8 +324,8 @@ main {
     align-items: center;
     justify-content: center;
     gap: 15px;
-    width: 150px;
-    height: 150px;
+    width: 120px;
+    height: 120px;
     background-color: #d3d3d3;
     border-radius: 20px;
     cursor: pointer;
@@ -345,13 +346,14 @@ main {
 }
 
 .btn-registrar-icon {
-    width: 80px;
+    width: 50px;
     height: 80px;
 }
 
 .btn-registrar-text {
     font-size: 14px;
     font-weight: 600;
+    margin-bottom: 5px;
     color: #333;
     text-align: center;
 }
