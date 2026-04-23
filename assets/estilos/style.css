@@ -759,27 +759,27 @@ main {
 }
 
 .btn-opcao.falta-nj {
-    border-color: #FF9800;
-    color: #FF9800;
-}
-
-.btn-opcao.falta-nj:hover,
-.btn-opcao.falta-nj.selecionado {
-    background: #FF9800;
-    color: white;
-    border-color: #FF9800;
-}
-
-.btn-opcao.falta-j {
     border-color: #F44336;
     color: #F44336;
 }
 
-.btn-opcao.falta-j:hover,
-.btn-opcao.falta-j.selecionado {
+.btn-opcao.falta-nj:hover,
+.btn-opcao.falta-nj.selecionado {
     background: #F44336;
     color: white;
     border-color: #F44336;
+}
+
+.btn-opcao.falta-j {
+    border-color: #2196F3;
+    color: #2196F3;
+}
+
+.btn-opcao.falta-j:hover,
+.btn-opcao.falta-j.selecionado {
+    background: #2196F3;
+    color: white;
+    border-color: #2196F3;
 }
 
 .btn-opcao.selecionado {
