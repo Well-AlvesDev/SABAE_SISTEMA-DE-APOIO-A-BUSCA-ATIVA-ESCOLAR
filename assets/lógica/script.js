@@ -888,6 +888,17 @@ function selecionarNoDropdown(dropdownId, valor, inputId) {
                 }
             }
         }
+
+        // ========== BOTÃO ENVIAR PARA O BANCO ==========
+        // Funcionalidade temporária - será implementada com Supabase em breve
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnEnviarParaBanco = document.getElementById('btnEnviarParaBanco');
+            if (btnEnviarParaBanco) {
+                btnEnviarParaBanco.addEventListener('click', () => {
+                    alert('⚠️ Esta funcionalidade será implementada em breve usando Supabase.\n\nAs chamadas estão salvas e serão enviadas em uma próxima atualização.');
+                });
+            }
+        });
     });
 }
 

@@ -171,42 +171,10 @@
         </div>
     </div>
 
-    <!-- Modal de Envio (Loader com Progresso) -->
-    <div id="modalEnvio" class="modal-envio" style="display: none;">
-        <div class="modal-envio-overlay"></div>
-        <div class="modal-envio-content">
-            <div class="modal-envio-icon">
-                <div class="spinner-envio"></div>
-            </div>
-            <h2 id="modalEnvioTitulo">Enviando Chamadas...</h2>
-            <p id="modalEnvioProgresso" class="modal-envio-progresso">0/0</p>
-            <div class="modal-envio-barra">
-                <div id="modalEnvioBarraProgresso" class="modal-envio-barra-progresso"></div>
-            </div>
-            <p id="modalEnvioDetalhes" class="modal-envio-detalhes">Enviando dados para a planilha...</p>
-        </div>
-    </div>
-
-    <!-- Modal de Resultado de Envio -->
-    <div id="modalResultadoEnvio" class="modal-resultado-envio" style="display: none;">
-        <div class="modal-resultado-overlay"></div>
-        <div class="modal-resultado-content">
-            <div id="modalResultadoIcone" class="modal-resultado-icone">
-                <i class="ri-checkbox-circle-fill"></i>
-            </div>
-            <h2 id="modalResultadoTitulo">Sucesso!</h2>
-            <p id="modalResultadoMensagem">Todas as chamadas foram enviadas com sucesso.</p>
-            <div id="modalResultadoDetalhes" class="modal-resultado-detalhes" style="display: none;">
-                <!-- Detalhes dos erros, se houver -->
-            </div>
-            <button id="btnFecharResultado" class="btn-fechar-resultado">OK</button>
-        </div>
-    </div>
-
     <script src="./assets/lógica/supabase-config.js"></script>
     <script src="./assets/lógica/auth.js"></script>
     <script src="./assets/lógica/supabase-alunos.js"></script>
-    <script src="./assets/lógica/google-sheets-envio.js"></script>
+    <script src="./assets/lógica/supabase-envio-chamadas.js"></script>
     <script src="./assets/lógica/script.js"></script>
 
     <script>
