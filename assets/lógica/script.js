@@ -167,14 +167,25 @@ async function inicializarPagina() {
         // Inicializar dropdown customizado
         inicializarDropdownCustomizado();
 
-        // Carregar as salas e remover loader após o carregamento
+        // Carregar TODOS os alunos e as salas antes de mostrar a página
         try {
+            console.log('⏳ Carregando dados iniciais...');
+
+            // Carregar todos os alunos no sessionStorage
+            const resultadoAlunos = await carregarTodosAlunosNaSessionStorage();
+            if (resultadoAlunos.sucesso) {
+                console.log(`✓ ${resultadoAlunos.alunos.length} alunos carregados no sessionStorage`);
+            } else {
+                console.warn(`⚠️ Aviso ao carregar alunos: ${resultadoAlunos.mensagem}`);
+            }
+
+            // Carregar as salas
             await carregarSalasNoDropdown('#salaDropdown');
             console.log('✓ Salas carregadas com sucesso');
         } catch (erro) {
-            console.error('⚠️ Erro ao carregar salas:', erro);
+            console.error('⚠️ Erro ao carregar dados:', erro);
         } finally {
-            // Remover loader após as salas terem sido carregadas (ou após erro)
+            // Remover loader após os dados terem sido carregados (ou após erro)
             removerLoader();
         }
     } else {
@@ -322,20 +333,20 @@ function inicializarBotaoIniciarRegistro() {
             `;
             document.body.appendChild(loader);
 
-            // Buscar alunos da sala selecionada
+            // Buscar alunos da sala selecionada a partir do sessionStorage
             console.log(`Buscando alunos da sala: ${salaSelecionada}`);
-            const resultado = await obterAlunosTurma(salaSelecionada);
+            const resultado = obterAlunosTurmaDaSessionStorage(salaSelecionada);
 
             // Remover loader
             loader.remove();
 
-            if (!resultado.sucesso || !resultado.dados || resultado.dados.length === 0) {
+            if (!resultado.sucesso || !resultado.alunos || resultado.alunos.length === 0) {
                 alert('Nenhum aluno encontrado para a sala selecionada');
                 return;
             }
 
             // Popular a lista de chamada no modal
-            populaListaChamada(resultado.dados, salaSelecionada, mesSelecionado, diaSelecionado);
+            populaListaChamada(resultado.alunos, salaSelecionada, mesSelecionado, diaSelecionado);
 
             // Resetar estado de edição se houver
             if (chamadaEmEdicao) {
@@ -815,21 +826,22 @@ function editarChamada(chamadaId) {
     const modalTitulo = document.getElementById('modalChamadaTitulo');
     modalTitulo.textContent = `Editar Chamada - ${chamada.sala}`;
 
-    // Recuperar alunos da sala para popular a lista
-    obterAlunosTurma(chamada.sala).then(resultado => {
-        if (resultado.sucesso && resultado.dados) {
-            // Usar a função populaListaChamada, mas com os dados da chamada salva
-            populaListaChamadaComDados(resultado.dados, chamada);
+    // Recuperar alunos da sala a partir do sessionStorage para popular a lista
+    const resultado = obterAlunosTurmaDaSessionStorage(chamada.sala);
 
-            // Abrir modal
-            const modal = document.getElementById('modalChamada');
-            modal.style.display = 'flex';
-        }
-    }).catch(erro => {
-        console.error('Erro ao recuperar alunos:', erro);
+    // Se bem-sucedido, continuar com a edição
+    if (resultado.sucesso && resultado.alunos) {
+        // Usar a função populaListaChamada, mas com os dados da chamada salva
+        populaListaChamadaComDados(resultado.alunos, chamada);
+
+        // Abrir modal
+        const modal = document.getElementById('modalChamada');
+        modal.style.display = 'flex';
+    } else {
+        console.error('Erro ao recuperar alunos:', resultado.mensagem);
         alert('Erro ao carregar alunos para edição');
         chamadaEmEdicao = null;
-    });
+    }
 }
 
 /**
