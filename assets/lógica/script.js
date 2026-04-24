@@ -479,9 +479,9 @@ function verificarChamadaDuplicada(sala, mes, dia) {
     const chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
 
     // Procurar por uma chamada com a mesma sala, mês e dia
-    return chamadasSalvas.some(chamada => 
-        chamada.sala === sala && 
-        chamada.mes === mes && 
+    return chamadasSalvas.some(chamada =>
+        chamada.sala === sala &&
+        chamada.mes === mes &&
         String(chamada.dia) === String(dia)
     );
 }
@@ -493,9 +493,6 @@ function salvarChamadaAuto() {
     const listaChamada = document.getElementById('listaChamada');
     const modal = document.getElementById('modalChamada');
     const modalTitulo = document.getElementById('modalChamadaTitulo');
-    const salaDropdownValue = document.getElementById('salaDropdownValue').value;
-    const mesValue = document.getElementById('mesValue').value;
-    const diaValue = document.getElementById('diaValue').value;
 
     // Validar se todos os alunos têm uma presença registrada
     const itensChamada = listaChamada.querySelectorAll('.item-chamada');
@@ -506,19 +503,27 @@ function salvarChamadaAuto() {
         return;
     }
 
-    // Coletar dados da chamada
+    // Recuperar chamadas existentes
+    let chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+    const chamadaOriginal = chamadasSalvas.find(c => c.id === chamadaEmEdicao);
+
+    if (!chamadaOriginal) {
+        alert('Chamada original não encontrada');
+        return;
+    }
+
+    // Manter dados originais (sala, mês, dia, data_hora_registrada)
+    // Apenas atualizar presença dos alunos
     let chamada = {
-        sala: salaDropdownValue,
-        mes: mesValue,
-        dia: diaValue,
-        data_hora_registrada: new Date().toLocaleString('pt-BR'),
+        id: chamadaEmEdicao,
+        sala: chamadaOriginal.sala,  // MANTER SALA ORIGINAL
+        mes: chamadaOriginal.mes,    // MANTER MÊS ORIGINAL
+        dia: chamadaOriginal.dia,    // MANTER DIA ORIGINAL
+        data_hora_registrada: chamadaOriginal.data_hora_registrada,  // MANTER DATA ORIGINAL
         alunos: []
     };
 
-    // Manter o ID original
-    chamada.id = chamadaEmEdicao;
-
-    // Coletar presença de cada aluno
+    // Coletar presença de cada aluno (ÚNICA COISA QUE MUDA)
     itensChamada.forEach(item => {
         chamada.alunos.push({
             matricula: item.dataset.alunoId,
@@ -526,9 +531,6 @@ function salvarChamadaAuto() {
             presenca: item.dataset.presenca
         });
     });
-
-    // Recuperar chamadas existentes
-    let chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
 
     // Atualizar chamada existente
     const indice = chamadasSalvas.findIndex(c => c.id === chamadaEmEdicao);
@@ -573,20 +575,38 @@ function salvarChamada() {
         return;
     }
 
-    // Coletar dados da chamada
-    let chamada = {
-        sala: salaDropdownValue,
-        mes: mesValue,
-        dia: diaValue,
-        data_hora_registrada: new Date().toLocaleString('pt-BR'),
-        alunos: []
-    };
+    // Recuperar chamadas existentes ou criar novo array
+    let chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
 
-    // Se está editando, manter o ID original; caso contrário, criar novo
+    let chamada;
+
     if (chamadaEmEdicao) {
-        chamada.id = chamadaEmEdicao;
+        // Modo edição: buscar chamada original e manter dados de sala/mês/dia/data
+        const chamadaOriginal = chamadasSalvas.find(c => c.id === chamadaEmEdicao);
+        if (!chamadaOriginal) {
+            alert('Chamada original não encontrada');
+            return;
+        }
+
+        // Manter dados originais, alterar apenas presença dos alunos
+        chamada = {
+            id: chamadaEmEdicao,
+            sala: chamadaOriginal.sala,  // MANTER SALA ORIGINAL
+            mes: chamadaOriginal.mes,    // MANTER MÊS ORIGINAL
+            dia: chamadaOriginal.dia,    // MANTER DIA ORIGINAL
+            data_hora_registrada: chamadaOriginal.data_hora_registrada,  // MANTER DATA ORIGINAL
+            alunos: []
+        };
     } else {
-        chamada.id = Date.now();
+        // Modo novo: criar chamada com dados do dropdown
+        chamada = {
+            id: Date.now(),
+            sala: salaDropdownValue,
+            mes: mesValue,
+            dia: diaValue,
+            data_hora_registrada: new Date().toLocaleString('pt-BR'),
+            alunos: []
+        };
     }
 
     // Coletar presença de cada aluno
@@ -597,9 +617,6 @@ function salvarChamada() {
             presenca: item.dataset.presenca
         });
     });
-
-    // Recuperar chamadas existentes ou criar novo array
-    let chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
 
     if (chamadaEmEdicao) {
         // Modo edição: atualizar chamada existente
@@ -634,8 +651,9 @@ function renderizarCartuchosChamadaaSalvas() {
     const container = document.getElementById('chamadassalvasContainer');
     const listaChamadas = document.getElementById('listaChamadaaSalvas');
 
-    // Recuperar chamadas salvas
-    const chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+    // Recuperar chamadas salvas e fazer uma cópia profunda para evitar ligações acidentais
+    const chamadasSalvasRaw = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+    const chamadasSalvas = JSON.parse(JSON.stringify(chamadasSalvasRaw)); // Cópia profunda isolada
 
     // Se não houver chamadas, esconder container
     if (chamadasSalvas.length === 0) {
@@ -796,11 +814,6 @@ function editarChamada(chamadaId) {
     // Atualizar título do modal
     const modalTitulo = document.getElementById('modalChamadaTitulo');
     modalTitulo.textContent = `Editar Chamada - ${chamada.sala}`;
-
-    // Preencher dropdowns (sala, mês, dia)
-    selecionarNoDropdown('salaDropdown', chamada.sala, 'salaDropdownValue');
-    selecionarNoDropdown('mesDropdown', chamada.mes, 'mesValue');
-    selecionarNoDropdown('diaDropdown', String(chamada.dia), 'diaValue');
 
     // Recuperar alunos da sala para popular a lista
     obterAlunosTurma(chamada.sala).then(resultado => {
@@ -1007,9 +1020,31 @@ function inicializarBotaoSalvarChamada() {
     }
 }
 
+// Adicionar listener ao dropdown de sala para evitar que mudanças afetem os cards
+function protegerCartuchosDeMudancasDropdown() {
+    const salaDropdown = document.getElementById('salaDropdown');
+    if (!salaDropdown) return;
+
+    // Listener para mudanças no dropdown de sala
+    salaDropdown.addEventListener('dropdownChange', (e) => {
+        // Se o modal está aberto (editando), não fazer nada
+        const modal = document.getElementById('modalChamada');
+        if (modal && modal.style.display === 'flex') {
+            return;
+        }
+
+        // Se não está em edição, apenas garantir que os dados dos cards estão atualizados
+        // com os dados do sessionStorage (proteção contra bugs de binding)
+        if (!chamadaEmEdicao) {
+            renderizarCartuchosChamadaaSalvas();
+        }
+    });
+}
+
 // Executar quando a página carregar
 document.addEventListener('DOMContentLoaded', () => {
     inicializarBotaoIniciarRegistro();
     inicializarBotaoSalvarChamada();
+    protegerCartuchosDeMudancasDropdown();
     renderizarCartuchosChamadaaSalvas();
 });
