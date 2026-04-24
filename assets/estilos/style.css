@@ -817,6 +817,15 @@ main {
     font-weight: 600;
 }
 
+.modal-chamada-info-header {
+    padding: 12px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 14px;
+    color: #495057;
+    font-weight: 500;
+}
+
 .btn-fechar-modal {
     background: rgba(255, 255, 255, 0.2);
     border: none;
@@ -979,9 +988,278 @@ main {
         font-size: 18px;
     }
 
+    .modal-chamada-info-header {
+        padding: 10px 15px;
+        font-size: 13px;
+    }
+
     .btn-fechar-modal {
         width: 36px;
         height: 36px;
         font-size: 20px;
+    }
+}
+
+/* ========== FOOTER DO MODAL DE CHAMADA ========== */
+.modal-chamada-footer {
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-salvar-chamada {
+    background: linear-gradient(135deg, #3e73bf 0%, #2c5aa0 100%);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(62, 115, 191, 0.3);
+}
+
+.btn-salvar-chamada:hover:not(:disabled) {
+    background: linear-gradient(135deg, #3568b3 0%, #284a94 100%);
+    box-shadow: 0 6px 12px rgba(62, 115, 191, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-salvar-chamada:active:not(:disabled) {
+    background: linear-gradient(135deg, #305aa3 0%, #213c87 100%);
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(62, 115, 191, 0.3);
+}
+
+.btn-salvar-chamada:disabled {
+    background: linear-gradient(135deg, #cccccc 0%, #aaaaaa 100%);
+    cursor: not-allowed;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ========== CONTAINER DE CHAMADAS SALVAS ========== */
+.chamadas-salvas-container {
+    margin-top: 40px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chamadas-salvas-titulo {
+    font-size: 18px;
+    font-weight: 600;
+    color: #3c3c3c;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #3e73bf;
+}
+
+.lista-chamadas-salvas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+/* ========== CARD DE CHAMADA SALVA ========== */
+.card-chamada-salva {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border-left: 4px solid #3e73bf;
+}
+
+.card-chamada-salva:hover {
+    box-shadow: 0 4px 12px rgba(62, 115, 191, 0.15);
+    transform: translateY(-2px);
+}
+
+.card-chamada-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+}
+
+.card-chamada-info {
+    flex: 1;
+}
+
+.card-chamada-sala {
+    font-size: 16px;
+    font-weight: 600;
+    color: #3c3c3c;
+    margin-bottom: 4px;
+}
+
+.card-chamada-data {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 8px;
+}
+
+.card-chamada-hora {
+    font-size: 12px;
+    color: #bbb;
+}
+
+.card-chamada-acoes {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn-card-acao {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.btn-card-editar {
+    color: #3e73bf;
+}
+
+.btn-card-editar:hover {
+    background-color: #e8f1ff;
+}
+
+.btn-card-remover {
+    color: #f44336;
+}
+
+.btn-card-remover:hover {
+    background-color: #ffebee;
+}
+
+.card-chamada-alunos {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.card-chamada-alunos-titulo {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.card-chamada-alunos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.card-aluno-presenca {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-aluno-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.card-aluno-badge.presente {
+    background-color: #c8e6c9;
+    color: #2e7d32;
+}
+
+.card-aluno-badge.falta-nj {
+    background-color: #ffcdd2;
+    color: #c62828;
+}
+
+.card-aluno-badge.falta-j {
+    background-color: #bbdefb;
+    color: #1565c0;
+}
+
+.card-aluno-nome {
+    flex: 1;
+    color: #333;
+}
+
+/* Responsividade para Mobile */
+@media (max-width: 600px) {
+    .lista-chamadas-salvas {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-chamada-footer {
+        padding: 15px;
+    }
+
+    .btn-salvar-chamada {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 16px;
+    }
+
+    .chamadas-salvas-container {
+        margin-top: 30px;
+        padding: 15px;
+    }
+
+    .card-chamada-header {
+        flex-direction: column;
+    }
+
+    .card-chamada-acoes {
+        margin-top: 12px;
+    }
+}
+
+/* Animações para notificações */
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateY(20px);
+        opacity: 0;
     }
 }
