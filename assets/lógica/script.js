@@ -224,7 +224,54 @@ if (btnSair) {
     });
 }
 
-// ========== LÓGICA DO BOT\u00c3O INICIAR REGISTRO ==========
+// ========== FUNCIONALIDADE DE RECARREGAR DADOS ==========
+const btnRecarregar = document.getElementById('btnRecarregar');
+if (btnRecarregar) {
+    btnRecarregar.addEventListener('click', async () => {
+        btnRecarregar.disabled = true;
+        const loaderRecarregamento = document.getElementById('loaderRecarregamento');
+        const modalSucesso = document.getElementById('modalSucesso');
+
+        // Mostrar loader
+        loaderRecarregamento.style.display = 'flex';
+
+        try {
+            console.log('🔄 Recarregando dados...');
+            await recarregarDados();
+            console.log('✅ Dados recarregados com sucesso');
+
+            // Esconder loader e mostrar modal de sucesso
+            loaderRecarregamento.style.display = 'none';
+            modalSucesso.style.display = 'flex';
+
+        } catch (erro) {
+            console.error('❌ Erro ao recarregar dados:', erro);
+            loaderRecarregamento.style.display = 'none';
+            alert('❌ Erro ao recarregar dados. Tente novamente.');
+        } finally {
+            btnRecarregar.disabled = false;
+        }
+    });
+}
+
+// Fechar modal de sucesso
+const btnFecharSucesso = document.getElementById('btnFecharSucesso');
+if (btnFecharSucesso) {
+    btnFecharSucesso.addEventListener('click', () => {
+        const modalSucesso = document.getElementById('modalSucesso');
+        modalSucesso.style.display = 'none';
+    });
+}
+
+// Fechar modal ao clicar fora dele
+const modalSucesso = document.getElementById('modalSucesso');
+if (modalSucesso) {
+    modalSucesso.addEventListener('click', (e) => {
+        if (e.target === modalSucesso || e.target.classList.contains('modal-sucesso-overlay')) {
+            modalSucesso.style.display = 'none';
+        }
+    });
+}
 function inicializarBotaoIniciarRegistro() {
     const btnIniciar = document.getElementById('btnIniciarRegistro');
     const btnFecharModal = document.getElementById('btnFecharModal');
@@ -325,8 +372,13 @@ function populaListaChamada(alunos, sala, mes, dia) {
     // Limpar lista anterior
     listaChamada.innerHTML = '';
 
+    // Ordenar alunos alfabeticamente para exibição (mantém a ordem original intacta para os dados)
+    const alunosOrdenados = [...alunos].sort((a, b) =>
+        a.nome.localeCompare(b.nome, 'pt-BR')
+    );
+
     // Criar item para cada aluno
-    alunos.forEach(aluno => {
+    alunosOrdenados.forEach(aluno => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'item-chamada';
         itemDiv.dataset.alunoId = aluno.matricula;
@@ -356,16 +408,19 @@ function populaListaChamada(alunos, sala, mes, dia) {
             btn.dataset.valor = opcao.valor;
 
             btn.addEventListener('click', () => {
-                // Remover classe selecionado de todos os bot\u00f5es deste item
-                itemDiv.querySelectorAll('.btn-opcao').forEach(b => {
-                    b.classList.remove('selecionado');
-                });
+                // Se o botão já está selecionado, desmarcar
+                if (btn.classList.contains('selecionado')) {
+                    btn.classList.remove('selecionado');
+                    itemDiv.dataset.presenca = '';
+                } else {
+                    // Se não está selecionado, remover de todos e marcar este
+                    itemDiv.querySelectorAll('.btn-opcao').forEach(b => {
+                        b.classList.remove('selecionado');
+                    });
 
-                // Adicionar classe selecionado ao bot\u00e3o clicado
-                btn.classList.add('selecionado');
-
-                // Armazenar a sele\u00e7\u00e3o no item (para futura salva\u00e7\u00e3o)
-                itemDiv.dataset.presenca = opcao.valor;
+                    btn.classList.add('selecionado');
+                    itemDiv.dataset.presenca = opcao.valor;
+                }
             });
 
             opcoesDiv.appendChild(btn);
