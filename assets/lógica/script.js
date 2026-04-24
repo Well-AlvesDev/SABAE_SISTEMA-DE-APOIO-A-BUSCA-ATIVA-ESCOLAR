@@ -422,14 +422,14 @@ function populaListaChamada(alunos, sala, mes, dia) {
     alunosOrdenados.forEach(aluno => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'item-chamada';
-        itemDiv.dataset.alunoId = aluno.matricula;
+        itemDiv.dataset.alunoId = aluno.mat;
 
         // Informa\u00e7\u00f5es do aluno
         const infoDiv = document.createElement('div');
         infoDiv.className = 'item-chamada-info';
         infoDiv.innerHTML = `
             <div class="item-chamada-nome">${aluno.nome}</div>
-            <div class="item-chamada-matricula">Mat\u00edcula: ${aluno.matricula}</div>
+            <div class="item-chamada-matricula">Mat\u00edcula: ${aluno.mat}</div>
         `;
 
         // Op\u00e7\u00f5es de presença
@@ -537,7 +537,7 @@ function salvarChamadaAuto() {
     // Coletar presença de cada aluno (ÚNICA COISA QUE MUDA)
     itensChamada.forEach(item => {
         chamada.alunos.push({
-            matricula: item.dataset.alunoId,
+            mat: item.dataset.alunoId,
             nome: item.querySelector('.item-chamada-nome').textContent,
             presenca: item.dataset.presenca
         });
@@ -623,7 +623,7 @@ function salvarChamada() {
     // Coletar presença de cada aluno
     itensChamada.forEach(item => {
         chamada.alunos.push({
-            matricula: item.dataset.alunoId,
+            mat: item.dataset.alunoId,
             nome: item.querySelector('.item-chamada-nome').textContent,
             presenca: item.dataset.presenca
         });
@@ -914,21 +914,21 @@ function populaListaChamadaComDados(alunos, chamadaSalva) {
     // Criar mapa de presenças da chamada salva para acesso rápido
     const presenças = {};
     chamadaSalva.alunos.forEach(aluno => {
-        presenças[aluno.matricula] = aluno.presenca;
+        presenças[aluno.mat] = aluno.presenca;
     });
 
     // Criar item para cada aluno
     alunosOrdenados.forEach(aluno => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'item-chamada';
-        itemDiv.dataset.alunoId = aluno.matricula;
+        itemDiv.dataset.alunoId = aluno.mat;
 
         // Informações do aluno
         const infoDiv = document.createElement('div');
         infoDiv.className = 'item-chamada-info';
         infoDiv.innerHTML = `
             <div class="item-chamada-nome">${aluno.nome}</div>
-            <div class="item-chamada-matricula">Matrícula: ${aluno.matricula}</div>
+            <div class="item-chamada-matricula">Matrícula: ${aluno.mat}</div>
         `;
 
         // Opções de presença
@@ -948,7 +948,7 @@ function populaListaChamadaComDados(alunos, chamadaSalva) {
             btn.dataset.valor = opcao.valor;
 
             // Se este aluno tinha uma presença registrada, marcar o botão
-            if (presenças[aluno.matricula] === opcao.valor) {
+            if (presenças[aluno.mat] === opcao.valor) {
                 btn.classList.add('selecionado');
                 itemDiv.dataset.presenca = opcao.valor;
             }
