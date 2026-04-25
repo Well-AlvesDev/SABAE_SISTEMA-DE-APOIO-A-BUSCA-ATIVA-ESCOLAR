@@ -7,6 +7,12 @@ function verificarAutenticacao() {
 // Variável para armazenar o ID da chamada sendo editada
 let chamadaEmEdicao = null;
 
+// Flag para identificar se a chamada veio do Supabase (não deve salvar em sessionStorage)
+let chamadaEmEdicaoVeioDoSupabase = false;
+
+// Armazenar dados da chamada do Supabase temporariamente durante edição
+let chamadaSupabaseEmEdicao = null;
+
 // Função para remover o loader
 function removerLoader() {
     const loader = document.getElementById('loader');
@@ -350,15 +356,6 @@ function inicializarBotaoIniciarRegistro() {
             return;
         }
 
-        // Verificar se já existe uma chamada para esta sala neste dia
-        if (verificarChamadaDuplicada(salaSelecionada, mesSelecionado, diaSelecionado)) {
-            exibirModalAviso(
-                'Chamada Duplicada',
-                `Já existe uma chamada registrada para a sala "${salaSelecionada}" em ${diaSelecionado}/${obterNumeroMes(mesSelecionado)}. Não é permitido fazer duas chamadas para a mesma sala no mesmo dia.`
-            );
-            return;
-        }
-
         try {
             // Mostrar loader
             const loader = document.createElement('div');
@@ -366,9 +363,77 @@ function inicializarBotaoIniciarRegistro() {
             loader.innerHTML = `
                 <img src="./assets/imagens/logos/sabae.png" alt="" style="width: 150px;">
                 <div class="spinner"></div>
-                <p>Carregando alunos da sala...</p>
+                <p>Verificando chamadas existentes...</p>
             `;
             document.body.appendChild(loader);
+
+            // ========== NOVA LÓGICA: Verificar se existe chamada no Supabase ==========
+            console.log(`🔍 Verificando se existe chamada no Supabase para ${salaSelecionada} - ${diaSelecionado}/${obterNumeroMes(mesSelecionado)}`);
+
+            const resultadoChamadaSupabase = await buscarChamadaSupabaseParaEditar(
+                salaSelecionada,
+                parseInt(diaSelecionado),
+                mesSelecionado
+            );
+
+            // Se uma chamada foi encontrada no Supabase, carregar para edição
+            if (resultadoChamadaSupabase.prontaParaEditar && resultadoChamadaSupabase.chamada) {
+                console.log('✅ Chamada encontrada no Supabase! Carregando para edição...');
+
+                const chamadaSupabase = resultadoChamadaSupabase.chamada;
+
+                // ========== NÃO adicionar ao sessionStorage de chamadasSalvas ==========
+                // Armazenar temporariamente em variável global para edição
+                chamadaSupabaseEmEdicao = chamadaSupabase;
+
+                // Marcar como em edição
+                chamadaEmEdicao = chamadaSupabase.id;
+                chamadaEmEdicaoVeioDoSupabase = true; // Flag para indicar que veio do Supabase
+
+                console.log('📝 Chamada do Supabase carregada para EDIÇÃO (será enviada direto ao Supabase)');
+
+                // Buscar alunos completos da sala para poder exibir todos com sua presença
+                const resultado = obterAlunosTurmaDaSessionStorage(salaSelecionada);
+
+                if (!resultado.sucesso || !resultado.alunos || resultado.alunos.length === 0) {
+                    loader.remove();
+                    exibirModalAviso('Nenhum Aluno Encontrado', 'Nenhum aluno foi encontrado para a sala selecionada.');
+                    return;
+                }
+
+                // Remover loader
+                loader.remove();
+
+                // Popular modal com dados da chamada existente
+                const modalTitulo = document.getElementById('modalChamadaTitulo');
+                modalTitulo.textContent = `Editar Chamada - ${salaSelecionada}`;
+
+                populaListaChamadaComDados(resultado.alunos, chamadaSupabase);
+
+                // Exibir modal
+                modal.style.display = 'flex';
+
+                // Mostrar mensagem informativa
+                mostrarNotificacaoSucesso(`Chamada encontrada! Editando chamada existente de ${diaSelecionado}/${obterNumeroMes(mesSelecionado)}.`);
+
+                return;
+            }
+
+            // ========== Se não encontrou no Supabase, criar novo registro ==========
+            console.log('📝 Nenhuma chamada existente. Criando novo registro...');
+
+            // Verificar se já existe uma chamada para esta sala neste dia no sessionStorage
+            if (verificarChamadaDuplicada(salaSelecionada, mesSelecionado, diaSelecionado)) {
+                loader.remove();
+                exibirModalAviso(
+                    'Chamada Duplicada',
+                    `Já existe uma chamada registrada para a sala "${salaSelecionada}" em ${diaSelecionado}/${obterNumeroMes(mesSelecionado)}. Não é permitido fazer duas chamadas para a mesma sala no mesmo dia.`
+                );
+                return;
+            }
+
+            // Atualizar loader
+            loader.querySelector('p').textContent = 'Carregando alunos da sala...';
 
             // Buscar alunos da sala selecionada a partir do sessionStorage
             console.log(`Buscando alunos da sala: ${salaSelecionada}`);
@@ -388,6 +453,7 @@ function inicializarBotaoIniciarRegistro() {
             // Resetar estado de edição se houver
             if (chamadaEmEdicao) {
                 chamadaEmEdicao = null;
+                chamadaEmEdicaoVeioDoSupabase = false; // Resetar flag
                 const modalTitulo = document.getElementById('modalChamadaTitulo');
                 modalTitulo.textContent = 'Registrar Chamada';
             }
@@ -407,11 +473,23 @@ function inicializarBotaoIniciarRegistro() {
     // Event listener para fechar o modal
     if (btnFecharModal) {
         btnFecharModal.addEventListener('click', () => {
-            // Se está em modo de edição, salvar automaticamente
-            if (chamadaEmEdicao) {
-                salvarChamadaAuto();
-            } else {
+            // Se está em modo de edição do Supabase, apenas fechar (sem salvar automaticamente)
+            if (chamadaEmEdicaoVeioDoSupabase) {
+                // Descartar edição
                 modal.style.display = 'none';
+                chamadaEmEdicao = null;
+                chamadaEmEdicaoVeioDoSupabase = false;
+                chamadaSupabaseEmEdicao = null;
+            }
+            // Se está em modo de edição e NÃO veio do Supabase, salvar automaticamente
+            else if (chamadaEmEdicao && !chamadaEmEdicaoVeioDoSupabase) {
+                salvarChamadaAuto();
+            }
+            // Se é novo, apenas fechar
+            else {
+                modal.style.display = 'none';
+                chamadaEmEdicao = null;
+                chamadaEmEdicaoVeioDoSupabase = false;
             }
         });
     }
@@ -419,11 +497,23 @@ function inicializarBotaoIniciarRegistro() {
     // Fechar modal ao clicar fora dele
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
-            // Se está em modo de edição, salvar automaticamente
-            if (chamadaEmEdicao) {
-                salvarChamadaAuto();
-            } else {
+            // Se está em modo de edição do Supabase, apenas fechar (sem salvar automaticamente)
+            if (chamadaEmEdicaoVeioDoSupabase) {
+                // Descartar edição
                 modal.style.display = 'none';
+                chamadaEmEdicao = null;
+                chamadaEmEdicaoVeioDoSupabase = false;
+                chamadaSupabaseEmEdicao = null;
+            }
+            // Se está em modo de edição e NÃO veio do Supabase, salvar automaticamente
+            else if (chamadaEmEdicao && !chamadaEmEdicaoVeioDoSupabase) {
+                salvarChamadaAuto();
+            }
+            // Se é novo, apenas fechar
+            else {
+                modal.style.display = 'none';
+                chamadaEmEdicao = null;
+                chamadaEmEdicaoVeioDoSupabase = false;
             }
         }
     });
@@ -592,6 +682,7 @@ function salvarChamadaAuto() {
 
     // Resetar estado de edição
     chamadaEmEdicao = null;
+    chamadaEmEdicaoVeioDoSupabase = false; // Resetar flag
     modalTitulo.textContent = 'Registrar Chamada';
 
     // Fechar modal
@@ -605,9 +696,11 @@ function salvarChamadaAuto() {
 }
 
 /**
- * Salva a chamada atual em sessionStorage
+ * Salva a chamada atual (sessionStorage ou Supabase)
+ * Se a chamada veio do Supabase, envia direto para Supabase
+ * Se é uma chamada nova, salva em sessionStorage
  */
-function salvarChamada() {
+async function salvarChamada() {
     const listaChamada = document.getElementById('listaChamada');
     const modal = document.getElementById('modalChamada');
     const salaDropdownValue = document.getElementById('salaDropdownValue').value;
@@ -623,6 +716,76 @@ function salvarChamada() {
         return;
     }
 
+    // ========== CASO 1: Edição do Supabase - Enviar direto para Supabase ==========
+    if (chamadaEmEdicaoVeioDoSupabase && chamadaSupabaseEmEdicao) {
+        console.log('📤 Enviando edição direto para Supabase (não salvando em sessionStorage)...');
+
+        // Coletar presença de cada aluno
+        const alunos = [];
+        itensChamada.forEach(item => {
+            alunos.push({
+                mat: item.dataset.alunoId,
+                nome: item.querySelector('.item-chamada-nome').textContent,
+                presenca: item.dataset.presenca
+            });
+        });
+
+        // Preparar dados para envio
+        const numerMes = obterNumeroMes(chamadaSupabaseEmEdicao.mes);
+        const dia = parseInt(chamadaSupabaseEmEdicao.dia);
+
+        const registros = alunos.map(aluno => ({
+            dia: dia,
+            mes: numerMes,
+            mat: String(aluno.mat || '').trim(),
+            nome: String(aluno.nome || '').trim(),
+            presenca: String(aluno.presenca || '').trim()
+        }));
+
+        try {
+            // Obter credenciais da sessão
+            const nomeUsuario = sessionStorage.getItem('usuario');
+            const senhaUsuario = sessionStorage.getItem('usuarioSenha');
+
+            if (!nomeUsuario || !senhaUsuario) {
+                throw new Error('Sessão expirada. Credenciais não encontradas.');
+            }
+
+            // Chamar a função RPC do Supabase com a nova função que atualiza por mês
+            const { data, error } = await supabaseClient.rpc('registrar_chamadas_lote_atualizar_mes', {
+                p_nome_usuario: nomeUsuario,
+                p_senha_usuario: senhaUsuario,
+                p_chamadas_json: registros
+            });
+
+            if (error) {
+                console.error('❌ Erro ao enviar edição para Supabase:', error);
+                alert(`❌ Erro ao salvar: ${error.message}`);
+                return;
+            }
+
+            console.log('✅ Edição enviada com sucesso para Supabase:', data);
+            mostrarNotificacaoSucesso('Chamada atualizada no Supabase com sucesso!');
+
+            // Resetar estado de edição
+            chamadaEmEdicao = null;
+            chamadaEmEdicaoVeioDoSupabase = false;
+            chamadaSupabaseEmEdicao = null;
+
+            // Fechar modal
+            modal.style.display = 'none';
+
+            // Atualizar exibição dos cards (não há cards para remover, pois não foi salvo em sessionStorage)
+            renderizarCartuchosChamadaaSalvas();
+
+        } catch (erro) {
+            console.error('❌ Erro inesperado ao enviar para Supabase:', erro);
+            alert(`❌ Erro: ${erro.message}`);
+        }
+        return;
+    }
+
+    // ========== CASO 2: Chamada nova ou edição de sessionStorage ==========
     // Recuperar chamadas existentes ou criar novo array
     let chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
 
@@ -675,6 +838,7 @@ function salvarChamada() {
             mostrarNotificacaoSucesso('Chamada atualizada com sucesso!');
         }
         chamadaEmEdicao = null;
+        chamadaEmEdicaoVeioDoSupabase = false; // Resetar flag
     } else {
         // Modo novo: adicionar nova chamada
         chamadasSalvas.push(chamada);
@@ -858,6 +1022,7 @@ function editarChamada(chamadaId) {
 
     // Marcar como em edição
     chamadaEmEdicao = chamadaId;
+    chamadaEmEdicaoVeioDoSupabase = false; // Esta é uma chamada do sessionStorage, não do Supabase
 
     // Atualizar título do modal
     const modalTitulo = document.getElementById('modalChamadaTitulo');
