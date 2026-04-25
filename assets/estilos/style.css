@@ -314,6 +314,81 @@ body {
     transform: scale(0.98);
 }
 
+/* Modal de Aviso */
+.modal-aviso {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10002;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-aviso-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-aviso-content {
+    position: relative;
+    z-index: 10003;
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 400px;
+    animation: slideUp 0.4s ease-out;
+}
+
+.modal-aviso-icon {
+    font-size: 60px;
+    color: #ff9800;
+    margin-bottom: 15px;
+}
+
+.modal-aviso-content h2 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.modal-aviso-content p {
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.btn-fechar-aviso {
+    background-color: #ff9800;
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-fechar-aviso:hover {
+    background-color: #f57c00;
+}
+
+.btn-fechar-aviso:active {
+    background-color: #e65100;
+    transform: scale(0.98);
+}
+
 /* Responsividade */
 @media (max-width: 600px) {
     .pwa-header {
@@ -719,10 +794,10 @@ main {
 
 /* ========== BOT\u00c3O INICIAR REGISTRO ========== */
 .btn-iniciar-registro {
-    background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
-    color: white;
-    border: none;
-    padding: 14px 32px;
+    background: #ffffff00;
+    color: rgb(40, 154, 25);
+    border: 1px solid #25b41581;
+    padding: 6px 15px;
     font-size: 16px;
     font-weight: 600;
     border-radius: 8px;
@@ -731,25 +806,6 @@ main {
     align-items: center;
     gap: 10px;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
-}
-
-.btn-iniciar-registro:hover:not(:disabled) {
-    background: linear-gradient(135deg, #45a049 0%, #357a3d 100%);
-    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
-    transform: translateY(-2px);
-}
-
-.btn-iniciar-registro:active:not(:disabled) {
-    background: linear-gradient(135deg, #3d8b40 0%, #2d6930 100%);
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
-}
-
-.btn-iniciar-registro:disabled {
-    background: linear-gradient(135deg, #cccccc 0%, #aaaaaa 100%);
-    cursor: not-allowed;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* ========== MODAL DE CHAMADA ========== */
@@ -806,7 +862,7 @@ main {
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    background: linear-gradient(135deg, #3e73bf 0%, #2c5aa0 100%);
+    background: #3e73bf;
     color: white;
     border-radius: 12px 12px 0 0;
 }
@@ -1011,12 +1067,12 @@ main {
 }
 
 .btn-salvar-chamada {
-    background: linear-gradient(135deg, #3e73bf 0%, #2c5aa0 100%);
+    background: #3e73bf;
     color: white;
     border: none;
     padding: 12px 32px;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 400;
     border-radius: 8px;
     cursor: pointer;
     display: inline-flex;
@@ -1027,19 +1083,16 @@ main {
 }
 
 .btn-salvar-chamada:hover:not(:disabled) {
-    background: linear-gradient(135deg, #3568b3 0%, #284a94 100%);
     box-shadow: 0 6px 12px rgba(62, 115, 191, 0.4);
     transform: translateY(-2px);
 }
 
 .btn-salvar-chamada:active:not(:disabled) {
-    background: linear-gradient(135deg, #305aa3 0%, #213c87 100%);
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(62, 115, 191, 0.3);
 }
 
 .btn-salvar-chamada:disabled {
-    background: linear-gradient(135deg, #cccccc 0%, #aaaaaa 100%);
     cursor: not-allowed;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

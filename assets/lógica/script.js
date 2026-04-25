@@ -286,6 +286,40 @@ if (modalSucesso) {
         }
     });
 }
+
+// ========== FUNCIONALIDADES DO MODAL DE AVISO ==========
+function exibirModalAviso(titulo, mensagem) {
+    const modalAviso = document.getElementById('modalAviso');
+    const modalAvisoTitulo = document.getElementById('modalAvisoTitulo');
+    const modalAvisoMensagem = document.getElementById('modalAvisoMensagem');
+
+    if (modalAvisoTitulo) modalAvisoTitulo.textContent = titulo;
+    if (modalAvisoMensagem) modalAvisoMensagem.textContent = mensagem;
+    if (modalAviso) modalAviso.style.display = 'flex';
+}
+
+function fecharModalAviso() {
+    const modalAviso = document.getElementById('modalAviso');
+    if (modalAviso) modalAviso.style.display = 'none';
+}
+
+// Listener para o botão "Entendido" do modal de aviso
+const btnFecharAviso = document.getElementById('btnFecharAviso');
+if (btnFecharAviso) {
+    btnFecharAviso.addEventListener('click', () => {
+        fecharModalAviso();
+    });
+}
+
+// Fechar modal de aviso ao clicar fora dele
+const modalAviso = document.getElementById('modalAviso');
+if (modalAviso) {
+    modalAviso.addEventListener('click', (e) => {
+        if (e.target === modalAviso || e.target.classList.contains('modal-aviso-overlay')) {
+            fecharModalAviso();
+        }
+    });
+}
 function inicializarBotaoIniciarRegistro() {
     const btnIniciar = document.getElementById('btnIniciarRegistro');
     const btnFecharModal = document.getElementById('btnFecharModal');
@@ -302,23 +336,26 @@ function inicializarBotaoIniciarRegistro() {
 
         // Validar se todos os campos foram preenchidos
         if (!salaSelecionada) {
-            alert('Por favor, selecione uma sala');
+            exibirModalAviso('Campo Obrigatório', 'Por favor, selecione uma sala para continuar.');
             return;
         }
 
         if (!mesSelecionado) {
-            alert('Por favor, selecione um mês');
+            exibirModalAviso('Campo Obrigatório', 'Por favor, selecione um mês para continuar.');
             return;
         }
 
         if (!diaSelecionado) {
-            alert('Por favor, selecione um dia');
+            exibirModalAviso('Campo Obrigatório', 'Por favor, selecione um dia para continuar.');
             return;
         }
 
         // Verificar se já existe uma chamada para esta sala neste dia
         if (verificarChamadaDuplicada(salaSelecionada, mesSelecionado, diaSelecionado)) {
-            alert(`⚠️ Já existe uma chamada registrada para a sala "${salaSelecionada}" em ${diaSelecionado}/${obterNumeroMes(mesSelecionado)}. Não é permitido fazer duas chamadas para a mesma sala no mesmo dia.`);
+            exibirModalAviso(
+                'Chamada Duplicada',
+                `Já existe uma chamada registrada para a sala "${salaSelecionada}" em ${diaSelecionado}/${obterNumeroMes(mesSelecionado)}. Não é permitido fazer duas chamadas para a mesma sala no mesmo dia.`
+            );
             return;
         }
 
@@ -341,7 +378,7 @@ function inicializarBotaoIniciarRegistro() {
             loader.remove();
 
             if (!resultado.sucesso || !resultado.alunos || resultado.alunos.length === 0) {
-                alert('Nenhum aluno encontrado para a sala selecionada');
+                exibirModalAviso('Nenhum Aluno Encontrado', 'Nenhum aluno foi encontrado para a sala selecionada.');
                 return;
             }
 
@@ -360,7 +397,7 @@ function inicializarBotaoIniciarRegistro() {
 
         } catch (erro) {
             console.error('Erro ao buscar alunos:', erro);
-            alert('Erro ao buscar alunos. Tente novamente.');
+            exibirModalAviso('Erro ao Buscar Alunos', 'Ocorreu um erro ao buscar os alunos. Tente novamente.');
             // Remover loader em caso de erro
             const loader = document.querySelector('.loader-container');
             if (loader) loader.remove();

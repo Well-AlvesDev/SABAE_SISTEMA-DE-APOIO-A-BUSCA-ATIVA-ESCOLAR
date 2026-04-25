@@ -48,7 +48,7 @@
 
             <!-- Seleção de Sala - Dropdown Customizado -->
             <div style="margin: 20px 0;">
-                <label for="salaDropdown" style="font-weight: bold; display: block; margin-bottom: 10px;">Selecione a
+                <label for="salaDropdown" style="font-weight: 400; display: block; margin-bottom: 10px;">Selecione a
                     Sala:</label>
                 <div id="salaDropdown" class="custom-dropdown">
                     <button class="dropdown-toggle" id="dropdownToggle">
@@ -64,7 +64,7 @@
 
             <!-- Seleção de Mês e Dia -->
             <div style="margin: 20px 0;">
-                <label style="font-weight: bold; display: block; margin-bottom: 10px;">Selecione a Data:</label>
+                <label style="font-weight: 400; display: block; margin-bottom: 10px;">Selecione a Data:</label>
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                     <!-- Seletor de Mês -->
                     <div style="flex: 1; min-width: 150px;">
@@ -168,6 +168,19 @@
             <h2>Dados Recarregados!</h2>
             <p>Os dados foram atualizados com sucesso.</p>
             <button id="btnFecharSucesso" class="btn-fechar-sucesso">OK</button>
+        </div>
+    </div>
+
+    <!-- Modal de Aviso -->
+    <div id="modalAviso" class="modal-aviso" style="display: none;">
+        <div class="modal-aviso-overlay"></div>
+        <div class="modal-aviso-content">
+            <div class="modal-aviso-icon">
+                <i class="ri-error-warning-fill"></i>
+            </div>
+            <h2 id="modalAvisoTitulo">Aviso</h2>
+            <p id="modalAvisoMensagem">Por favor, selecione uma sala para continuar.</p>
+            <button id="btnFecharAviso" class="btn-fechar-aviso">Entendido</button>
         </div>
     </div>
 
