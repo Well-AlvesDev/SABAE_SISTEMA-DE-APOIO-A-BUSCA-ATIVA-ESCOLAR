@@ -368,6 +368,57 @@ body {
     line-height: 1.5;
 }
 
+.modal-aviso-botoes {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.btn-cancelar-aviso,
+.btn-confirmar-aviso,
+.btn-entendido-aviso {
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    flex: 1;
+    min-width: 120px;
+}
+
+.btn-cancelar-aviso {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.btn-cancelar-aviso:hover {
+    background-color: #d0d0d0;
+}
+
+.btn-cancelar-aviso:active {
+    background-color: #c0c0c0;
+    transform: scale(0.98);
+}
+
+.btn-confirmar-aviso,
+.btn-entendido-aviso {
+    background-color: #ff9800;
+    color: white;
+}
+
+.btn-confirmar-aviso:hover,
+.btn-entendido-aviso:hover {
+    background-color: #f57c00;
+}
+
+.btn-confirmar-aviso:active,
+.btn-entendido-aviso:active {
+    background-color: #e65100;
+    transform: scale(0.98);
+}
+
 .btn-fechar-aviso {
     background-color: #ff9800;
     color: white;
@@ -575,7 +626,6 @@ main {
 .btn-registrar-chamadas:hover {
     background-color: #c0c0c0;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-    transform: translateY(-3px);
 }
 
 .btn-registrar-chamadas:active {
@@ -865,6 +915,11 @@ main {
     background: #3e73bf;
     color: white;
     border-radius: 12px 12px 0 0;
+    transition: background 0.3s ease;
+}
+
+.modal-chamada-header.edit-mode {
+    background: #FF9500;
 }
 
 .modal-chamada-header h2 {
@@ -880,6 +935,15 @@ main {
     font-size: 14px;
     color: #495057;
     font-weight: 500;
+}
+
+.modal-chamada-data {
+    padding: 12px 20px;
+    background: #e3f2fd;
+    border-bottom: 1px solid #bbdefb;
+    font-size: 14px;
+    color: #1976d2;
+    font-weight: 600;
 }
 
 .btn-fechar-modal {
@@ -1042,6 +1106,11 @@ main {
 
     .modal-chamada-header h2 {
         font-size: 18px;
+    }
+
+    .modal-chamada-data {
+        padding: 10px 15px;
+        font-size: 13px;
     }
 
     .modal-chamada-info-header {

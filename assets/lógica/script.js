@@ -13,11 +13,45 @@ let chamadaEmEdicaoVeioDoSupabase = false;
 // Armazenar dados da chamada do Supabase temporariamente durante edição
 let chamadaSupabaseEmEdicao = null;
 
+// Função auxiliar para adicionar/remover modo de edição do modal header
+function adicionarModoEdicaoModalHeader() {
+    const modalHeader = document.querySelector('.modal-chamada-header');
+    if (modalHeader) {
+        modalHeader.classList.add('edit-mode');
+    }
+}
+
+function removerModoEdicaoModalHeader() {
+    const modalHeader = document.querySelector('.modal-chamada-header');
+    if (modalHeader) {
+        modalHeader.classList.remove('edit-mode');
+    }
+}
+
 // Função para remover o loader
 function removerLoader() {
     const loader = document.getElementById('loader');
     if (loader) {
         loader.remove();
+    }
+}
+
+// Funções para controlar o loader de processamento
+function mostrarLoaderProcessamento(mensagem = 'Processando...') {
+    const loader = document.getElementById('loaderRecarregamento');
+    if (loader) {
+        const paragrafo = loader.querySelector('p');
+        if (paragrafo) {
+            paragrafo.textContent = mensagem;
+        }
+        loader.style.display = 'flex';
+    }
+}
+
+function esconderLoaderProcessamento() {
+    const loader = document.getElementById('loaderRecarregamento');
+    if (loader) {
+        loader.style.display = 'none';
     }
 }
 
@@ -173,25 +207,32 @@ async function inicializarPagina() {
         // Inicializar dropdown customizado
         inicializarDropdownCustomizado();
 
-        // Carregar TODOS os alunos e as salas antes de mostrar a página
-        try {
-            console.log('⏳ Carregando dados iniciais...');
+        // Carregar dados apenas se estamos na página chamada.html (verificar se dropdown existe)
+        const salaDropdown = document.getElementById('salaDropdown');
+        if (salaDropdown) {
+            // Carregar TODOS os alunos e as salas antes de mostrar a página
+            try {
+                console.log('⏳ Carregando dados iniciais...');
 
-            // Carregar todos os alunos no sessionStorage
-            const resultadoAlunos = await carregarTodosAlunosNaSessionStorage();
-            if (resultadoAlunos.sucesso) {
-                console.log(`✓ ${resultadoAlunos.alunos.length} alunos carregados no sessionStorage`);
-            } else {
-                console.warn(`⚠️ Aviso ao carregar alunos: ${resultadoAlunos.mensagem}`);
+                // Carregar todos os alunos no sessionStorage
+                const resultadoAlunos = await carregarTodosAlunosNaSessionStorage();
+                if (resultadoAlunos.sucesso) {
+                    console.log(`✓ ${resultadoAlunos.alunos.length} alunos carregados no sessionStorage`);
+                } else {
+                    console.warn(`⚠️ Aviso ao carregar alunos: ${resultadoAlunos.mensagem}`);
+                }
+
+                // Carregar as salas
+                await carregarSalasNoDropdown('#salaDropdown');
+                console.log('✓ Salas carregadas com sucesso');
+            } catch (erro) {
+                console.error('⚠️ Erro ao carregar dados:', erro);
+            } finally {
+                // Remover loader após os dados terem sido carregados (ou após erro)
+                removerLoader();
             }
-
-            // Carregar as salas
-            await carregarSalasNoDropdown('#salaDropdown');
-            console.log('✓ Salas carregadas com sucesso');
-        } catch (erro) {
-            console.error('⚠️ Erro ao carregar dados:', erro);
-        } finally {
-            // Remover loader após os dados terem sido carregados (ou após erro)
+        } else {
+            // Estamos em index.html, apenas remover loader
             removerLoader();
         }
     } else {
@@ -309,10 +350,58 @@ function fecharModalAviso() {
     if (modalAviso) modalAviso.style.display = 'none';
 }
 
-// Listener para o botão "Entendido" do modal de aviso
-const btnFecharAviso = document.getElementById('btnFecharAviso');
-if (btnFecharAviso) {
-    btnFecharAviso.addEventListener('click', () => {
+// Funções para o modal de confirmação de edição
+function exibirModalConfirmacaoEdicao(titulo, mensagem) {
+    const modalConfirmacao = document.getElementById('modalConfirmacaoEdicao');
+    const modalTitulo = document.getElementById('modalConfirmacaoEdicaoTitulo');
+    const modalMensagem = document.getElementById('modalConfirmacaoEdicaoMensagem');
+
+    if (modalTitulo) modalTitulo.textContent = titulo;
+    if (modalMensagem) modalMensagem.textContent = mensagem;
+    if (modalConfirmacao) modalConfirmacao.style.display = 'flex';
+}
+
+function fecharModalConfirmacaoEdicao() {
+    const modalConfirmacao = document.getElementById('modalConfirmacaoEdicao');
+    if (modalConfirmacao) modalConfirmacao.style.display = 'none';
+}
+
+// Listeners para os botões do modal de confirmação de edição
+const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
+const btnConfirmarEdicao = document.getElementById('btnConfirmarEdicao');
+
+if (btnCancelarEdicao) {
+    btnCancelarEdicao.addEventListener('click', () => {
+        fecharModalConfirmacaoEdicao();
+        // Resetar estado de edição
+        chamadaEmEdicao = null;
+        chamadaEmEdicaoVeioDoSupabase = false;
+        chamadaSupabaseEmEdicao = null;
+    });
+}
+
+if (btnConfirmarEdicao) {
+    btnConfirmarEdicao.addEventListener('click', () => {
+        // Este evento será disparado quando o usuário confirmar a edição
+        // Será tratado no contexto específico onde o modal é exibido
+    });
+}
+
+// Fechar modal de confirmação ao clicar fora dele
+const modalConfirmacao = document.getElementById('modalConfirmacaoEdicao');
+if (modalConfirmacao) {
+    modalConfirmacao.addEventListener('click', (e) => {
+        if (e.target === modalConfirmacao || e.target.classList.contains('modal-aviso-overlay')) {
+            fecharModalConfirmacaoEdicao();
+        }
+    });
+}
+
+// Listener para o botão do modal de aviso
+const btnEntendidoAviso = document.getElementById('btnEntendidoAviso');
+
+if (btnEntendidoAviso) {
+    btnEntendidoAviso.addEventListener('click', () => {
         fecharModalAviso();
     });
 }
@@ -332,7 +421,7 @@ function inicializarBotaoIniciarRegistro() {
     const modal = document.getElementById('modalChamada');
     const listaChamada = document.getElementById('listaChamada');
 
-    if (!btnIniciar) return;
+    if (!btnIniciar || !modal) return;
 
     // Event listener para o botão "Iniciar Registro"
     btnIniciar.addEventListener('click', async () => {
@@ -410,11 +499,32 @@ function inicializarBotaoIniciarRegistro() {
 
                 populaListaChamadaComDados(resultado.alunos, chamadaSupabase);
 
-                // Exibir modal
-                modal.style.display = 'flex';
+                // Exibir modal de confirmação de edição
+                exibirModalConfirmacaoEdicao(
+                    'Chamada Existente',
+                    `Esta chamada já foi registrada em ${diaSelecionado}/${obterNumeroMes(mesSelecionado)}. Você deseja editá-la?`
+                );
 
-                // Mostrar mensagem informativa
-                mostrarNotificacaoSucesso(`Chamada encontrada! Editando chamada existente de ${diaSelecionado}/${obterNumeroMes(mesSelecionado)}.`);
+                // Aguardar usuário escolher Cancelar ou Sim, editar
+                const btnConfirmarEdicaoTemp = document.getElementById('btnConfirmarEdicao');
+                if (btnConfirmarEdicaoTemp) {
+                    // Usar uma função nomeada para poder remover o listener depois
+                    const handleConfirmarEdicao = function () {
+                        // Fechar modal de confirmação
+                        fecharModalConfirmacaoEdicao();
+
+                        // Exibir modal de edição
+                        modal.style.display = 'flex';
+
+                        // Adicionar classe ao modal header para indicar modo edição
+                        adicionarModoEdicaoModalHeader();
+
+                        // Remover listener após uso
+                        btnConfirmarEdicaoTemp.removeEventListener('click', handleConfirmarEdicao);
+                    };
+
+                    btnConfirmarEdicaoTemp.addEventListener('click', handleConfirmarEdicao);
+                }
 
                 return;
             }
@@ -473,48 +583,24 @@ function inicializarBotaoIniciarRegistro() {
     // Event listener para fechar o modal
     if (btnFecharModal) {
         btnFecharModal.addEventListener('click', () => {
-            // Se está em modo de edição do Supabase, apenas fechar (sem salvar automaticamente)
-            if (chamadaEmEdicaoVeioDoSupabase) {
-                // Descartar edição
-                modal.style.display = 'none';
-                chamadaEmEdicao = null;
-                chamadaEmEdicaoVeioDoSupabase = false;
-                chamadaSupabaseEmEdicao = null;
-            }
-            // Se está em modo de edição e NÃO veio do Supabase, salvar automaticamente
-            else if (chamadaEmEdicao && !chamadaEmEdicaoVeioDoSupabase) {
-                salvarChamadaAuto();
-            }
-            // Se é novo, apenas fechar
-            else {
-                modal.style.display = 'none';
-                chamadaEmEdicao = null;
-                chamadaEmEdicaoVeioDoSupabase = false;
-            }
+            // Simplesmente fechar o modal sem salvar
+            modal.style.display = 'none';
+            removerModoEdicaoModalHeader();
+            chamadaEmEdicao = null;
+            chamadaEmEdicaoVeioDoSupabase = false;
+            chamadaSupabaseEmEdicao = null;
         });
     }
 
     // Fechar modal ao clicar fora dele
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
-            // Se está em modo de edição do Supabase, apenas fechar (sem salvar automaticamente)
-            if (chamadaEmEdicaoVeioDoSupabase) {
-                // Descartar edição
-                modal.style.display = 'none';
-                chamadaEmEdicao = null;
-                chamadaEmEdicaoVeioDoSupabase = false;
-                chamadaSupabaseEmEdicao = null;
-            }
-            // Se está em modo de edição e NÃO veio do Supabase, salvar automaticamente
-            else if (chamadaEmEdicao && !chamadaEmEdicaoVeioDoSupabase) {
-                salvarChamadaAuto();
-            }
-            // Se é novo, apenas fechar
-            else {
-                modal.style.display = 'none';
-                chamadaEmEdicao = null;
-                chamadaEmEdicaoVeioDoSupabase = false;
-            }
+            // Simplesmente fechar o modal sem salvar
+            modal.style.display = 'none';
+            removerModoEdicaoModalHeader();
+            chamadaEmEdicao = null;
+            chamadaEmEdicaoVeioDoSupabase = false;
+            chamadaSupabaseEmEdicao = null;
         }
     });
 }
@@ -530,9 +616,15 @@ function populaListaChamada(alunos, sala, mes, dia) {
     const listaChamada = document.getElementById('listaChamada');
     const modalTitulo = document.getElementById('modalChamadaTitulo');
     const modalQuantidade = document.getElementById('modalChamadaQuantidade');
+    const modalData = document.getElementById('modalChamadaData');
 
-    // Atualizar t\u00edtulo do modal
+    // Atualizar título do modal
     modalTitulo.textContent = `Registrar Chamada - ${sala}`;
+
+    // Atualizar data da chamada
+    const diaPadronizado = String(dia).padStart(2, '0');
+    const mesNumero = obterNumeroMes(mes);
+    modalData.textContent = `Dia/Mês: ${diaPadronizado}/${mesNumero}`;
 
     // Atualizar quantidade de alunos
     modalQuantidade.textContent = `Total de alunos: ${alunos.length}`;
@@ -687,6 +779,7 @@ function salvarChamadaAuto() {
 
     // Fechar modal
     modal.style.display = 'none';
+    removerModoEdicaoModalHeader();
 
     // Atualizar exibição dos cards
     renderizarCartuchosChamadaaSalvas();
@@ -716,33 +809,36 @@ async function salvarChamada() {
         return;
     }
 
-    // ========== CASO 1: Edição do Supabase - Enviar direto para Supabase ==========
-    if (chamadaEmEdicaoVeioDoSupabase && chamadaSupabaseEmEdicao) {
-        console.log('📤 Enviando edição direto para Supabase (não salvando em sessionStorage)...');
+    // Mostrar loader
+    mostrarLoaderProcessamento('Salvando chamada...');
 
-        // Coletar presença de cada aluno
-        const alunos = [];
-        itensChamada.forEach(item => {
-            alunos.push({
-                mat: item.dataset.alunoId,
-                nome: item.querySelector('.item-chamada-nome').textContent,
-                presenca: item.dataset.presenca
+    try {
+        // ========== CASO 1: Edição do Supabase - Enviar direto para Supabase ==========
+        if (chamadaEmEdicaoVeioDoSupabase && chamadaSupabaseEmEdicao) {
+            console.log('📤 Enviando edição direto para Supabase (não salvando em sessionStorage)...');
+
+            // Coletar presença de cada aluno
+            const alunos = [];
+            itensChamada.forEach(item => {
+                alunos.push({
+                    mat: item.dataset.alunoId,
+                    nome: item.querySelector('.item-chamada-nome').textContent,
+                    presenca: item.dataset.presenca
+                });
             });
-        });
 
-        // Preparar dados para envio
-        const numerMes = obterNumeroMes(chamadaSupabaseEmEdicao.mes);
-        const dia = parseInt(chamadaSupabaseEmEdicao.dia);
+            // Preparar dados para envio
+            const numerMes = obterNumeroMes(chamadaSupabaseEmEdicao.mes);
+            const dia = parseInt(chamadaSupabaseEmEdicao.dia);
 
-        const registros = alunos.map(aluno => ({
-            dia: dia,
-            mes: numerMes,
-            mat: String(aluno.mat || '').trim(),
-            nome: String(aluno.nome || '').trim(),
-            presenca: String(aluno.presenca || '').trim()
-        }));
+            const registros = alunos.map(aluno => ({
+                dia: dia,
+                mes: numerMes,
+                mat: String(aluno.mat || '').trim(),
+                nome: String(aluno.nome || '').trim(),
+                presenca: String(aluno.presenca || '').trim()
+            }));
 
-        try {
             // Obter credenciais da sessão
             const nomeUsuario = sessionStorage.getItem('usuario');
             const senhaUsuario = sessionStorage.getItem('usuarioSenha');
@@ -759,13 +855,11 @@ async function salvarChamada() {
             });
 
             if (error) {
-                console.error('❌ Erro ao enviar edição para Supabase:', error);
-                alert(`❌ Erro ao salvar: ${error.message}`);
-                return;
+                throw new Error(error.message || 'Erro ao salvar chamada');
             }
 
             console.log('✅ Edição enviada com sucesso para Supabase:', data);
-            mostrarNotificacaoSucesso('Chamada atualizada no Supabase com sucesso!');
+            mostrarNotificacaoSucesso('Chamada atualizada no banco de dados com sucesso!');
 
             // Resetar estado de edição
             chamadaEmEdicao = null;
@@ -774,86 +868,91 @@ async function salvarChamada() {
 
             // Fechar modal
             modal.style.display = 'none';
+            removerModoEdicaoModalHeader();
 
             // Atualizar exibição dos cards (não há cards para remover, pois não foi salvo em sessionStorage)
             renderizarCartuchosChamadaaSalvas();
 
-        } catch (erro) {
-            console.error('❌ Erro inesperado ao enviar para Supabase:', erro);
-            alert(`❌ Erro: ${erro.message}`);
-        }
-        return;
-    }
-
-    // ========== CASO 2: Chamada nova ou edição de sessionStorage ==========
-    // Recuperar chamadas existentes ou criar novo array
-    let chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
-
-    let chamada;
-
-    if (chamadaEmEdicao) {
-        // Modo edição: buscar chamada original e manter dados de sala/mês/dia/data
-        const chamadaOriginal = chamadasSalvas.find(c => c.id === chamadaEmEdicao);
-        if (!chamadaOriginal) {
-            alert('Chamada original não encontrada');
             return;
         }
 
-        // Manter dados originais, alterar apenas presença dos alunos
-        chamada = {
-            id: chamadaEmEdicao,
-            sala: chamadaOriginal.sala,  // MANTER SALA ORIGINAL
-            mes: chamadaOriginal.mes,    // MANTER MÊS ORIGINAL
-            dia: chamadaOriginal.dia,    // MANTER DIA ORIGINAL
-            data_hora_registrada: chamadaOriginal.data_hora_registrada,  // MANTER DATA ORIGINAL
-            alunos: []
-        };
-    } else {
-        // Modo novo: criar chamada com dados do dropdown
-        chamada = {
-            id: Date.now(),
-            sala: salaDropdownValue,
-            mes: mesValue,
-            dia: diaValue,
-            data_hora_registrada: new Date().toLocaleString('pt-BR'),
-            alunos: []
-        };
-    }
+        // ========== CASO 2: Chamada nova ou edição de sessionStorage ==========
+        // Recuperar chamadas existentes ou criar novo array
+        let chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
 
-    // Coletar presença de cada aluno
-    itensChamada.forEach(item => {
-        chamada.alunos.push({
-            mat: item.dataset.alunoId,
-            nome: item.querySelector('.item-chamada-nome').textContent,
-            presenca: item.dataset.presenca
-        });
-    });
+        let chamada;
 
-    if (chamadaEmEdicao) {
-        // Modo edição: atualizar chamada existente
-        const indice = chamadasSalvas.findIndex(c => c.id === chamadaEmEdicao);
-        if (indice !== -1) {
-            chamadasSalvas[indice] = chamada;
-            console.log('✅ Chamada atualizada com sucesso:', chamada);
-            mostrarNotificacaoSucesso('Chamada atualizada com sucesso!');
+        if (chamadaEmEdicao) {
+            // Modo edição: buscar chamada original e manter dados de sala/mês/dia/data
+            const chamadaOriginal = chamadasSalvas.find(c => c.id === chamadaEmEdicao);
+            if (!chamadaOriginal) {
+                throw new Error('Chamada original não encontrada');
+            }
+
+            // Manter dados originais, alterar apenas presença dos alunos
+            chamada = {
+                id: chamadaEmEdicao,
+                sala: chamadaOriginal.sala,  // MANTER SALA ORIGINAL
+                mes: chamadaOriginal.mes,    // MANTER MÊS ORIGINAL
+                dia: chamadaOriginal.dia,    // MANTER DIA ORIGINAL
+                data_hora_registrada: chamadaOriginal.data_hora_registrada,  // MANTER DATA ORIGINAL
+                alunos: []
+            };
+        } else {
+            // Modo novo: criar chamada com dados do dropdown
+            chamada = {
+                id: Date.now(),
+                sala: salaDropdownValue,
+                mes: mesValue,
+                dia: diaValue,
+                data_hora_registrada: new Date().toLocaleString('pt-BR'),
+                alunos: []
+            };
         }
-        chamadaEmEdicao = null;
-        chamadaEmEdicaoVeioDoSupabase = false; // Resetar flag
-    } else {
-        // Modo novo: adicionar nova chamada
-        chamadasSalvas.push(chamada);
-        console.log('✅ Chamada salva com sucesso:', chamada);
-        mostrarNotificacaoSucesso('Chamada registrada com sucesso!');
+
+        // Coletar presença de cada aluno
+        itensChamada.forEach(item => {
+            chamada.alunos.push({
+                mat: item.dataset.alunoId,
+                nome: item.querySelector('.item-chamada-nome').textContent,
+                presenca: item.dataset.presenca
+            });
+        });
+
+        if (chamadaEmEdicao) {
+            // Modo edição: atualizar chamada existente
+            const indice = chamadasSalvas.findIndex(c => c.id === chamadaEmEdicao);
+            if (indice !== -1) {
+                chamadasSalvas[indice] = chamada;
+                console.log('✅ Chamada atualizada com sucesso:', chamada);
+                mostrarNotificacaoSucesso('Chamada atualizada com sucesso!');
+            }
+            chamadaEmEdicao = null;
+            chamadaEmEdicaoVeioDoSupabase = false; // Resetar flag
+        } else {
+            // Modo novo: adicionar nova chamada
+            chamadasSalvas.push(chamada);
+            console.log('✅ Chamada salva com sucesso:', chamada);
+            mostrarNotificacaoSucesso('Chamada registrada com sucesso!');
+        }
+
+        // Salvar em sessionStorage
+        sessionStorage.setItem('chamadasSalvas', JSON.stringify(chamadasSalvas));
+
+        // Fechar modal
+        modal.style.display = 'none';
+        removerModoEdicaoModalHeader();
+
+        // Atualizar exibição dos cards
+        renderizarCartuchosChamadaaSalvas();
+
+    } catch (erro) {
+        console.error('❌ Erro ao salvar chamada:', erro);
+        alert(`❌ Erro ao salvar: ${erro.message}`);
+    } finally {
+        // Esconder loader
+        esconderLoaderProcessamento();
     }
-
-    // Salvar em sessionStorage
-    sessionStorage.setItem('chamadasSalvas', JSON.stringify(chamadasSalvas));
-
-    // Fechar modal
-    modal.style.display = 'none';
-
-    // Atualizar exibição dos cards
-    renderizarCartuchosChamadaaSalvas();
 }
 
 /**
@@ -862,6 +961,11 @@ async function salvarChamada() {
 function renderizarCartuchosChamadaaSalvas() {
     const container = document.getElementById('chamadassalvasContainer');
     const listaChamadas = document.getElementById('listaChamadaaSalvas');
+
+    // Se os elementos não existem, sair (página index.html não tem esses elementos)
+    if (!container || !listaChamadas) {
+        return;
+    }
 
     // Recuperar chamadas salvas e fazer uma cópia profunda para evitar ligações acidentais
     const chamadasSalvasRaw = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
@@ -1112,6 +1216,12 @@ function selecionarNoDropdown(dropdownId, valor, inputId) {
 function populaListaChamadaComDados(alunos, chamadaSalva) {
     const listaChamada = document.getElementById('listaChamada');
     const modalQuantidade = document.getElementById('modalChamadaQuantidade');
+    const modalData = document.getElementById('modalChamadaData');
+
+    // Atualizar data da chamada
+    const diaPadronizado = String(chamadaSalva.dia).padStart(2, '0');
+    const mesNumero = obterNumeroMes(chamadaSalva.mes);
+    modalData.textContent = `Dia/Mês: ${diaPadronizado}/${mesNumero}`;
 
     // Atualizar quantidade de alunos
     modalQuantidade.textContent = `Total de alunos: ${alunos.length}`;
@@ -1207,42 +1317,46 @@ function obterNumeroMes(mes) {
  * @param {string} mensagem - Mensagem a exibir
  */
 function mostrarNotificacaoSucesso(mensagem) {
-    // Criar elemento de notificação
-    const notificacao = document.createElement('div');
-    notificacao.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background-color: #4CAF50;
-        color: white;
-        padding: 16px 24px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        z-index: 10004;
-        animation: slideInUp 0.3s ease;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    `;
-    notificacao.innerHTML = `<i class="ri-checkbox-circle-fill"></i>${mensagem}`;
-    document.body.appendChild(notificacao);
+    const modalSucesso = document.getElementById('modalSucesso');
+    if (!modalSucesso) return;
 
-    // Remover após 3 segundos
-    setTimeout(() => {
-        notificacao.style.animation = 'slideOutDown 0.3s ease';
-        setTimeout(() => {
-            notificacao.remove();
-        }, 300);
-    }, 3000);
+    // Atualizar mensagem do modal
+    const titleElement = modalSucesso.querySelector('h2');
+    const messageElement = modalSucesso.querySelector('p');
+
+    if (titleElement) {
+        titleElement.textContent = '✅ Sucesso!';
+    }
+    if (messageElement) {
+        messageElement.textContent = mensagem;
+    }
+
+    // Mostrar modal
+    modalSucesso.style.display = 'flex';
+
+    // Fechar ao clicar no botão OK
+    const btnFechar = document.getElementById('btnFecharSucesso');
+    if (btnFechar) {
+        btnFechar.onclick = () => {
+            modalSucesso.style.display = 'none';
+        };
+    }
+
+    // Fechar ao clicar na overlay (opcional)
+    const overlay = modalSucesso.querySelector('.modal-sucesso-overlay');
+    if (overlay) {
+        overlay.onclick = () => {
+            modalSucesso.style.display = 'none';
+        };
+    }
 }
 
 // Inicializar botão Salvar Chamada
 function inicializarBotaoSalvarChamada() {
     const btnSalvar = document.getElementById('btnSalvarChamada');
-    if (btnSalvar) {
-        btnSalvar.addEventListener('click', salvarChamada);
-    }
+    if (!btnSalvar) return;
+
+    btnSalvar.addEventListener('click', salvarChamada);
 }
 
 // Adicionar listener ao dropdown de sala para evitar que mudanças afetem os cards
@@ -1268,8 +1382,15 @@ function protegerCartuchosDeMudancasDropdown() {
 
 // Executar quando a página carregar
 document.addEventListener('DOMContentLoaded', () => {
-    inicializarBotaoIniciarRegistro();
-    inicializarBotaoSalvarChamada();
-    protegerCartuchosDeMudancasDropdown();
-    renderizarCartuchosChamadaaSalvas();
+    // Apenas executar se os elementos da página chamada.html existirem
+    const btnIniciarRegistro = document.getElementById('btnIniciarRegistro');
+    const btnSalvarChamada = document.getElementById('btnSalvarChamada');
+    const chamadassalvasContainer = document.getElementById('chamadassalvasContainer');
+
+    if (btnIniciarRegistro && btnSalvarChamada && chamadassalvasContainer) {
+        inicializarBotaoIniciarRegistro();
+        inicializarBotaoSalvarChamada();
+        protegerCartuchosDeMudancasDropdown();
+        renderizarCartuchosChamadaaSalvas();
+    }
 });
