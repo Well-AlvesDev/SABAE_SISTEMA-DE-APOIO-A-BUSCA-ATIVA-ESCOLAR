@@ -13,6 +13,9 @@ let chamadaEmEdicaoVeioDoSupabase = false;
 // Armazenar dados da chamada do Supabase temporariamente durante edição
 let chamadaSupabaseEmEdicao = null;
 
+// Armazenar dados da chamada duplicada (para edição após confirmar no modal)
+let chamadaDuplicadaParaEditar = null;
+
 // Função auxiliar para adicionar/remover modo de edição do modal header
 function adicionarModoEdicaoModalHeader() {
     const modalHeader = document.querySelector('.modal-chamada-header');
@@ -339,15 +342,75 @@ function exibirModalAviso(titulo, mensagem) {
     const modalAviso = document.getElementById('modalAviso');
     const modalAvisoTitulo = document.getElementById('modalAvisoTitulo');
     const modalAvisoMensagem = document.getElementById('modalAvisoMensagem');
+    const modalAvisoBotoes = document.getElementById('modalAvisoBotoes');
 
     if (modalAvisoTitulo) modalAvisoTitulo.textContent = titulo;
-    if (modalAvisoMensagem) modalAvisoMensagem.textContent = mensagem;
+    if (modalAvisoMensagem) modalAvisoMensagem.innerHTML = mensagem;
+
+    // Resetar botões para o padrão (apenas "Entendido")
+    if (modalAvisoBotoes) {
+        modalAvisoBotoes.innerHTML = '<button id="btnEntendidoAviso" class="btn-entendido-aviso">Entendido</button>';
+
+        // Adicionar listener ao botão
+        const btnEntendido = document.getElementById('btnEntendidoAviso');
+        if (btnEntendido) {
+            btnEntendido.addEventListener('click', fecharModalAviso);
+        }
+    }
+
     if (modalAviso) modalAviso.style.display = 'flex';
 }
 
 function fecharModalAviso() {
     const modalAviso = document.getElementById('modalAviso');
     if (modalAviso) modalAviso.style.display = 'none';
+}
+
+// Função para exibir modal de chamada duplicada com opções de editar ou voltar
+function exibirModalChamadaDuplicada(titulo, mensagem, chamadaId, salaSelecionada, mesSelecionado, diaSelecionado) {
+    const modalAviso = document.getElementById('modalAviso');
+    const modalAvisoTitulo = document.getElementById('modalAvisoTitulo');
+    const modalAvisoMensagem = document.getElementById('modalAvisoMensagem');
+    const modalAvisoBotoes = document.getElementById('modalAvisoBotoes');
+
+    // Armazenar dados da chamada duplicada
+    chamadaDuplicadaParaEditar = {
+        id: chamadaId,
+        sala: salaSelecionada,
+        mes: mesSelecionado,
+        dia: diaSelecionado
+    };
+
+    if (modalAvisoTitulo) modalAvisoTitulo.textContent = titulo;
+    if (modalAvisoMensagem) modalAvisoMensagem.innerHTML = mensagem;
+
+    // Substituir botões por "Voltar" e "Sim, editar"
+    if (modalAvisoBotoes) {
+        modalAvisoBotoes.innerHTML = `
+            <button id="btnVoltarChamadaDuplicada" class="btn-voltar-chamada-duplicada">Voltar</button>
+            <button id="btnSimEditarChamadaDuplicada" class="btn-sim-editar-chamada-duplicada">Sim, editar</button>
+        `;
+
+        // Listener para botão Voltar
+        const btnVoltar = document.getElementById('btnVoltarChamadaDuplicada');
+        if (btnVoltar) {
+            btnVoltar.addEventListener('click', () => {
+                fecharModalAviso();
+                chamadaDuplicadaParaEditar = null;
+            });
+        }
+
+        // Listener para botão Sim, editar
+        const btnSimEditar = document.getElementById('btnSimEditarChamadaDuplicada');
+        if (btnSimEditar) {
+            btnSimEditar.addEventListener('click', () => {
+                fecharModalAviso();
+                editarChamadaDuplicada(chamadaId);
+            });
+        }
+    }
+
+    if (modalAviso) modalAviso.style.display = 'flex';
 }
 
 // Funções para o modal de confirmação de edição
@@ -397,14 +460,7 @@ if (modalConfirmacao) {
     });
 }
 
-// Listener para o botão do modal de aviso
-const btnEntendidoAviso = document.getElementById('btnEntendidoAviso');
-
-if (btnEntendidoAviso) {
-    btnEntendidoAviso.addEventListener('click', () => {
-        fecharModalAviso();
-    });
-}
+// Listener para o botão do modal de aviso (listeners dinâmicos serão adicionados nas funções exibirModalAviso/exibirModalChamadaDuplicada)
 
 // Fechar modal de aviso ao clicar fora dele
 const modalAviso = document.getElementById('modalAviso');
@@ -502,7 +558,7 @@ function inicializarBotaoIniciarRegistro() {
                 // Exibir modal de confirmação de edição
                 exibirModalConfirmacaoEdicao(
                     'Chamada Existente',
-                    `Esta chamada já foi registrada em ${diaSelecionado}/${obterNumeroMes(mesSelecionado)}. Você deseja editá-la?`
+                    `Esta chamada já foi registrada em ${diaSelecionado}/${obterNumeroMes(mesSelecionado)} e está salva no banco de dados. Você deseja editá-la?`
                 );
 
                 // Aguardar usuário escolher Cancelar ou Sim, editar
@@ -535,9 +591,24 @@ function inicializarBotaoIniciarRegistro() {
             // Verificar se já existe uma chamada para esta sala neste dia no sessionStorage
             if (verificarChamadaDuplicada(salaSelecionada, mesSelecionado, diaSelecionado)) {
                 loader.remove();
-                exibirModalAviso(
+
+                // Encontrar o ID da chamada duplicada
+                const chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+                const chamadaDuplicada = chamadasSalvas.find(c =>
+                    c.sala === salaSelecionada &&
+                    c.mes === mesSelecionado &&
+                    String(c.dia) === String(diaSelecionado)
+                );
+
+                const chamadaId = chamadaDuplicada ? chamadaDuplicada.id : null;
+
+                exibirModalChamadaDuplicada(
                     'Chamada Duplicada',
-                    `Já existe uma chamada registrada para a sala "${salaSelecionada}" em ${diaSelecionado}/${obterNumeroMes(mesSelecionado)}. Não é permitido fazer duas chamadas para a mesma sala no mesmo dia.`
+                    `Você já registrou localmente uma chamada para o "${salaSelecionada}" para ${diaSelecionado}/${obterNumeroMes(mesSelecionado)} e que ainda não foi enviada ao banco de dados. Não é permitido fazer duas chamadas para a mesma sala no mesmo dia. <span style="font-weight: bold;">Deseja editar a chamada existente?</span>`,
+                    chamadaId,
+                    salaSelecionada,
+                    mesSelecionado,
+                    diaSelecionado
                 );
                 return;
             }
@@ -1143,6 +1214,49 @@ function editarChamada(chamadaId) {
         // Abrir modal
         const modal = document.getElementById('modalChamada');
         modal.style.display = 'flex';
+    } else {
+        console.error('Erro ao recuperar alunos:', resultado.mensagem);
+        alert('Erro ao carregar alunos para edição');
+        chamadaEmEdicao = null;
+    }
+}
+
+/**
+ * Edita uma chamada duplicada (chamada quando o usuário clica em "Sim, editar" no modal)
+ * @param {number} chamadaId - ID da chamada a editar
+ */
+function editarChamadaDuplicada(chamadaId) {
+    // Recuperar chamadas salvas
+    const chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+    const chamada = chamadasSalvas.find(c => c.id === chamadaId);
+
+    if (!chamada) {
+        alert('Chamada não encontrada');
+        return;
+    }
+
+    // Marcar como em edição
+    chamadaEmEdicao = chamadaId;
+    chamadaEmEdicaoVeioDoSupabase = false; // Esta é uma chamada do sessionStorage, não do Supabase
+
+    // Atualizar título do modal
+    const modalTitulo = document.getElementById('modalChamadaTitulo');
+    modalTitulo.textContent = `Editar Chamada - ${chamada.sala}`;
+
+    // Recuperar alunos da sala a partir do sessionStorage para popular a lista
+    const resultado = obterAlunosTurmaDaSessionStorage(chamada.sala);
+
+    // Se bem-sucedido, continuar com a edição
+    if (resultado.sucesso && resultado.alunos) {
+        // Usar a função populaListaChamada, mas com os dados da chamada salva
+        populaListaChamadaComDados(resultado.alunos, chamada);
+
+        // Abrir modal
+        const modal = document.getElementById('modalChamada');
+        modal.style.display = 'flex';
+
+        // Adicionar classe ao modal header para indicar modo edição
+        adicionarModoEdicaoModalHeader();
     } else {
         console.error('Erro ao recuperar alunos:', resultado.mensagem);
         alert('Erro ao carregar alunos para edição');

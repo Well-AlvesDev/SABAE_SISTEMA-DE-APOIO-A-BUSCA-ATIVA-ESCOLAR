@@ -378,7 +378,7 @@ body {
 .btn-confirmar-aviso,
 .btn-entendido-aviso {
     border: none;
-    padding: 12px 24px;
+    padding: 8px 24px;
     border-radius: 6px;
     font-size: 16px;
     font-weight: 600;
@@ -404,20 +404,11 @@ body {
 
 .btn-confirmar-aviso,
 .btn-entendido-aviso {
-    background-color: #ff9800;
-    color: white;
+    background-color: #84dda930;
+    border: 1px solid #27ae60;
+    color: rgb(36, 36, 36);
 }
 
-.btn-confirmar-aviso:hover,
-.btn-entendido-aviso:hover {
-    background-color: #f57c00;
-}
-
-.btn-confirmar-aviso:active,
-.btn-entendido-aviso:active {
-    background-color: #e65100;
-    transform: scale(0.98);
-}
 
 .btn-fechar-aviso {
     background-color: #ff9800;
@@ -438,6 +429,39 @@ body {
 .btn-fechar-aviso:active {
     background-color: #e65100;
     transform: scale(0.98);
+}
+
+.btn-voltar-chamada-duplicada {
+    background-color: #e0e0e0;
+    color: #333;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-voltar-chamada-duplicada:hover {
+    background-color: #d0d0d0;
+}
+
+.btn-voltar-chamada-duplicada:active {
+    background-color: #c0c0c0;
+    transform: scale(0.98);
+}
+
+.btn-sim-editar-chamada-duplicada {
+    background-color: #84dda930;
+    color: rgb(36, 36, 36);
+    border: 1px solid #27ae60;
+    padding: 8px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 /* Responsividade */
