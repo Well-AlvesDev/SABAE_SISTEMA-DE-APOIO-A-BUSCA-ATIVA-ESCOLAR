@@ -112,14 +112,14 @@
                 <h2 class="chamadas-salvas-titulo"><img
                         src="./assets/imagens/ico/databaseprocess_basededatos_12922 (1).png" alt=""
                         style="width: 30px; vertical-align: middle; margin-right: 10px;">Prontas para envio</h2>
-                <div id="listaChamadaaSalvas" class="lista-chamadas-salvas">
-                    <!-- Cards de chamadas serão adicionados aqui -->
-                </div>
                 <!-- Botão Enviar para o Banco -->
-                <div style="margin-top: 20px; text-align: center;">
+                <div style="margin-bottom: 20px; text-align: center;">
                     <button id="btnEnviarParaBanco" class="btn-enviar-banco">
                         <i class="ri-cloud-upload-line"></i> Enviar para o Banco
                     </button>
+                </div>
+                <div id="listaChamadaaSalvas" class="lista-chamadas-salvas">
+                    <!-- Cards de chamadas serão adicionados aqui -->
                 </div>
             </div>
         </div>
@@ -139,15 +139,14 @@
             </div>
             <div class="modal-chamada-info-header">
                 <span id="modalChamadaQuantidade">Total de alunos: 0</span>
+                <button id="btnSalvarChamada" class="btn-salvar-chamada" title="Salvar chamada">
+                    <img src="./assets/imagens/ico/save.svg" alt="" style="width: 30px;">
+                    <span>salvar</span>
+                </button>
             </div>
             <div class="modal-chamada-body">
                 <div id="listaChamada" class="lista-chamada">
                     <!-- Alunos serão adicionados aqui dinamicamente -->
-                </div>
-                <div class="modal-chamada-footer">
-                    <button id="btnSalvarChamada" class="btn-salvar-chamada">
-                        <i class="ri-save-line"></i> Salvar Chamada
-                    </button>
                 </div>
             </div>
         </div>
@@ -168,7 +167,7 @@
         <div class="modal-sucesso-overlay"></div>
         <div class="modal-sucesso-content">
             <div class="modal-sucesso-icon">
-                <img src="./assets/imagens/ico/save.svg" alt="save icon" style="width: 60px;">
+                <img src="./assets/imagens/ico/correct.svg" alt="save icon" style="width: 60px;">
             </div>
             <h2>Dados Recarregados!</h2>
             <p>Os dados foram atualizados com sucesso.</p>
@@ -203,6 +202,24 @@
             <div class="modal-aviso-botoes">
                 <button id="btnCancelarEdicao" class="btn-cancelar-aviso">Cancelar</button>
                 <button id="btnConfirmarEdicao" class="btn-confirmar-aviso">Sim, editar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="modalConfirmacaoExclusao" class="modal-aviso" style="display: none;">
+        <div class="modal-aviso-overlay"></div>
+        <div class="modal-aviso-content">
+            <div class="modal-aviso-icon">
+                <img src="./assets/imagens/ico/exclamation.webp" alt="" style="width: 70px;">
+            </div>
+            <h2 id="modalConfirmacaoExclusaoTitulo">Remover Chamada?</h2>
+            <p id="modalConfirmacaoExclusaoMensagem">Tem certeza que deseja remover esta chamada? Esta ação não pode ser
+                desfeita.</p>
+            <div class="modal-aviso-botoes" style="flex-direction: row; gap: 16px;">
+                <button id="btnCancelarExclusao" class="btn-cancelar-aviso"
+                    style="flex: 1; padding: 12px 32px; border-radius: 8px;">Cancelar</button>
+                <button id="btnConfirmarExclusao" class="btn-confirmar-exclusao" style="flex: 1;">Sim, remover</button>
             </div>
         </div>
     </div>

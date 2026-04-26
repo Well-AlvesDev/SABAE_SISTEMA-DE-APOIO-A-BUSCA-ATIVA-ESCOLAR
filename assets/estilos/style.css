@@ -402,27 +402,61 @@ body {
     transform: scale(0.98);
 }
 
+/* Específico para botão de cancelar no modal de exclusão */
+#modalConfirmacaoExclusao .btn-cancelar-aviso {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #d0d0d0;
+    padding: 12px 32px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+#modalConfirmacaoExclusao .btn-cancelar-aviso:hover {
+    background-color: #e8e8e8;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+#modalConfirmacaoExclusao .btn-cancelar-aviso:active {
+    background-color: #d8d8d8;
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Container de botões para modal de exclusão */
+#modalConfirmacaoExclusao .modal-aviso-botoes {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    padding: 0 20px;
+}
+
 .btn-confirmar-aviso,
 .btn-entendido-aviso {
-    background-color: #84dda930;
-    border: 1px solid #27ae60;
-    color: rgb(36, 36, 36);
+    background-color: #19c62d;
+    color: rgb(241, 241, 241);
+}
+
+
+
+.btn-confirmar-exclusao {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 
 .btn-fechar-aviso {
-    background-color: #ff9800;
-    color: white;
-    border: none;
-    padding: 12px 32px;
-    border-radius: 6px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.btn-fechar-aviso:hover {
     background-color: #f57c00;
 }
 
@@ -959,6 +993,10 @@ main {
     font-size: 14px;
     color: #495057;
     font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
 }
 
 .modal-chamada-data {
@@ -1151,43 +1189,32 @@ main {
 
 /* ========== FOOTER DO MODAL DE CHAMADA ========== */
 .modal-chamada-footer {
-    padding: 20px;
-    border-top: 1px solid #e0e0e0;
-    background-color: #f9f9f9;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
+    display: none;
 }
 
 .btn-salvar-chamada {
     background: #3e73bf;
     color: white;
     border: none;
-    padding: 12px 32px;
+    padding: 8px 12px;
     font-size: 16px;
-    font-weight: 400;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(62, 115, 191, 0.3);
+    box-shadow: 0 2px 6px rgba(62, 115, 191, 0.3);
+    flex-shrink: 0;
 }
 
-.btn-salvar-chamada:hover:not(:disabled) {
-    box-shadow: 0 6px 12px rgba(62, 115, 191, 0.4);
-    transform: translateY(-2px);
+.btn-salvar-chamada i {
+    font-size: 18px;
 }
 
-.btn-salvar-chamada:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(62, 115, 191, 0.3);
-}
-
-.btn-salvar-chamada:disabled {
-    cursor: not-allowed;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.btn-salvar-chamada span {
+    font-size: 14px;
+    font-weight: 500;
 }
 
 /* ========== CONTAINER DE CHAMADAS SALVAS ========== */
@@ -1355,20 +1382,27 @@ main {
     color: #333;
 }
 
+/* ========== BOTÃO ENVIAR PARA O BANCO ========== */
+.btn-enviar-banco {
+    background-color: #808080;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
 /* Responsividade para Mobile */
 @media (max-width: 600px) {
     .lista-chamadas-salvas {
         grid-template-columns: 1fr;
-    }
-
-    .modal-chamada-footer {
-        padding: 15px;
-    }
-
-    .btn-salvar-chamada {
-        width: 100%;
-        justify-content: center;
-        padding: 14px 16px;
     }
 
     .chamadas-salvas-container {

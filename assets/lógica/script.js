@@ -16,6 +16,9 @@ let chamadaSupabaseEmEdicao = null;
 // Armazenar dados da chamada duplicada (para edição após confirmar no modal)
 let chamadaDuplicadaParaEditar = null;
 
+// Variável para armazenar o ID da chamada sendo excluída
+let chamadaParaExcluir = null;
+
 // Função auxiliar para adicionar/remover modo de edição do modal header
 function adicionarModoEdicaoModalHeader() {
     const modalHeader = document.querySelector('.modal-chamada-header');
@@ -471,6 +474,60 @@ if (modalAviso) {
         }
     });
 }
+
+// ========== FUNCIONALIDADES DO MODAL DE CONFIRMAÇÃO DE EXCLUSÃO ==========
+// Variável para armazenar o ID da chamada sendo excluída
+let chamadaEmExclusao = null;
+
+// Funções para o modal de confirmação de exclusão
+function exibirModalConfirmacaoExclusao(chamadaId) {
+    const modalExclusao = document.getElementById('modalConfirmacaoExclusao');
+    const modalTitulo = document.getElementById('modalConfirmacaoExclusaoTitulo');
+    const modalMensagem = document.getElementById('modalConfirmacaoExclusaoMensagem');
+
+    if (modalTitulo) modalTitulo.textContent = 'Remover Chamada?';
+    if (modalMensagem) modalMensagem.textContent = 'Tem certeza que deseja remover esta chamada? Esta ação não pode ser desfeita.';
+
+    chamadaEmExclusao = chamadaId;
+
+    if (modalExclusao) modalExclusao.style.display = 'flex';
+}
+
+function fecharModalConfirmacaoExclusao() {
+    const modalExclusao = document.getElementById('modalConfirmacaoExclusao');
+    if (modalExclusao) modalExclusao.style.display = 'none';
+    chamadaEmExclusao = null;
+}
+
+// Listeners para os botões do modal de confirmação de exclusão
+const btnCancelarExclusao = document.getElementById('btnCancelarExclusao');
+const btnConfirmarExclusao = document.getElementById('btnConfirmarExclusao');
+
+if (btnCancelarExclusao) {
+    btnCancelarExclusao.addEventListener('click', () => {
+        fecharModalConfirmacaoExclusao();
+    });
+}
+
+if (btnConfirmarExclusao) {
+    btnConfirmarExclusao.addEventListener('click', () => {
+        if (chamadaEmExclusao !== null) {
+            removerChamada(chamadaEmExclusao);
+            fecharModalConfirmacaoExclusao();
+        }
+    });
+}
+
+// Fechar modal de confirmação de exclusão ao clicar fora dele
+const modalExclusao = document.getElementById('modalConfirmacaoExclusao');
+if (modalExclusao) {
+    modalExclusao.addEventListener('click', (e) => {
+        if (e.target === modalExclusao || e.target.classList.contains('modal-aviso-overlay')) {
+            fecharModalConfirmacaoExclusao();
+        }
+    });
+}
+
 function inicializarBotaoIniciarRegistro() {
     const btnIniciar = document.getElementById('btnIniciarRegistro');
     const btnFecharModal = document.getElementById('btnFecharModal');
@@ -604,7 +661,7 @@ function inicializarBotaoIniciarRegistro() {
 
                 exibirModalChamadaDuplicada(
                     'Chamada Duplicada',
-                    `Você já registrou localmente uma chamada para o "${salaSelecionada}" para ${diaSelecionado}/${obterNumeroMes(mesSelecionado)} e que ainda não foi enviada ao banco de dados. Não é permitido fazer duas chamadas para a mesma sala no mesmo dia. <span style="font-weight: bold;">Deseja editar a chamada existente?</span>`,
+                    `Você já lançou localmente uma chamada para o "${salaSelecionada}" para ${diaSelecionado}/${obterNumeroMes(mesSelecionado)} e que ainda não foi enviada ao banco de dados. Não é permitido fazer duas chamadas para a mesma sala no mesmo dia. <span style="font-weight: bold;">Deseja editar a chamada existente?</span>`,
                     chamadaId,
                     salaSelecionada,
                     mesSelecionado,
@@ -1102,9 +1159,7 @@ function renderizarCartuchosChamadaaSalvas() {
         btnRemover.innerHTML = '<i class="ri-delete-bin-line"></i>';
         btnRemover.title = 'Remover chamada';
         btnRemover.addEventListener('click', () => {
-            if (confirm('Tem certeza que deseja remover esta chamada?')) {
-                removerChamada(chamada.id);
-            }
+            exibirModalConfirmacaoExclusao(chamada.id);
         });
 
         acoesDiv.appendChild(btnEditar);
@@ -1173,12 +1228,12 @@ function removerChamada(chamadaId) {
     // Salvar de volta em sessionStorage
     sessionStorage.setItem('chamadasSalvas', JSON.stringify(chamadasSalvas));
 
-    console.log('✅ Chamada removida com sucesso');
+    console.log('✅ Chamada removida com sucesso. CODX:', chamadaId);
 
     // Atualizar exibição dos cards
     renderizarCartuchosChamadaaSalvas();
 
-    mostrarNotificacaoSucesso('Chamada removida!');
+    mostrarNotificacaoSucesso('✅ Chamada removida com sucesso. CODX: ' + chamadaId);
 }
 
 /**
@@ -1439,7 +1494,7 @@ function mostrarNotificacaoSucesso(mensagem) {
     const messageElement = modalSucesso.querySelector('p');
 
     if (titleElement) {
-        titleElement.textContent = '✅ Sucesso!';
+        titleElement.textContent = 'Sucesso!';
     }
     if (messageElement) {
         messageElement.textContent = mensagem;
