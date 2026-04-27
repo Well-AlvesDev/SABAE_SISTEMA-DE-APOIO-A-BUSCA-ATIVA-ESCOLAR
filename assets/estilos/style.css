@@ -1427,7 +1427,109 @@ main {
     color: #333;
 }
 
-/* ========== BOTÃO ENVIAR PARA O BANCO ========== */
+
+.modal-loader-envio {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1001;
+}
+
+.modal-loader-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUpLoader {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.modal-loader-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 40px 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    animation: slideUpLoader 0.3s ease-out;
+}
+
+.modal-loader-icon {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-loader-content h2 {
+    margin: 15px 0;
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
+}
+
+.modal-loader-progress {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.modal-loader-bar-container {
+    background: #f0f0f0;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.modal-loader-bar {
+    background: linear-gradient(90deg, #3e73bf, #2c5aa0);
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+.modal-loader-detalhes {
+    font-size: 12px;
+    color: #999;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+/* ========== BOT\u00c3O ENVIAR PARA O BANCO ========== */
 .btn-enviar-banco {
     background-color: #808080;
     color: white;

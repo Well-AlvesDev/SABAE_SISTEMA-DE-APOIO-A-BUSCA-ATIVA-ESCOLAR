@@ -1497,14 +1497,6 @@ function mostrarNotificacaoSucesso(mensagem) {
     // Mostrar modal
     modalSucesso.style.display = 'flex';
 
-    // Fechar ao clicar no botão OK
-    const btnFechar = document.getElementById('btnFecharSucesso');
-    if (btnFechar) {
-        btnFechar.onclick = () => {
-            modalSucesso.style.display = 'none';
-        };
-    }
-
     // Fechar ao clicar na overlay (opcional)
     const overlay = modalSucesso.querySelector('.modal-sucesso-overlay');
     if (overlay) {
@@ -1684,6 +1676,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sempre inicializar modal de perfil em ambas as páginas
     inicializarModalPerfil();
+
+    // Inicializar listener do botão "OK" do modal de sucesso
+    const btnFecharSucesso = document.getElementById('btnFecharSucesso');
+    if (btnFecharSucesso) {
+        btnFecharSucesso.addEventListener('click', () => {
+            const modalSucesso = document.getElementById('modalSucesso');
+            if (modalSucesso) {
+                modalSucesso.style.display = 'none';
+            }
+        });
+    }
 
     // Inicializar listener do botão "Enviar para o Banco"
     const btnEnviarParaBanco = document.getElementById('btnEnviarParaBanco');

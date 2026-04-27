@@ -122,44 +122,31 @@ async function enviarTodasChamadasParaSupabase() {
     const chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
 
     if (chamadasSalvas.length === 0) {
-        alert('⚠️ Não há chamadas registradas para enviar!');
+        console.warn('⚠️ Não há chamadas registradas para enviar!');
         return;
     }
 
-    // Confirmar antes de enviar
-    const totalAlunos = chamadasSalvas.reduce((sum, chamada) => sum + chamada.alunos.length, 0);
-    const confirmar = confirm(
-        `Enviar ${chamadasSalvas.length} chamada(s) com ${totalAlunos} alunos para o Supabase?\n\nEsta ação não poderá ser desfeita.`
-    );
-    if (!confirmar) {
-        return;
-    }
-
-    // Criar modal se não existir
+    // Criar modal se não existir (apenas verifica)
     criarModalEnvio();
 
-    // Aguardar um frame para garantir que o modal foi inserido no DOM
-    await new Promise(resolve => setTimeout(resolve, 50));
-
-    // Obter referências dos elementos do modal DEPOIS de garantir sua existência
-    const modalEnvio = document.getElementById('modalEnvio');
-    const progressoTexto = document.getElementById('modalEnvioProgresso');
-    const barraProgressoContainer = document.querySelector('#modalEnvioBarraProgresso');
-    const detalhes = document.getElementById('modalEnvioDetalhes');
+    // Obter referências dos elementos do modal
+    const modalLoaderEnvio = document.getElementById('modalLoaderEnvio');
+    const progressoTexto = document.getElementById('modalLoaderProgresso');
+    const barraProgressoContainer = document.getElementById('modalLoaderBarra');
+    const detalhes = document.getElementById('modalLoaderDetalhes');
 
     // Verificar se todos os elementos foram encontrados
-    if (!modalEnvio || !progressoTexto || !barraProgressoContainer || !detalhes) {
+    if (!modalLoaderEnvio || !progressoTexto || !barraProgressoContainer || !detalhes) {
         console.error('❌ Erro: Não foi possível encontrar todos os elementos do modal');
-        console.error('modalEnvio:', !!modalEnvio);
+        console.error('modalLoaderEnvio:', !!modalLoaderEnvio);
         console.error('progressoTexto:', !!progressoTexto);
         console.error('barraProgressoContainer:', !!barraProgressoContainer);
         console.error('detalhes:', !!detalhes);
-        alert('❌ Erro ao criar interface de envio. Tente recarregar a página.');
         return;
     }
 
     // Mostrar modal
-    modalEnvio.style.display = 'flex';
+    modalLoaderEnvio.style.display = 'flex';
 
     let chamadaEnviadaTotal = 0;
     let alunosEnviadosTotal = 0;
@@ -237,8 +224,8 @@ async function enviarTodasChamadasParaSupabase() {
         }
 
         // Fechar modal de envio
-        if (modalEnvio) {
-            modalEnvio.style.display = 'none';
+        if (modalLoaderEnvio) {
+            modalLoaderEnvio.style.display = 'none';
         }
 
         // Exibir resultado
@@ -257,11 +244,12 @@ async function enviarTodasChamadasParaSupabase() {
             console.log('✅ Todas as chamadas foram enviadas e removidas da memória');
         }
 
+        // Esconder modal de loader
+        esconderModalLoaderEnvio();
+
     } catch (erro) {
         console.error('❌ Erro crítico durante envio:', erro);
-        if (modalEnvio) {
-            modalEnvio.style.display = 'none';
-        }
+        esconderModalLoaderEnvio();
 
         exibirResultadoEnvioSupabase(
             chamadaEnviadaTotal,
@@ -270,36 +258,56 @@ async function enviarTodasChamadasParaSupabase() {
             alunosFalhadosTotal,
             [...errosGerais, `Erro crítico: ${erro.message}`]
         );
+    } finally {
+        esconderModalLoaderEnvio();
     }
 }
 
 /**
- * Cria o modal de envio se ele não existir
+ * Exibe o modal de loader para envio
+ */
+function mostrarModalLoaderEnvio() {
+    const modal = document.getElementById('modalLoaderEnvio');
+    if (modal) {
+        modal.style.display = 'flex';
+        // Garantir que o overlay está visível
+        const overlay = modal.querySelector('.modal-loader-overlay');
+        if (overlay) overlay.style.display = 'block';
+    }
+}
+
+/**
+ * Esconde o modal de loader para envio
+ */
+function esconderModalLoaderEnvio() {
+    const modal = document.getElementById('modalLoaderEnvio');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+/**
+ * Atualiza a barra de progresso do modal de loader
+ */
+function atualizarProgressoModalLoader(atual, total, mensagem = '') {
+    const modal = document.getElementById('modalLoaderEnvio');
+    if (!modal) return;
+
+    const progresso = document.getElementById('modalLoaderProgresso');
+    const barra = document.getElementById('modalLoaderBarra');
+    const detalhes = document.getElementById('modalLoaderDetalhes');
+
+    if (progresso) progresso.textContent = `${atual}/${total}`;
+    if (barra) barra.style.width = `${(atual / total) * 100}%`;
+    if (detalhes && mensagem) detalhes.textContent = mensagem;
+}
+
+/**
+ * Cria o modal de envio se ele não existir (compatibilidade com código antigo)
  */
 function criarModalEnvio() {
-    let modalExistente = document.getElementById('modalEnvio');
-    if (modalExistente) {
-        return; // Modal já existe
-    }
-
-    const modalHTML = `
-    <div id="modalEnvio" class="modal-envio" style="display: none;">
-        <div style="background: white; padding: 30px; border-radius: 15px; max-width: 400px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            <div style="margin-bottom: 20px;">
-                <div class="spinner" style="width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
-            </div>
-            <h2 style="margin: 20px 0; font-size: 18px; color: #333;">Enviando Chamadas...</h2>
-            <p id="modalEnvioProgresso" style="font-size: 14px; color: #666; margin-bottom: 10px;">0/0</p>
-            <div style="background: #f0f0f0; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 15px;">
-                <div id="modalEnvioBarraProgresso" style="background: linear-gradient(90deg, #3498db, #2ecc71); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
-            </div>
-            <p id="modalEnvioDetalhes" style="font-size: 12px; color: #999; margin-top: 10px;">Preparando...</p>
-        </div>
-    </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    console.log('✓ Modal de envio criado com sucesso');
+    // Modal já existe no HTML, apenas retorna
+    console.log('✓ Modal de loader já configurado no HTML');
 }
 
 /**
@@ -311,115 +319,57 @@ function criarModalEnvio() {
  * @param {Array} erros - Array com mensagens de erro
  */
 function exibirResultadoEnvioSupabase(chamadasEnviadas, totalChamadas, alunosEnviados, alunosFalhados = 0, erros = []) {
-    let modal = document.getElementById('modalResultadoEnvio');
+    // Usar o modal padrão de sucesso
+    const modalSucesso = document.getElementById('modalSucesso');
 
-    // Criar modal se não existir
-    if (!modal) {
-        const modalHTML = `
-        <div id="modalResultadoEnvio" class="modal-resultado-envio" style="display: none;">
-            <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                <div id="modalResultadoIcone" style="text-align: center; margin-bottom: 20px;"></div>
-                <h2 id="modalResultadoTitulo" style="text-align: center; margin: 20px 0; font-size: 20px;"></h2>
-                <p id="modalResultadoMensagem" style="text-align: center; margin: 15px 0; color: #666; font-size: 14px; line-height: 1.5;"></p>
-                <div id="modalResultadoStats" style="background: #f9f9f9; padding: 15px; border-radius: 10px; margin: 15px 0; font-size: 13px; color: #555;">
-                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
-                        <span>Chamadas:</span>
-                        <strong id="modalResultadoEstatChamadas">0</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
-                        <span>Alunos Enviados:</span>
-                        <strong id="modalResultadoEstatAlunos" style="color: #4CAF50;">0</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                        <span>Alunos Falhados:</span>
-                        <strong id="modalResultadoEstatFalhados" style="color: #FF9800;">0</strong>
-                    </div>
-                </div>
-                <div id="modalResultadoDetalhes" style="display: none; background: #fff3cd; border-left: 4px solid #FF9800; padding: 12px; border-radius: 5px; margin: 15px 0; font-size: 12px; color: #856404; max-height: 200px; overflow-y: auto;"></div>
-                <div style="text-align: center; margin-top: 20px;">
-                    <button id="btnFecharResultado" style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.3s ease;">Fechar</button>
-                </div>
-            </div>
-        </div>
-        `;
-
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        modal = document.getElementById('modalResultadoEnvio');
-
-        // Adicionar event listener ao botão de fechar
-        const btnFecharResultado = document.getElementById('btnFecharResultado');
-        if (btnFecharResultado) {
-            btnFecharResultado.addEventListener('click', () => {
-                if (modal) {
-                    modal.style.display = 'none';
-                }
-            });
-        }
-    }
-
-    // Verificar se o modal foi criado com sucesso
-    if (!modal) {
-        console.error('❌ Erro ao criar modal de resultado');
-        alert('Erro ao exibir resultado. Por favor, verifique os dados manualmente no Supabase.');
+    if (!modalSucesso) {
+        console.error('❌ Modal de sucesso não encontrado');
         return;
     }
 
-    // Obter referências dos elementos dentro do modal
-    const icone = document.getElementById('modalResultadoIcone');
-    const titulo = document.getElementById('modalResultadoTitulo');
-    const mensagem = document.getElementById('modalResultadoMensagem');
-    const detalhesDiv = document.getElementById('modalResultadoDetalhes');
-    const estatChamadas = document.getElementById('modalResultadoEstatChamadas');
-    const estatAlunos = document.getElementById('modalResultadoEstatAlunos');
-    const estatFalhados = document.getElementById('modalResultadoEstatFalhados');
-
-    // Verificar se todos os elementos foram encontrados
-    if (!icone || !titulo || !mensagem || !detalhesDiv || !estatChamadas || !estatAlunos || !estatFalhados) {
-        console.error('❌ Erro: Não foi possível encontrar todos os elementos do modal de resultado');
-        return;
-    }
-
-    // Configurar ícone e cor baseado no resultado
+    // Atualizar conteúdo do modal padrão baseado no resultado
     const todasEnviadas = chamadasEnviadas === totalChamadas;
 
     if (todasEnviadas && alunosFalhados === 0) {
-        icone.innerHTML = '<i class="ri-checkbox-circle-fill" style="color: #4CAF50; font-size: 48px;"></i>';
-        titulo.textContent = '✅ Sucesso Completo!';
-        titulo.style.color = '#4CAF50';
-        mensagem.textContent = `Todas as ${chamadasEnviadas} chamada(s) foram enviadas com sucesso! ${alunosEnviados} alunos registrados no banco de dados.`;
+        // Sucesso completo
+        const titulo = modalSucesso.querySelector('h2');
+        const descricao = modalSucesso.querySelector('p');
+
+        if (titulo) titulo.textContent = '✅ Enviado com Sucesso!';
+        if (descricao) {
+            descricao.textContent = `${chamadasEnviadas} chamada(s) enviada(s).\n${alunosEnviados} alunos registrados no banco de dados.`;
+        }
     } else if (chamadasEnviadas > 0) {
-        icone.innerHTML = '<i class="ri-alert-line" style="color: #FF9800; font-size: 48px;"></i>';
-        titulo.textContent = '⚠️ Envio Parcial';
-        titulo.style.color = '#FF9800';
-        mensagem.textContent = `${chamadasEnviadas}/${totalChamadas} chamada(s) enviadas. ${alunosEnviados} alunos registrados ${alunosFalhados > 0 ? `e ${alunosFalhados} não encontrados` : ''}.`;
+        // Envio parcial
+        const titulo = modalSucesso.querySelector('h2');
+        const descricao = modalSucesso.querySelector('p');
+
+        if (titulo) titulo.textContent = '⚠️ Envio Parcial';
+        if (descricao) {
+            descricao.textContent = `${chamadasEnviadas}/${totalChamadas} chamada(s) enviadas.\n${alunosEnviados} alunos registrados ${alunosFalhados > 0 ? `e ${alunosFalhados} não encontrados` : ''}.`;
+        }
     } else {
-        icone.innerHTML = '<i class="ri-close-circle-fill" style="color: #d32f2f; font-size: 48px;"></i>';
-        titulo.textContent = '❌ Falha no Envio';
-        titulo.style.color = '#d32f2f';
-        mensagem.textContent = 'Não foi possível enviar as chamadas. Verifique sua conexão e tente novamente.';
+        // Falha no envio
+        const titulo = modalSucesso.querySelector('h2');
+        const descricao = modalSucesso.querySelector('p');
+
+        if (titulo) titulo.textContent = '❌ Falha no Envio';
+        if (descricao) descricao.textContent = 'Não foi possível enviar as chamadas. Verifique sua conexão e tente novamente.';
     }
 
-    // Atualizar estatísticas
-    estatChamadas.textContent = `${chamadasEnviadas}/${totalChamadas}`;
-    estatAlunos.textContent = alunosEnviados;
-    estatFalhados.textContent = alunosFalhados;
-
-    // Exibir erros, se houver
+    // Log de erros no console para debug
     if (erros.length > 0) {
-        detalhesDiv.style.display = 'block';
-        detalhesDiv.innerHTML = '<strong>⚠️ Detalhes dos Erros:</strong><br>' +
-            erros.slice(0, 10).map((erro, idx) =>
-                `<div style="padding: 5px 0; border-bottom: 1px solid #ffebcd;">
-                    ${idx + 1}. ${erro}
-                </div>`
-            ).join('') +
-            (erros.length > 10 ? `<div style="padding: 5px 0; font-style: italic;">... e mais ${erros.length - 10} erros</div>` : '');
-    } else {
-        detalhesDiv.style.display = 'none';
+        console.warn('⚠️ Erros durante envio:');
+        erros.slice(0, 10).forEach((erro, idx) => {
+            console.warn(`${idx + 1}. ${erro}`);
+        });
+        if (erros.length > 10) {
+            console.warn(`... e mais ${erros.length - 10} erros`);
+        }
     }
 
     // Mostrar modal
-    modal.style.display = 'flex';
+    modalSucesso.style.display = 'flex';
 }
 
 /**
