@@ -133,7 +133,7 @@ body {
     font-weight: 500;
     color: #0066cc;
     text-decoration: underline;
-    max-width: 200px;
+    max-width: 300px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -570,7 +570,7 @@ body {
 
     .user-name {
         font-size: 12px;
-        max-width: 100px;
+        max-width: 300px;
     }
 }
 
