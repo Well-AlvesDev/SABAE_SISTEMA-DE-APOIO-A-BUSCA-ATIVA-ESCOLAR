@@ -211,6 +211,35 @@
         </div>
     </div>
 
+    <!-- Modal de Perfil do Usuário -->
+    <div id="modalPerfilUsuario" class="modal-perfil-usuario" style="display: none;">
+        <div class="modal-perfil-overlay"></div>
+        <div class="modal-perfil-content">
+            <button id="btnFecharPerfilModal" class="btn-fechar-perfil">
+                <i class="ri-close-line"></i>
+            </button>
+            <div class="perfil-usuario-body">
+                <div class="perfil-usuario-avatar">
+                    <img src="./assets/imagens/ico/User_icon_2.svg" alt="Avatar do usuário" style="width: 60px;">
+                </div>
+                <div class="perfil-usuario-info">
+                    <div class="info-item">
+                        <label>NOME DO USUÁRIO</label>
+                        <p id="perfilNomeUsuario" class="info-value nome-usuario">-</p>
+                    </div>
+                    <div class="info-item">
+                        <label>FUNÇÃO</label>
+                        <p id="perfilFuncao" class="info-value">-</p>
+                    </div>
+                    <div class="info-item">
+                        <label>ESCOLA</label>
+                        <p id="perfilCodigoEscolar" class="info-value">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="./assets/lógica/supabase-config.js"></script>
     <script src="./assets/lógica/auth.js"></script>
     <script src="./assets/lógica/supabase-alunos.js"></script>

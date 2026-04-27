@@ -1513,6 +1513,131 @@ function protegerCartuchosDeMudancasDropdown() {
 }
 
 // Executar quando a página carregar
+// ========== FUNCIONALIDADES DO MODAL DE PERFIL DO USUÁRIO ==========
+
+// Função para extrair informações do nome do usuário
+// Formato esperado: funcao@codigo.escolar
+function extrairInformacoesUsuario(nomeUsuario) {
+    if (!nomeUsuario || typeof nomeUsuario !== 'string') {
+        return {
+            nomeCompleto: '',
+            funcao: '',
+            codigoEscolar: ''
+        };
+    }
+
+    // Verificar se existe @ para separar função
+    const posicaoArroba = nomeUsuario.indexOf('@');
+    const posicaoPonto = nomeUsuario.lastIndexOf('.');
+
+    let funcao = '';
+    let codigoEscolar = '';
+
+    if (posicaoArroba !== -1 && posicaoPonto !== -1 && posicaoArroba < posicaoPonto) {
+        // Função é entre @ e o primeiro ponto após @
+        funcao = nomeUsuario.substring(posicaoArroba + 1, posicaoPonto);
+        codigoEscolar = nomeUsuario.substring(posicaoPonto + 1);
+    }
+
+    return {
+        nomeCompleto: nomeUsuario.toUpperCase(),
+        funcao: funcao.toUpperCase(),
+        codigoEscolar: codigoEscolar.toUpperCase()
+    };
+}
+
+// Função para abrir o modal de perfil
+function abrirModalPerfilUsuario() {
+    const nomeUsuario = sessionStorage.getItem('usuario');
+
+    if (!nomeUsuario) {
+        console.warn('⚠️ Nome do usuário não encontrado na sessão');
+        return;
+    }
+
+    // Extrair informações
+    const info = extrairInformacoesUsuario(nomeUsuario);
+
+    // Preencher modal com as informações
+    const perfilNomeUsuario = document.getElementById('perfilNomeUsuario');
+    const perfilFuncao = document.getElementById('perfilFuncao');
+    const perfilCodigoEscolar = document.getElementById('perfilCodigoEscolar');
+
+    if (perfilNomeUsuario) {
+        perfilNomeUsuario.textContent = info.nomeCompleto;
+    }
+
+    if (perfilFuncao) {
+        perfilFuncao.textContent = info.funcao || '-';
+    }
+
+    if (perfilCodigoEscolar) {
+        perfilCodigoEscolar.textContent = info.codigoEscolar || '-';
+    }
+
+    // Mostrar modal
+    const modal = document.getElementById('modalPerfilUsuario');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+// Função para fechar o modal de perfil
+function fecharModalPerfilUsuario() {
+    const modal = document.getElementById('modalPerfilUsuario');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Inicializar event listeners do modal de perfil
+function inicializarModalPerfil() {
+    // Elementos que abrem o modal
+    const nomeUsuarioHeader = document.getElementById('nomeUsuarioHeader');
+    const userIcon = document.querySelector('.user-icon');
+    const btnFecharPerfilModal = document.getElementById('btnFecharPerfilModal');
+    const modalPerfilOverlay = document.querySelector('.modal-perfil-overlay');
+    const modalPerfilUsuario = document.getElementById('modalPerfilUsuario');
+
+    // Clique no nome do usuário
+    if (nomeUsuarioHeader) {
+        nomeUsuarioHeader.style.cursor = 'pointer';
+        nomeUsuarioHeader.addEventListener('click', abrirModalPerfilUsuario);
+    }
+
+    // Clique no ícone do usuário
+    if (userIcon) {
+        userIcon.style.cursor = 'pointer';
+        userIcon.addEventListener('click', abrirModalPerfilUsuario);
+    }
+
+    // Botão fechar modal
+    if (btnFecharPerfilModal) {
+        btnFecharPerfilModal.addEventListener('click', fecharModalPerfilUsuario);
+    }
+
+    // Fechar ao clicar no overlay
+    if (modalPerfilOverlay) {
+        modalPerfilOverlay.addEventListener('click', fecharModalPerfilUsuario);
+    }
+
+    // Fechar ao clicar fora do modal (no background)
+    if (modalPerfilUsuario) {
+        modalPerfilUsuario.addEventListener('click', (e) => {
+            if (e.target === modalPerfilUsuario) {
+                fecharModalPerfilUsuario();
+            }
+        });
+    }
+
+    // Fechar com tecla ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            fecharModalPerfilUsuario();
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Apenas executar se os elementos da página chamada.html existirem
     const btnIniciarRegistro = document.getElementById('btnIniciarRegistro');
@@ -1525,4 +1650,7 @@ document.addEventListener('DOMContentLoaded', () => {
         protegerCartuchosDeMudancasDropdown();
         renderizarCartuchosChamadaaSalvas();
     }
+
+    // Sempre inicializar modal de perfil em ambas as páginas
+    inicializarModalPerfil();
 });
