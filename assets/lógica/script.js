@@ -291,44 +291,7 @@ if (btnSair) {
     });
 }
 
-// ========== FUNCIONALIDADE DE RECARREGAR DADOS ==========
-const btnRecarregar = document.getElementById('btnRecarregar');
-if (btnRecarregar) {
-    btnRecarregar.addEventListener('click', async () => {
-        btnRecarregar.disabled = true;
-        const loaderRecarregamento = document.getElementById('loaderRecarregamento');
-        const modalSucesso = document.getElementById('modalSucesso');
 
-        // Mostrar loader
-        loaderRecarregamento.style.display = 'flex';
-
-        try {
-            console.log('🔄 Recarregando dados...');
-            await recarregarDados();
-            console.log('✅ Dados recarregados com sucesso');
-
-            // Esconder loader e mostrar modal de sucesso
-            loaderRecarregamento.style.display = 'none';
-            modalSucesso.style.display = 'flex';
-
-        } catch (erro) {
-            console.error('❌ Erro ao recarregar dados:', erro);
-            loaderRecarregamento.style.display = 'none';
-            alert('❌ Erro ao recarregar dados. Tente novamente.');
-        } finally {
-            btnRecarregar.disabled = false;
-        }
-    });
-}
-
-// Fechar modal de sucesso
-const btnFecharSucesso = document.getElementById('btnFecharSucesso');
-if (btnFecharSucesso) {
-    btnFecharSucesso.addEventListener('click', () => {
-        const modalSucesso = document.getElementById('modalSucesso');
-        modalSucesso.style.display = 'none';
-    });
-}
 
 // Fechar modal ao clicar fora dele
 const modalSucesso = document.getElementById('modalSucesso');
