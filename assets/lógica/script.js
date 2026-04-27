@@ -592,6 +592,9 @@ function inicializarBotaoIniciarRegistro() {
                         // Exibir modal de edição
                         modal.style.display = 'flex';
 
+                        const modalBody = document.querySelector('.modal-chamada-body');
+                        if (modalBody) modalBody.scrollTop = 0;
+
                         // Adicionar classe ao modal header para indicar modo edição
                         adicionarModoEdicaoModalHeader();
 
@@ -661,6 +664,10 @@ function inicializarBotaoIniciarRegistro() {
 
             // Exibir modal
             modal.style.display = 'flex';
+
+            // CORREÇÃO DO SCROLL: Adicione isto aqui
+            const modalBody = document.querySelector('.modal-chamada-body');
+            if (modalBody) modalBody.scrollTop = 0;
 
         } catch (erro) {
             console.error('Erro ao buscar alunos:', erro);
@@ -1232,6 +1239,10 @@ function editarChamada(chamadaId) {
         // Abrir modal
         const modal = document.getElementById('modalChamada');
         modal.style.display = 'flex';
+
+        // CORREÇÃO DO SCROLL: Adicione isto aqui
+        const modalBody = document.querySelector('.modal-chamada-body');
+        if (modalBody) modalBody.scrollTop = 0;
     } else {
         console.error('Erro ao recuperar alunos:', resultado.mensagem);
         alert('Erro ao carregar alunos para edição');
@@ -1272,7 +1283,9 @@ function editarChamadaDuplicada(chamadaId) {
         // Abrir modal
         const modal = document.getElementById('modalChamada');
         modal.style.display = 'flex';
-
+        // CORREÇÃO DO SCROLL: Adicione isto aqui
+        const modalBody = document.querySelector('.modal-chamada-body');
+        if (modalBody) modalBody.scrollTop = 0;
         // Adicionar classe ao modal header para indicar modo edição
         adicionarModoEdicaoModalHeader();
     } else {
