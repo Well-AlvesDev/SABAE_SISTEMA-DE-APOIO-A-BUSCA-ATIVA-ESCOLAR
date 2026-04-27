@@ -491,6 +491,31 @@ if (modalExclusao) {
     });
 }
 
+// ========== FUNCIONALIDADES DO MODAL DE CONFIRMAÇÃO DE ENVIO ==========
+// Variável para armazenar se há envio em andamento
+let envioEmAndamento = false;
+
+// Funções para o modal de confirmação de envio
+function exibirModalConfirmacaoEnvio() {
+    const modalEnvio = document.getElementById('modalConfirmacaoEnvio');
+    const modalTitulo = document.getElementById('modalConfirmacaoEnvioTitulo');
+    const modalMensagem = document.getElementById('modalConfirmacaoEnvioMensagem');
+
+    if (modalTitulo) modalTitulo.textContent = 'Enviar Chamada(s)?';
+    if (modalMensagem) modalMensagem.textContent = 'Tem certeza que deseja enviar a(s) chamada(s) para o banco de dados?';
+
+    if (modalEnvio) modalEnvio.style.display = 'flex';
+}
+
+function fecharModalConfirmacaoEnvio() {
+    const modalEnvio = document.getElementById('modalConfirmacaoEnvio');
+    if (modalEnvio) modalEnvio.style.display = 'none';
+}
+
+// Listeners para os botões do modal de confirmação de envio (será inicializado no DOMContentLoaded)
+
+// Fechar modal de confirmação de envio ao clicar fora dele (será inicializado no DOMContentLoaded)
+
 function inicializarBotaoIniciarRegistro() {
     const btnIniciar = document.getElementById('btnIniciarRegistro');
     const btnFecharModal = document.getElementById('btnFecharModal');
@@ -1243,6 +1268,9 @@ function editarChamada(chamadaId) {
         // CORREÇÃO DO SCROLL: Adicione isto aqui
         const modalBody = document.querySelector('.modal-chamada-body');
         if (modalBody) modalBody.scrollTop = 0;
+
+        // Adicionar classe ao modal header para indicar modo edição
+        adicionarModoEdicaoModalHeader();
     } else {
         console.error('Erro ao recuperar alunos:', resultado.mensagem);
         alert('Erro ao carregar alunos para edição');
@@ -1340,16 +1368,6 @@ function selecionarNoDropdown(dropdownId, valor, inputId) {
             }
         }
 
-        // ========== BOTÃO ENVIAR PARA O BANCO ==========
-        // Funcionalidade temporária - será implementada com Supabase em breve
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnEnviarParaBanco = document.getElementById('btnEnviarParaBanco');
-            if (btnEnviarParaBanco) {
-                btnEnviarParaBanco.addEventListener('click', () => {
-                    alert('⚠️ Esta funcionalidade será implementada em breve usando Supabase.\n\nAs chamadas estão salvas e serão enviadas em uma próxima atualização.');
-                });
-            }
-        });
     });
 }
 
@@ -1666,4 +1684,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sempre inicializar modal de perfil em ambas as páginas
     inicializarModalPerfil();
+
+    // Inicializar listener do botão "Enviar para o Banco"
+    const btnEnviarParaBanco = document.getElementById('btnEnviarParaBanco');
+    if (btnEnviarParaBanco) {
+        btnEnviarParaBanco.addEventListener('click', () => {
+            exibirModalConfirmacaoEnvio();
+        });
+    }
+
+    // Inicializar listeners do modal de confirmação de envio
+    const btnCancelarEnvio = document.getElementById('btnCancelarEnvio');
+    const btnConfirmarEnvio = document.getElementById('btnConfirmarEnvio');
+    const modalEnvio = document.getElementById('modalConfirmacaoEnvio');
+
+    if (btnCancelarEnvio) {
+        btnCancelarEnvio.addEventListener('click', () => {
+            fecharModalConfirmacaoEnvio();
+        });
+    }
+
+    if (btnConfirmarEnvio) {
+        btnConfirmarEnvio.addEventListener('click', () => {
+            // Aqui será executada a lógica de envio real
+            fecharModalConfirmacaoEnvio();
+            // Trigger do evento de envio (será capturado por supabase-envio-chamadas.js)
+            const evento = new CustomEvent('confirmarEnvioChamas');
+            document.dispatchEvent(evento);
+        });
+    }
+
+    if (modalEnvio) {
+        modalEnvio.addEventListener('click', (e) => {
+            if (e.target === modalEnvio || e.target.classList.contains('modal-aviso-overlay')) {
+                fecharModalConfirmacaoEnvio();
+            }
+        });
+    }
 });

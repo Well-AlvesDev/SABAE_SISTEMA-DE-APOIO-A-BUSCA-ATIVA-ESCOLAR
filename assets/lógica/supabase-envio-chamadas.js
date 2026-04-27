@@ -426,13 +426,10 @@ function exibirResultadoEnvioSupabase(chamadasEnviadas, totalChamadas, alunosEnv
  * Inicializa os event listeners do botão de envio
  */
 function inicializarBotaoEnvioSupabase() {
-    // Botão de enviar para o banco
-    const btnEnviarParaBanco = document.getElementById('btnEnviarParaBanco');
-    if (btnEnviarParaBanco) {
-        btnEnviarParaBanco.addEventListener('click', () => {
-            enviarTodasChamadasParaSupabase();
-        });
-    }
+    // Listener para o evento de confirmação do modal
+    document.addEventListener('confirmarEnvioChamas', () => {
+        enviarTodasChamadasParaSupabase();
+    });
 
     console.log('✓ Funcionalidade de envio para Supabase inicializada');
 }

@@ -211,6 +211,24 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmação de Envio -->
+    <div id="modalConfirmacaoEnvio" class="modal-aviso" style="display: none;">
+        <div class="modal-aviso-overlay"></div>
+        <div class="modal-aviso-content">
+            <div class="modal-aviso-icon">
+                <img src="./assets/imagens/ico/serverDB.svg" alt="" style="width: 120px;">
+            </div>
+            <h2 id="modalConfirmacaoEnvioTitulo">Enviar Chamada(s)?</h2>
+            <p id="modalConfirmacaoEnvioMensagem">Tem certeza que deseja enviar a(s) chamada(s) para o banco de dados?
+            </p>
+            <div class="modal-aviso-botoes" style="flex-direction: row; gap: 16px;">
+                <button id="btnCancelarEnvio" class="btn-cancelar-aviso"
+                    style="flex: 1; padding: 12px 32px; border-radius: 8px;">Cancelar</button>
+                <button id="btnConfirmarEnvio" class="btn-confirmar-aviso" style="flex: 1;">Sim, enviar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Perfil do Usuário -->
     <div id="modalPerfilUsuario" class="modal-perfil-usuario" style="display: none;">
         <div class="modal-perfil-overlay"></div>

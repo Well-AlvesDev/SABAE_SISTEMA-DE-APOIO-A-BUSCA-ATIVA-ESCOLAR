@@ -420,9 +420,9 @@ body {
 }
 
 .btn-sim-editar-chamada-duplicada {
-    background-color: #84dda930;
-    color: rgb(36, 36, 36);
-    border: 1px solid #27ae60;
+    background-color: #19c62d;
+    color: rgb(253, 253, 253);
+    border: none;
     padding: 8px 24px;
     border-radius: 6px;
     font-size: 16px;
