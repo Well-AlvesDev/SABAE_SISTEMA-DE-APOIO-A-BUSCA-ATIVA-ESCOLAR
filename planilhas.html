@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="PT-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SABAE - GERAR PLANILHA</title>
+    <link rel="shortcut icon" href="./assets/imagens/logos/sabae.png" type="image/x-icon">
+    <link rel="stylesheet" href="./assets/estilos/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.min.css">
+    <style>
+        /* Modal da Planilha */
+        .modal-planilha {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-planilha-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-planilha-content {
+            position: relative;
+            background: white;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 1400px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-planilha-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-planilha-header h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .btn-fechar-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-fechar-modal:hover {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .modal-planilha-body {
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .modal-planilha-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tabela-container {
+            flex: 1;
+            overflow: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        #tabelaPlanilha {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 800px;
+        }
+
+        #tabelaPlanilha th {
+            background: #1976d2;
+            color: white;
+            padding: 12px 8px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            text-align: center;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        #tabelaPlanilha td {
+            padding: 10px 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        #tabelaPlanilha td:first-child,
+        #tabelaPlanilha th:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 11;
+            background: inherit;
+        }
+
+        #tabelaPlanilha th:first-child {
+            background: #1565c0;
+        }
+
+        #tabelaPlanilha td:nth-child(2),
+        #tabelaPlanilha th:nth-child(2) {
+            position: sticky;
+            left: 60px;
+            z-index: 11;
+            background: inherit;
+        }
+
+        #tabelaPlanilha th:nth-child(2) {
+            background: #1565c0;
+        }
+
+        /* Cores de presença */
+        .presenca-p {
+            background: #c8e6c9 !important;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .presenca-fj {
+            background: #fff9c4 !important;
+            color: #f57f17;
+            font-weight: bold;
+        }
+
+        .presenca-fnj {
+            background: #ffcdd2 !important;
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .modal-planilha-content {
+                width: 98%;
+                max-height: 95vh;
+                border-radius: 8px;
+            }
+
+            .modal-planilha-header {
+                padding: 15px;
+            }
+
+            .modal-planilha-header h2 {
+                font-size: 18px;
+            }
+
+            .modal-planilha-body {
+                padding: 15px;
+            }
+
+            .modal-planilha-actions {
+                justify-content: center;
+            }
+
+            #tabelaPlanilha {
+                font-size: 11px;
+            }
+
+            #tabelaPlanilha th,
+            #tabelaPlanilha td {
+                padding: 8px 4px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-planilha-content {
+                width: 100%;
+                height: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            .modal-planilha-header h2 {
+                font-size: 16px;
+            }
+
+            #tabelaPlanilha {
+                font-size: 10px;
+                min-width: 600px;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body style="overflow: hidden;">
+
+    <div id="loader" class="loader-container">
+        <img src="./assets/imagens/logos/sabae.png" alt="" style="width: 150px;">
+        <div class="spinner"></div>
+        <p>Um momento...</p>
+    </div>
+
+    <!-- Carregar bibliotecas de configuração PRIMEIRO -->
+    <script src="./assets/lógica/supabase-config.js"></script>
+    <script src="./assets/lógica/supabase-gerar-planilha.js"></script>
+
+    <header class="pwa-header">
+        <div class="header-left">
+            <button id="btnVoltar" class="btn-voltar"
+                style="background: #ffffff33; border: none; border-radius: 5px; cursor: pointer; padding: 6px;">
+                <i class="ri-arrow-left-line" style="font-size: 24px; color: white;"></i>
+            </button>
+            <img src="./assets/imagens/logos/sabae.png" alt="SABAE Logo" class="header-logo"
+                style="width: 50px; height: 50px; border-radius: 10px;">
+            <span class="header-title">Gerar Planilhas</span>
+        </div>
+        <span class="header-datetime" id="headerDateTime">--:--</span>
+    </header>
+
+    <div class="user-info-bar">
+        <div class="user-info-content">
+            <span class="user-icon"><img src="./assets/imagens/ico/User_icon_2.svg" alt="" style="width: 30px;"></span>
+            <span class="user-name" id="nomeUsuarioHeader">Usuário</span>
+        </div>
+        <button class="btn-sair" id="btnSair">Desconectar <i class="ri-plug-line"></i></button>
+    </div>
+
+    <main style="flex-direction: column;">
+        <div class="conteudo-principal">
+            <h1>Gerar Planilha</h1>
+
+            <!-- Seleção de Mês -->
+            <div style="margin: 20px 0;">
+                <label for="mesDropdown" style="font-weight: 400; display: block; margin-bottom: 10px;">Selecione o
+                    Mês:</label>
+                <div id="mesDropdown" class="custom-dropdown">
+                    <button class="dropdown-toggle" id="mesToggle">
+                        <span class="dropdown-label">-- Selecione o mês --</span>
+                        <i class="ri-arrow-down-s-line"></i>
+                    </button>
+                    <div class="dropdown-menu" id="mesMenu">
+                        <!-- Será preenchido por JavaScript -->
+                    </div>
+                </div>
+                <input type="hidden" id="mesValue" value="">
+            </div>
+
+            <!-- Seleção de Sala (Opcional) -->
+            <div style="margin: 20px 0;">
+                <label for="salaDropdown" style="font-weight: 400; display: block; margin-bottom: 10px;">Selecione a
+                    Sala (Opcional):</label>
+                <div id="salaDropdown" class="custom-dropdown">
+                    <button class="dropdown-toggle" id="salaToggle">
+                        <span class="dropdown-label">-- Todas as salas --</span>
+                        <i class="ri-arrow-down-s-line"></i>
+                    </button>
+                    <div class="dropdown-menu" id="salaMenu">
+                        <!-- Será preenchido por JavaScript -->
+                    </div>
+                </div>
+                <input type="hidden" id="salaValue" value="">
+            </div>
+
+            <!-- Botão Gerar Planilha -->
+            <button id="btnGerarPlanilha" class="btn btn-primary" style="margin-top: 15px; opacity: 0.5;" disabled>
+                <i class="ri-file-excel-line"></i> Gerar Planilha
+            </button>
+
+            <!-- Info da Planilha -->
+            <div id="infoPlanilha"
+                style="display: none; margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+                <p id="mensagemPlanilha" style="margin: 0; color: #2e7d32; font-weight: 500;"></p>
+            </div>
+
+            <!-- Container da Planilha (Modal) -->
+            <div id="modalPlanilha" class="modal-planilha" style="display: none;">
+                <div class="modal-planilha-overlay"></div>
+                <div class="modal-planilha-content">
+                    <div class="modal-planilha-header">
+                        <h2 id="tituloPlanilha">Chamada</h2>
+                        <button id="btnFecharPlanilha" class="btn-fechar-modal">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+                    <div class="modal-planilha-body">
+                        <div class="modal-planilha-actions">
+                            <button id="btnDownloadExcelModal" class="btn btn-success">
+                                <i class="ri-download-cloud-line"></i> Excel
+                            </button>
+                            <button id="btnDownloadCSVModal" class="btn btn-secondary">
+                                <i class="ri-file-text-line"></i> CSV
+                            </button>
+                        </div>
+                        <div class="tabela-container">
+                            <table id="tabelaPlanilha">
+                                <!-- Conteúdo gerado por JavaScript -->
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </main>
+    <!-- Modal de Perfil do Usuário -->
+    <div id="modalPerfilUsuario" class="modal-perfil-usuario" style="display: none;">
+        <div class="modal-perfil-overlay"></div>
+        <div class="modal-perfil-content">
+            <button id="btnFecharPerfilModal" class="btn-fechar-perfil">
+                <i class="ri-close-line"></i>
+            </button>
+            <div class="perfil-usuario-body">
+                <div class="perfil-usuario-avatar">
+                    <img src="./assets/imagens/ico/User_icon_2.svg" alt="Avatar do usuário" style="width: 60px;">
+                </div>
+                <div class="perfil-usuario-info">
+                    <div class="info-item">
+                        <label>NOME DO USUÁRIO</label>
+                        <p id="perfilNomeUsuario" class="info-value nome-usuario">-</p>
+                    </div>
+                    <div class="info-item">
+                        <label>FUNÇÃO</label>
+                        <p id="perfilFuncao" class="info-value">-</p>
+                    </div>
+                    <div class="info-item">
+                        <label>ESCOLA</label>
+                        <p id="perfilCodigoEscolar" class="info-value">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        // Atualizar data e hora
+        function atualizarDataHora() {
+            const agora = new Date();
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const ano = agora.getFullYear();
+            const horas = String(agora.getHours()).padStart(2, '0');
+            const minutos = String(agora.getMinutes()).padStart(2, '0');
+
+            const dataHora = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+            const elemento = document.getElementById('headerDateTime');
+            if (elemento) {
+                elemento.textContent = dataHora;
+            }
+        }
+
+        function agendarProximaAtualizacao() {
+            atualizarDataHora();
+            setInterval(atualizarDataHora, 1000);
+        }
+
+        // Popular dropdown de mês com os 12 meses
+        function preencherMeses() {
+            const meses = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+
+            const mesMenu = document.getElementById('mesMenu');
+            mesMenu.innerHTML = '';
+
+            meses.forEach((mes, index) => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = mes;
+                item.dataset.value = mes;
+                item.dataset.mes = index + 1; // Mês de 1-12
+
+                // Adicionar evento de clique para selecionar o mês
+                item.addEventListener('click', () => {
+                    const toggle = document.getElementById('mesToggle');
+                    const label = toggle.querySelector('.dropdown-label');
+                    const mesValue = document.getElementById('mesValue');
+
+                    label.textContent = mes;
+                    mesValue.value = mes;
+
+                    // Fechar dropdown
+                    toggle.classList.remove('active');
+                    mesMenu.classList.remove('show');
+
+                    // Habilitar botão gerar
+                    const btnGerar = document.getElementById('btnGerarPlanilha');
+                    if (btnGerar) {
+                        btnGerar.disabled = false;
+                        btnGerar.style.opacity = '1';
+                    }
+
+                    console.log('Mês selecionado:', mes, '- Índice:', index + 1);
+                });
+
+                mesMenu.appendChild(item);
+            });
+        }
+
+        /**
+         * Preenche o dropdown de salas baseado nos dados carregados
+         * @param {array} dadosBrutos - Array com dados dos alunos
+         */
+        function preencherSalas(dadosBrutos) {
+            const salaMenu = document.getElementById('salaMenu');
+            if (!salaMenu || !dadosBrutos || dadosBrutos.length === 0) return;
+
+            // Extrair salas únicas dos dados
+            const salasUnicas = new Set();
+            dadosBrutos.forEach(aluno => {
+                if (aluno.TURMA) {
+                    salasUnicas.add(aluno.TURMA);
+                }
+            });
+
+            // Ordenar salas
+            const salasOrdenadas = Array.from(salasUnicas).sort();
+
+            // Limpar menu
+            salaMenu.innerHTML = '';
+
+            // Adicionar opção "Todas as salas"
+            const itemTodas = document.createElement('div');
+            itemTodas.className = 'dropdown-item';
+            itemTodas.textContent = '-- Todas as salas --';
+            itemTodas.dataset.value = '';
+            itemTodas.addEventListener('click', () => {
+                const toggle = document.getElementById('salaToggle');
+                const label = toggle.querySelector('.dropdown-label');
+                const salaValue = document.getElementById('salaValue');
+
+                label.textContent = '-- Todas as salas --';
+                salaValue.value = '';
+
+                toggle.classList.remove('active');
+                salaMenu.classList.remove('show');
+            });
+            salaMenu.appendChild(itemTodas);
+
+            // Adicionar cada sala
+            salasOrdenadas.forEach(sala => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = sala;
+                item.dataset.value = sala;
+
+                item.addEventListener('click', () => {
+                    const toggle = document.getElementById('salaToggle');
+                    const label = toggle.querySelector('.dropdown-label');
+                    const salaValue = document.getElementById('salaValue');
+
+                    label.textContent = sala;
+                    salaValue.value = sala;
+
+                    toggle.classList.remove('active');
+                    salaMenu.classList.remove('show');
+                });
+
+                salaMenu.appendChild(item);
+            });
+
+            console.log('Salas encontradas:', salasOrdenadas.length, salasOrdenadas);
+        }
+
+        // Habilitar botão quando mês for selecionado
+        function habilitarBotaoAoSelecionarMes() {
+            const mesDropdown = document.getElementById('mesDropdown');
+            mesDropdown.addEventListener('dropdownChange', (e) => {
+                if (e.detail.value && e.detail.value !== '-- Selecione o mês --') {
+                    document.getElementById('btnGerarPlanilha').disabled = false;
+                    document.getElementById('btnGerarPlanilha').style.opacity = '1';
+                }
+            });
+        }
+
+        /**
+         * Converte nome do mês para número (1-12)
+         * @param {string} mesNome - Nome do mês (ex: "Janeiro", "Fevereiro")
+         * @returns {number} Número do mês (1-12)
+         */
+        function obterNumeroMes(mesNome) {
+            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            const numero = meses.indexOf(mesNome) + 1;
+            return numero; // Retorna número, não string
+        }
+
+        /**
+         * Extrai o tipo de presença de uma entrada de chamada
+         * @param {string} entrada - Entrada no formato "presenca:mes" (ex: "P:5", "FJ:3")
+         * @returns {string} Tipo de presença (P, FJ, FNJ) ou null
+         */
+        function extrairPresencaDaChamada(entrada) {
+            if (!entrada) return null;
+            entrada = String(entrada).trim();
+            const match = entrada.match(/^([A-Za-z]+):/);
+            const presenca = match ? match[1].toUpperCase() : null;
+            return (presenca === 'P' || presenca === 'FJ' || presenca === 'FNJ') ? presenca : null;
+        }
+
+        /**
+         * Extrai o número do mês de uma entrada de chamada
+         * @param {string} entrada - Entrada no formato "presenca:mes" (ex: "P:5", "FJ:3")
+         * @returns {number} Número do mês (1-12) ou null
+         */
+        function extrairMesDaChamada(entrada) {
+            if (!entrada) return null;
+            entrada = String(entrada).trim();
+            const match = entrada.match(/:(\d+)$/);
+            const mes = match ? parseInt(match[1]) : null;
+            return (mes >= 1 && mes <= 12) ? mes : null;
+        }
+
+        /**
+         * Processa uma coluna de dia e retorna a presença do mês específico
+         * @param {string} colunaDia - Conteúdo da coluna (ex: "P:5, FJ:3, FNJ:7")
+         * @param {number} mesSelecionado - Número do mês a buscar (1-12)
+         * @returns {string} Presença do mês específico ou vazio
+         */
+        function processarColunaDiaParaMes(colunaDia, mesSelecionado) {
+            if (!colunaDia || String(colunaDia).trim() === '') {
+                return '';
+            }
+
+            // Dividir múltiplas entradas separadas por vírgula
+            const entradas = String(colunaDia).split(',').map(e => e.trim()).filter(e => e.length > 0);
+
+            // Procurar a entrada que corresponde ao mês selecionado
+            for (const entrada of entradas) {
+                const mes = extrairMesDaChamada(entrada);
+                // Comparação flexível (número vs string)
+                if (mes === mesSelecionado || mes === Number(mesSelecionado)) {
+                    return extrairPresencaDaChamada(entrada);
+                }
+            }
+
+            return '';
+        }
+
+        /**
+         * Obtém o valor de uma coluna de dia do aluno (suporta diferentes formatos de chave)
+         * @param {object} aluno - Objeto do aluno
+         * @param {number} dia - Dia do mês (1-31)
+         * @returns {string} Valor da coluna ou vazio
+         */
+        function obterValorColunaDia(aluno, dia) {
+            // Tentar diferentes formatos de chave
+            const formatos = [
+                String(dia),           // "1", "2", ...
+                String(dia).padStart(2, '0'), // "01", "02", ...
+                dia                    // 1, 2, ... (número)
+            ];
+
+            for (const formato of formatos) {
+                if (aluno[formato] !== undefined && aluno[formato] !== null) {
+                    return String(aluno[formato]);
+                }
+            }
+
+            return '';
+        }
+
+        /**
+         * Gera a planilha em formato HTML table
+         * @param {array} dadosBrutos - Array com todos os dados brutos do cache
+         * @param {number} mesSelecionado - Número do mês selecionado (1-12)
+         * @param {string} salaSelecionada - Sala selecionada (opcional, vazio = todas)
+         */
+        function gerarPlanilhaHTML(dadosBrutos, mesSelecionado, salaSelecionada) {
+            console.log('=== GERANDO PLANILHA HTML ===');
+            console.log('Mês selecionado:', mesSelecionado);
+            console.log('Sala selecionada:', salaSelecionada || 'todas');
+            console.log('Total alunos (brutos):', dadosBrutos.length);
+
+            // Filtrar por sala se selecionada
+            let dadosFiltrados = dadosBrutos;
+            if (salaSelecionada && salaSelecionada !== '') {
+                dadosFiltrados = dadosBrutos.filter(aluno =>
+                    aluno.TURMA && aluno.TURMA === salaSelecionada
+                );
+                console.log('Alunos após filtro de sala:', dadosFiltrados.length);
+            }
+
+            console.log('Primeiro aluno sample:', JSON.stringify(dadosFiltrados[0], null, 2));
+
+            const tabela = document.getElementById('tabelaPlanilha');
+            let html = '<thead><tr>';
+
+            // Cabeçalho: MATRICULA, NOME, TURMA, TURNO, STATUS, Dias 1-31
+            html += '<th style="min-width: 80px;">MAT</th>';
+            html += '<th style="min-width: 150px;">NOME</th>';
+            html += '<th style="min-width: 80px;">TURMA</th>';
+            html += '<th style="min-width: 70px;">TURNO</th>';
+            html += '<th style="min-width: 70px;">STATUS</th>';
+
+            // Dias 1 a 31
+            for (let dia = 1; dia <= 31; dia++) {
+                html += `<th style="min-width: 35px;">${dia}</th>`;
+            }
+            html += '</tr></thead><tbody>';
+
+            // Dados dos alunos
+            dadosFiltrados.forEach((aluno, idx) => {
+                const par = idx % 2 === 0;
+                html += `<tr style="background: ${par ? '#ffffff' : '#f5f5f5'};">`;
+
+                // Colunas fixas
+                html += `<td style="text-align: left;">${aluno.MAT || ''}</td>`;
+                html += `<td style="text-align: left; white-space: nowrap;">${aluno.NOME || ''}</td>`;
+                html += `<td>${aluno.TURMA || ''}</td>`;
+                html += `<td>${aluno.TURNO || ''}</td>`;
+                html += `<td>${aluno.STATUS || ''}</td>`;
+
+                // Dias 1 a 31 - usar função flexível para obter valor da coluna
+                for (let dia = 1; dia <= 31; dia++) {
+                    const colunaDia = obterValorColunaDia(aluno, dia);
+                    const presenca = processarColunaDiaParaMes(colunaDia, mesSelecionado);
+
+                    // Classe conforme tipo de presença
+                    let classePresenca = '';
+                    if (presenca === 'P') {
+                        classePresenca = 'presenca-p';
+                    } else if (presenca === 'FJ') {
+                        classePresenca = 'presenca-fj';
+                    } else if (presenca === 'FNJ') {
+                        classePresenca = 'presenca-fnj';
+                    }
+
+                    html += `<td class="${classePresenca}">${presenca}</td>`;
+                }
+                html += '</tr>';
+            });
+
+            html += '</tbody>';
+            tabela.innerHTML = html;
+
+            // Atualizar título do modal
+            const mesNome = document.getElementById('mesValue').value;
+            let titulo = `Chamada - ${mesNome}`;
+            if (salaSelecionada && salaSelecionada !== '') {
+                titulo += ` - ${salaSelecionada}`;
+            }
+            document.getElementById('tituloPlanilha').textContent = titulo;
+
+            // Abrir modal
+            abrirModalPlanilha();
+
+            return dadosFiltrados.length;
+        }
+
+        /**
+         * Abre o modal da planilha
+         */
+        function abrirModalPlanilha() {
+            const modal = document.getElementById('modalPlanilha');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        /**
+         * Fecha o modal da planilha
+         */
+        function fecharModalPlanilha() {
+            const modal = document.getElementById('modalPlanilha');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        /**
+         * Inicializa os eventos do modal
+         */
+        function inicializarModalPlanilha() {
+            // Botão fechar
+            const btnFechar = document.getElementById('btnFecharPlanilha');
+            if (btnFechar) {
+                btnFechar.addEventListener('click', fecharModalPlanilha);
+            }
+
+            // Overlay para fechar
+            const overlay = document.querySelector('.modal-planilha-overlay');
+            if (overlay) {
+                overlay.addEventListener('click', fecharModalPlanilha);
+            }
+
+            // Botões de download do modal
+            const btnExcelModal = document.getElementById('btnDownloadExcelModal');
+            if (btnExcelModal) {
+                btnExcelModal.addEventListener('click', baixarExcel);
+            }
+
+            const btnCSVModal = document.getElementById('btnDownloadCSVModal');
+            if (btnCSVModal) {
+                btnCSVModal.addEventListener('click', baixarCSV);
+            }
+
+            // Tecla ESC para fechar
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('modalPlanilha');
+                    if (modal && modal.style.display !== 'none') {
+                        fecharModalPlanilha();
+                    }
+                }
+            });
+        }
+
+        /**
+         * Converte dados para CSV
+         * @param {array} dadosBrutos - Array com todos os dados brutos
+         * @param {number} mesSelecionado - Número do mês selecionado
+         * @param {string} salaSelecionada - Sala selecionada (opcional)
+         * @returns {string} Conteúdo CSV
+         */
+        function converterParaCSV(dadosBrutos, mesSelecionado, salaSelecionada) {
+            // Filtrar por sala se selecionada
+            let dadosFiltrados = dadosBrutos;
+            if (salaSelecionada && salaSelecionada !== '') {
+                dadosFiltrados = dadosBrutos.filter(aluno =>
+                    aluno.TURMA && aluno.TURMA === salaSelecionada
+                );
+            }
+
+            let csv = 'MAT,NOME,TURMA,TURNO,STATUS';
+
+            // Header com dias 1-31
+            for (let dia = 1; dia <= 31; dia++) {
+                csv += `,${dia}`;
+            }
+            csv += '\n';
+
+            // Dados dos alunos
+            dadosFiltrados.forEach(aluno => {
+                const linha = [
+                    `"${aluno.MAT || ''}"`,
+                    `"${aluno.NOME || ''}"`,
+                    `"${aluno.TURMA || ''}"`,
+                    `"${aluno.TURNO || ''}"`,
+                    `"${aluno.STATUS || ''}"`
+                ];
+
+                for (let dia = 1; dia <= 31; dia++) {
+                    const colunaDia = obterValorColunaDia(aluno, dia);
+                    const presenca = processarColunaDiaParaMes(colunaDia, mesSelecionado);
+                    // Converter para maiúsculo
+                    linha.push(presenca ? presenca.toUpperCase() : '');
+                }
+
+                csv += linha.join(',') + '\n';
+            });
+
+            return csv;
+        }
+
+        /**
+         * Converte dados para formato Excel (XML Spreadsheet)
+         * @param {array} dadosBrutos - Array com todos os dados brutos
+         * @param {number} mesSelecionado - Número do mês selecionado
+         * @param {string} nomeMes - Nome do mês selecionado
+         * @param {string} salaSelecionada - Sala selecionada (opcional)
+         * @returns {string} Conteúdo XML do Excel
+         */
+        function converterParaExcelXML(dadosBrutos, mesSelecionado, nomeMes, salaSelecionada) {
+            // Filtrar por sala se selecionada
+            let dadosFiltrados = dadosBrutos;
+            if (salaSelecionada && salaSelecionada !== '') {
+                dadosFiltrados = dadosBrutos.filter(aluno =>
+                    aluno.TURMA && aluno.TURMA === salaSelecionada
+                );
+            }
+
+            let xml = '<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?>';
+            xml += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ';
+            xml += 'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';
+
+            // Definir estilos
+            xml += '<Styles>';
+            // Estilo para células de presença (maiúsculo, centralizado, borda preta, fundo branco)
+            xml += '<Style ss:ID="presencaStyle">';
+            xml += '<Alignment ss:Horizontal="Center" ss:Vertical="Center"/>';
+            xml += '<Font ss:Size="9"/>';
+            xml += '<Borders>';
+            xml += '<Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>';
+            xml += '<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>';
+            xml += '<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>';
+            xml += '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>';
+            xml += '</Borders>';
+            xml += '</Style>';
+            xml += '</Styles>';
+
+            xml += '<Worksheet ss:Name="Chamada ' + nomeMes + '">';
+            xml += '<Table>';
+
+            // Header
+            let header = '<Row><Cell><Data ss:Type="String">MAT</Data></Cell>';
+            header += '<Cell><Data ss:Type="String">NOME</Data></Cell>';
+            header += '<Cell><Data ss:Type="String">TURMA</Data></Cell>';
+            header += '<Cell><Data ss:Type="String">TURNO</Data></Cell>';
+            header += '<Cell><Data ss:Type="String">STATUS</Data></Cell>';
+            for (let dia = 1; dia <= 31; dia++) {
+                header += '<Cell><Data ss:Type="String">' + dia + '</Data></Cell>';
+            }
+            header += '</Row>';
+            xml += header;
+
+            // Dados
+            dadosFiltrados.forEach(aluno => {
+                let row = '<Row>';
+                row += '<Cell><Data ss:Type="String">' + (aluno.MAT || '') + '</Data></Cell>';
+                row += '<Cell><Data ss:Type="String">' + (aluno.NOME || '') + '</Data></Cell>';
+                row += '<Cell><Data ss:Type="String">' + (aluno.TURMA || '') + '</Data></Cell>';
+                row += '<Cell><Data ss:Type="String">' + (aluno.TURNO || '') + '</Data></Cell>';
+                row += '<Cell><Data ss:Type="String">' + (aluno.STATUS || '') + '</Data></Cell>';
+
+                for (let dia = 1; dia <= 31; dia++) {
+                    const colunaDia = obterValorColunaDia(aluno, dia);
+                    const presenca = processarColunaDiaParaMes(colunaDia, mesSelecionado);
+
+                    // Converter para maiúsculo
+                    const presencaUpper = presenca ? presenca.toUpperCase() : '';
+
+                    // Aplicar estilo com borda preta e centralizado (fundo branco padrão)
+                    row += '<Cell ss:StyleID="presencaStyle"><Data ss:Type="String">' + presencaUpper + '</Data></Cell>';
+                }
+                row += '</Row>';
+                xml += row;
+            });
+
+            xml += '</Table></Worksheet></Workbook>';
+            return xml;
+        }
+
+        /**
+         * Baixa arquivo CSV
+         */
+        function baixarCSV() {
+            const dadosBrutos = recuperarDadosPlanilhaBrutos();
+            const mesValue = document.getElementById('mesValue').value;
+            const salaValue = document.getElementById('salaValue').value;
+            const mesNumero = obterNumeroMes(mesValue);
+
+            if (!dadosBrutos || dadosBrutos.length === 0) {
+                exibirNotificacao('Dados não disponíveis para download', 'erro');
+                return;
+            }
+
+            const csv = converterParaCSV(dadosBrutos, mesNumero, salaValue);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+
+            let nomeArquivo = `chamada_${mesValue}`;
+            if (salaValue && salaValue !== '') {
+                nomeArquivo += `_${salaValue}`;
+            }
+            nomeArquivo += `_${new Date().toISOString().split('T')[0]}.csv`;
+
+            link.download = nomeArquivo;
+            link.click();
+        }
+
+        /**
+         * Baixa arquivo Excel (XML format)
+         */
+        function baixarExcel() {
+            const dadosBrutos = recuperarDadosPlanilhaBrutos();
+            const mesValue = document.getElementById('mesValue').value;
+            const salaValue = document.getElementById('salaValue').value;
+            const mesNumero = obterNumeroMes(mesValue);
+
+            if (!dadosBrutos || dadosBrutos.length === 0) {
+                exibirNotificacao('Dados não disponíveis para download', 'erro');
+                return;
+            }
+
+            const excelXML = converterParaExcelXML(dadosBrutos, mesNumero, mesValue, salaValue);
+            const blob = new Blob([excelXML], { type: 'application/vnd.ms-excel' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+
+            let nomeArquivo = `chamada_${mesValue}`;
+            if (salaValue && salaValue !== '') {
+                nomeArquivo += `_${salaValue}`;
+            }
+            nomeArquivo += `_${new Date().toISOString().split('T')[0]}.xls`;
+
+            link.download = nomeArquivo;
+            link.click();
+        }
+
+        // Mostrar loader
+        function mostrarLoaderGeracaoPlanilha(mensagem = 'Gerando planilha...') {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                const paragrafo = loader.querySelector('p');
+                if (paragrafo) {
+                    paragrafo.textContent = mensagem;
+                }
+                loader.classList.remove('escondido');
+                loader.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // Esconder loader
+        function esconderLoaderGeracaoPlanilha() {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.classList.add('escondido');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Exibir notificação
+        function exibirNotificacao(mensagem, tipo = 'sucesso') {
+            const notificacao = document.createElement('div');
+            notificacao.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                padding: 15px 20px;
+                background: ${tipo === 'sucesso' ? '#4caf50' : '#f44336'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                max-width: 400px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notificacao.textContent = mensagem;
+            document.body.appendChild(notificacao);
+
+            setTimeout(() => {
+                notificacao.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notificacao.remove(), 300);
+            }, 3000);
+        }
+
+
+
+
+
+        // Inicializar página carregando dados automaticamente
+        async function inicializarPaginaPlanilha() {
+            console.log('=== INICIALIZANDO PÁGINA DE PLANILHAS ===');
+
+            // Obter credenciais do sessionStorage
+            const usuarioNome = sessionStorage.getItem('usuario');
+            const usuarioSenha = sessionStorage.getItem('usuarioSenha');
+
+            if (!usuarioNome || !usuarioSenha) {
+                exibirNotificacao('Credenciais não encontradas. Faça login novamente', 'erro');
+                esconderLoaderGeracaoPlanilha();
+                return;
+            }
+
+            mostrarLoaderGeracaoPlanilha('Carregando todos os dados do banco...');
+
+            try {
+                // Gerar dados da planilha (retorna TODOS os dados brutos - sem filtro de mês)
+                const resultado = await gerarDadosPlanilha(usuarioNome, usuarioSenha, 1);
+
+                esconderLoaderGeracaoPlanilha();
+
+                if (!resultado.sucesso) {
+                    exibirNotificacao(resultado.mensagem, 'erro');
+                    console.error('Erro ao gerar planilha:', resultado);
+                    return;
+                }
+
+                // Armazenar dados BRUTOS em sessionStorage (TODOS os meses, sem processamento)
+                armazenarDadosPlanilha(resultado.dados);
+
+                // Preencher dropdown de salas com os dados carregados
+                preencherSalas(resultado.dados);
+
+                console.log('✅ Página inicializada com sucesso');
+                console.log('Dados brutos armazenados:', resultado.dados.length, 'alunos');
+
+            } catch (erro) {
+                esconderLoaderGeracaoPlanilha();
+                exibirNotificacao(`Erro ao carregar dados: ${erro.message}`, 'erro');
+                console.error('Erro na inicialização:', erro);
+            }
+        }
+
+        // Ação do botão gerar - usa dados do cache
+        function inicializarBotaoGerar() {
+            const btnGerar = document.getElementById('btnGerarPlanilha');
+            btnGerar.addEventListener('click', () => {
+                const mesSelecionado = document.getElementById('mesValue').value;
+                const salaSelecionada = document.getElementById('salaValue').value;
+                const mesNumero = obterNumeroMes(mesSelecionado);
+
+                if (!mesSelecionado || mesSelecionado === '') {
+                    exibirNotificacao('Por favor, selecione um mês', 'erro');
+                    return;
+                }
+
+                // Verificar se há dados no cache
+                const dadosBrutos = recuperarDadosPlanilhaBrutos();
+
+                if (!dadosBrutos || dadosBrutos.length === 0) {
+                    exibirNotificacao('Dados não carregados. Recarregue a página.', 'erro');
+                    return;
+                }
+
+                console.log('=== GERANDO PLANILHA DO MÊS:', mesSelecionado, '(', mesNumero, ') ===');
+                console.log('Sala selecionada:', salaSelecionada || 'todas');
+                console.log('Total de alunos nos dados:', dadosBrutos.length);
+
+                // Gerar planilha HTML com os dados do cache (com filtro de sala)
+                const totalAlunos = gerarPlanilhaHTML(dadosBrutos, mesNumero, salaSelecionada);
+
+                // Atualizar info da planilha
+                const infoPlanilha = document.getElementById('infoPlanilha');
+                const mensagemPlanilha = document.getElementById('mensagemPlanilha');
+
+                let msg = `Planilha de ${mesSelecionado}`;
+                if (salaSelecionada && salaSelecionada !== '') {
+                    msg += ` - Sala ${salaSelecionada}`;
+                }
+                msg += ` gerada com ${totalAlunos} aluno(s)`;
+
+                mensagemPlanilha.textContent = msg;
+                infoPlanilha.style.display = 'block';
+
+                exibirNotificacao(`Planilha gerada com sucesso!`, 'sucesso');
+            });
+
+            // Botões de download
+            const btnDownloadCSV = document.getElementById('btnDownloadCSV');
+            if (btnDownloadCSV) {
+                btnDownloadCSV.addEventListener('click', baixarCSV);
+            }
+
+            const btnDownloadExcel = document.getElementById('btnDownloadExcel');
+            if (btnDownloadExcel) {
+                btnDownloadExcel.addEventListener('click', baixarExcel);
+            }
+        }
+
+
+
+        // Executar inicialização assim que o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', () => {
+            agendarProximaAtualizacao();
+            preencherMeses();
+            inicializarBotaoGerar();
+            inicializarModalPlanilha(); // Inicializar eventos do modal (inclui botões Excel/CSV)
+
+            // Botão voltar
+            const btnVoltar = document.getElementById('btnVoltar');
+            if (btnVoltar) {
+                btnVoltar.addEventListener('click', () => {
+                    window.history.back();
+                });
+            }
+        });
+
+        // Após o script.js ser carregado, inicializar listeners e carregar dados
+        window.addEventListener('load', () => {
+            // Carregar dados automaticamente ao abrir a página
+            inicializarPaginaPlanilha();
+        });
+    </script>
+    <script src="./assets/lógica/script.js"></script>
+</body>
+
+</html>

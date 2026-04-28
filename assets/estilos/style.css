@@ -22,7 +22,15 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 9999;
+    z-index: 99999;
+    pointer-events: auto;
+    transition: opacity 0.3s ease;
+}
+
+.loader-container.escondido {
+    display: none !important;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .spinner {
