@@ -707,7 +707,9 @@ body {
 main {
     display: flex;
     justify-content: center;
-    padding: 4px 20px;
+    gap: 20px;
+    padding: 20px;
+    flex-wrap: wrap;
 }
 
 .btn-registrar-chamadas {
@@ -742,6 +744,45 @@ main {
 }
 
 .btn-registrar-text {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+    text-align: center;
+}
+
+/* Botão Gerar Planilha */
+.btn-gerar-planilha {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    width: 120px;
+    height: 120px;
+    background-color: #d3d3d3;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-gerar-planilha:hover {
+    background-color: #c0c0c0;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-gerar-planilha:active {
+    background-color: #b0b0b0;
+    transform: translateY(-1px);
+}
+
+.btn-gerar-planilha-icon {
+    width: 60px;
+}
+
+.btn-gerar-planilha-text {
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 5px;
