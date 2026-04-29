@@ -234,6 +234,87 @@
                 min-width: 600px;
             }
         }
+
+        /* Estilo Robusto do Botão Gerar Planilha */
+        #btnGerarPlanilha {
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: 400;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%) !important;
+            color: white;
+        }
+
+        #btnGerarPlanilha:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: linear-gradient(135deg, #bdbdbd 0%, #9e9e9e 100%) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        #btnGerarPlanilha i {
+            font-size: 18px;
+        }
+
+        /* Estilo dos Botões de Download */
+        #btnDownloadExcelModal,
+        #btnDownloadCSVModal {
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: white;
+        }
+
+        #btnDownloadExcelModal {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%) !important;
+        }
+
+        #btnDownloadExcelModal:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(39, 174, 96, 0.2) !important;
+        }
+
+        #btnDownloadCSVModal {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%) !important;
+        }
+
+        #btnDownloadCSVModal:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2) !important;
+        }
+
+        #btnDownloadExcelModal i,
+        #btnDownloadCSVModal i {
+            font-size: 16px;
+        }
+
+        @media (max-width: 600px) {
+            #btnGerarPlanilha {
+                padding: 10px 24px;
+                font-size: 14px;
+            }
+
+            #btnGerarPlanilha i {
+                font-size: 16px;
+            }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -307,8 +388,19 @@
                 <input type="hidden" id="salaValue" value="">
             </div>
 
+            <!-- Ordem de Matrículas (Opcional) -->
+            <div style="margin: 20px 0;">
+                <label for="ordemMatriculas" style="font-weight: 400; display: block; margin-bottom: 10px;">Ordem de
+                    Matrículas (Opcional):</label>
+                <textarea id="ordemMatriculas"
+                    placeholder="Cole as matrículas em sequência (ex: 1234567890123452345678...). Cada matrícula tem 7 dígitos."
+                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: monospace; font-size: 12px; resize: vertical; height: 60px;"></textarea>
+                <small style="color: #666; display: block; margin-top: 5px;">Deixe vazio para usar ordenação padrão (por
+                    sala e nome)</small>
+            </div>
+
             <!-- Botão Gerar Planilha -->
-            <button id="btnGerarPlanilha" class="btn btn-primary" style="margin-top: 15px; opacity: 0.5;" disabled>
+            <button id="btnGerarPlanilha" class="btn btn-primary" style="margin-top: 20px;" disabled>
                 <i class="ri-file-excel-line"></i> Gerar Planilha
             </button>
 
@@ -331,7 +423,7 @@
                     <div class="modal-planilha-body">
                         <div class="modal-planilha-actions">
                             <button id="btnDownloadExcelModal" class="btn btn-success">
-                                <i class="ri-download-cloud-line"></i> Excel
+                                <i class="ri-download-cloud-line"></i> XLSX
                             </button>
                             <button id="btnDownloadCSVModal" class="btn btn-secondary">
                                 <i class="ri-file-text-line"></i> CSV
@@ -629,6 +721,13 @@
                 console.log('Alunos após filtro de sala:', dadosFiltrados.length);
             }
 
+            // Extrair ordem de matrículas do input
+            const ordemMatriculas = extrairMatriculasDoInput();
+
+            // Ordenar alunos conforme as prioridades
+            dadosFiltrados = ordenarAlunos(dadosFiltrados, salaSelecionada, ordemMatriculas);
+            console.log('Alunos após ordenação');
+
             console.log('Primeiro aluno sample:', JSON.stringify(dadosFiltrados[0], null, 2));
 
             const tabela = document.getElementById('tabelaPlanilha');
@@ -768,6 +867,12 @@
                 );
             }
 
+            // Extrair ordem de matrículas do input
+            const ordemMatriculas = extrairMatriculasDoInput();
+
+            // Ordenar alunos conforme as prioridades
+            dadosFiltrados = ordenarAlunos(dadosFiltrados, salaSelecionada, ordemMatriculas);
+
             let csv = 'MAT,NOME,TURMA,TURNO,STATUS';
 
             // Header com dias 1-31
@@ -815,6 +920,12 @@
                     aluno.TURMA && aluno.TURMA === salaSelecionada
                 );
             }
+
+            // Extrair ordem de matrículas do input
+            const ordemMatriculas = extrairMatriculasDoInput();
+
+            // Ordenar alunos conforme as prioridades
+            dadosFiltrados = ordenarAlunos(dadosFiltrados, salaSelecionada, ordemMatriculas);
 
             let xml = '<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?>';
             xml += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ';
@@ -1058,21 +1169,6 @@
 
                 // Gerar planilha HTML com os dados do cache (com filtro de sala)
                 const totalAlunos = gerarPlanilhaHTML(dadosBrutos, mesNumero, salaSelecionada);
-
-                // Atualizar info da planilha
-                const infoPlanilha = document.getElementById('infoPlanilha');
-                const mensagemPlanilha = document.getElementById('mensagemPlanilha');
-
-                let msg = `Planilha de ${mesSelecionado}`;
-                if (salaSelecionada && salaSelecionada !== '') {
-                    msg += ` - Sala ${salaSelecionada}`;
-                }
-                msg += ` gerada com ${totalAlunos} aluno(s)`;
-
-                mensagemPlanilha.textContent = msg;
-                infoPlanilha.style.display = 'block';
-
-                exibirNotificacao(`Planilha gerada com sucesso!`, 'sucesso');
             });
 
             // Botões de download
@@ -1087,7 +1183,152 @@
             }
         }
 
+        /**
+         * Extrai as matrículas do input de ordem
+         * @returns {array} Array com matrículas extraídas (7 dígitos cada)
+         */
+        function extrairMatriculasDoInput() {
+            const ordemMatriculas = document.getElementById('ordemMatriculas');
+            if (!ordemMatriculas || !ordemMatriculas.value.trim()) {
+                return null;
+            }
 
+            const textoMatriculas = ordemMatriculas.value.trim().replace(/\s+/g, '');
+            const matriculas = [];
+
+            // Extrair de 7 em 7 dígitos
+            for (let i = 0; i < textoMatriculas.length; i += 7) {
+                const matricula = textoMatriculas.substring(i, i + 7);
+                if (matricula.length === 7 && /^\d{7}$/.test(matricula)) {
+                    matriculas.push(matricula);
+                }
+            }
+
+            return matriculas.length > 0 ? matriculas : null;
+        }
+
+        /**
+         * Cria um mapa de ordem para as matrículas
+         * @param {array} matriculas - Array com matrículas em ordem
+         * @returns {object} Objeto com mapa de ordem {matricula: posição}
+         */
+        function criarMapaOrdenMatriculas(matriculas) {
+            const mapa = {};
+            matriculas.forEach((mat, idx) => {
+                mapa[mat] = idx;
+            });
+            return mapa;
+        }
+
+        /**
+         * Compara duas salas conforme as regras especificadas
+         * Ordem: 1°A, 1°B, 2°A, 2°B, ..., 3°A, 3°B, ..., 1°MOD (por último)
+         * @param {string} salaA - Primeira sala
+         * @param {string} salaB - Segunda sala
+         * @returns {number} -1 se A < B, 1 se A > B, 0 se iguais
+         */
+        function compararSalas(salaA, salaB) {
+            if (!salaA || !salaB) {
+                return (salaA || '').localeCompare(salaB || '', 'pt-BR');
+            }
+
+            // Extrair número e letra da sala (ex: "1°A" -> número: 1, letra: A)
+            const regexSala = /^(\d+)°?(.*)$/;
+            const matchA = salaA.trim().match(regexSala);
+            const matchB = salaB.trim().match(regexSala);
+
+            if (!matchA || !matchB) {
+                return salaA.localeCompare(salaB, 'pt-BR');
+            }
+
+            const numA = parseInt(matchA[1] || 0);
+            const letraA = (matchA[2] || '').toUpperCase();
+            const numB = parseInt(matchB[1] || 0);
+            const letraB = (matchB[2] || '').toUpperCase();
+
+            // Verificar se é 1°MOD (deve ficar por último)
+            const ehModA = letraA === 'MOD';
+            const ehModB = letraB === 'MOD';
+
+            if (ehModA && !ehModB) return 1; // A (MOD) vem depois de B
+            if (!ehModA && ehModB) return -1; // A vem antes de B (MOD)
+            if (ehModA && ehModB) return 0; // Ambos MOD, iguais
+
+            // Comparar por número primeiro
+            if (numA !== numB) {
+                return numA - numB;
+            }
+
+            // Mesmo número, comparar por letra alfabeticamente
+            return letraA.localeCompare(letraB, 'pt-BR');
+        }
+
+        /**
+         * Ordena alunos conforme as 3 prioridades:
+         * 1. Se ordem de matrículas foi fornecida, usar essa ordem
+         * 2. Se não há ordem e não há sala específica, ordenar por sala+nome
+         * 3. Se há sala específica, ordenar por nome alfabético
+         * @param {array} alunos - Array com alunos
+         * @param {string} salaSelecionada - Sala selecionada (vazio se nenhuma)
+         * @param {array} ordemMatriculas - Array com matrículas em ordem (null se não fornecido)
+         * @returns {array} Array com alunos ordenados
+         */
+        function ordenarAlunos(alunos, salaSelecionada, ordemMatriculas) {
+            if (!alunos || alunos.length === 0) {
+                return alunos;
+            }
+
+            // Prioridade 1: Se houver ordem de matrículas
+            if (ordemMatriculas && ordemMatriculas.length > 0) {
+                const mapaOrdem = criarMapaOrdenMatriculas(ordemMatriculas);
+
+                // Criar novo array ordenado pelas matrículas
+                const alunosOrdenados = [];
+                const alunosNaoEncontrados = [...alunos];
+
+                // Adicionar alunos na ordem das matrículas
+                ordemMatriculas.forEach(mat => {
+                    const idxAluno = alunosNaoEncontrados.findIndex(a =>
+                        (a.MAT || a.mat || '').toString().trim() === mat.trim()
+                    );
+                    if (idxAluno >= 0) {
+                        alunosOrdenados.push(alunosNaoEncontrados[idxAluno]);
+                        alunosNaoEncontrados.splice(idxAluno, 1);
+                    }
+                });
+
+                // Adicionar alunos não encontrados na ordem original
+                alunosOrdenados.push(...alunosNaoEncontrados);
+                return alunosOrdenados;
+            }
+
+            // Prioridade 3: Se há sala específica selecionada, ordenar apenas por nome
+            if (salaSelecionada && salaSelecionada !== '') {
+                return alunos.sort((a, b) => {
+                    const nomeA = (a.NOME || a.nome || '').toUpperCase();
+                    const nomeB = (b.NOME || b.nome || '').toUpperCase();
+                    return nomeA.localeCompare(nomeB, 'pt-BR');
+                });
+            }
+
+            // Prioridade 2: Sem ordem de matrículas e sem sala específica
+            // Ordenar por sala e depois por nome
+            return alunos.sort((a, b) => {
+                const salaA = a.TURMA || a.sala || '';
+                const salaB = b.TURMA || b.sala || '';
+
+                // Comparar salas com regras especiais
+                const compSala = compararSalas(salaA, salaB);
+                if (compSala !== 0) {
+                    return compSala;
+                }
+
+                // Mesma sala, ordenar por nome
+                const nomeA = (a.NOME || a.nome || '').toUpperCase();
+                const nomeB = (b.NOME || b.nome || '').toUpperCase();
+                return nomeA.localeCompare(nomeB, 'pt-BR');
+            });
+        }
 
         // Executar inicialização assim que o DOM estiver pronto
         document.addEventListener('DOMContentLoaded', () => {
