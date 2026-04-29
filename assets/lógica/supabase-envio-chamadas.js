@@ -7,7 +7,7 @@
 
 /**
  * Transforma a estrutura de chamadas para o formato esperado pela função SQL
- * @param {Array} chamadasSalvas - Array de chamadas do sessionStorage
+ * @param {Array} chamadasSalvas - Array de chamadas do localStorage (cache persistente)
  * @returns {Array} Array de registros no formato para a função SQL
  */
 function prepararChamadasParaSupabase(chamadasSalvas) {
@@ -119,7 +119,7 @@ async function enviarChamadaParaSupabase(chamada) {
  */
 async function enviarTodasChamadasParaSupabase() {
     // Recuperar chamadas salvas
-    const chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+    const chamadasSalvas = JSON.parse(localStorage.getItem('chamadasSalvas') || '[]');
 
     if (chamadasSalvas.length === 0) {
         console.warn('⚠️ Não há chamadas registradas para enviar!');
@@ -237,9 +237,9 @@ async function enviarTodasChamadasParaSupabase() {
             errosGerais
         );
 
-        // Se tudo foi enviado com sucesso, limpar sessionStorage
+        // Limpar localStorage apenas após confirmação de envio bem-sucedido
         if (chamadaEnviadaTotal === chamadasSalvas.length && alunosFalhadosTotal === 0) {
-            sessionStorage.removeItem('chamadasSalvas');
+            localStorage.removeItem('chamadasSalvas');
             renderizarCartuchosChamadaaSalvas();
             console.log('✅ Todas as chamadas foram enviadas e removidas da memória');
         }

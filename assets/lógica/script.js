@@ -572,7 +572,7 @@ function inicializarBotaoIniciarRegistro() {
 
                 const chamadaSupabase = resultadoChamadaSupabase.chamada;
 
-                // ========== NÃO adicionar ao sessionStorage de chamadasSalvas ==========
+                // ========== NÃO adicionar ao localStorage de chamadasSalvas ==========
                 // Armazenar temporariamente em variável global para edição
                 chamadaSupabaseEmEdicao = chamadaSupabase;
 
@@ -641,7 +641,7 @@ function inicializarBotaoIniciarRegistro() {
                 loader.remove();
 
                 // Encontrar o ID da chamada duplicada
-                const chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+                const chamadasSalvas = JSON.parse(localStorage.getItem('chamadasSalvas') || '[]');
                 const chamadaDuplicada = chamadasSalvas.find(c =>
                     c.sala === salaSelecionada &&
                     c.mes === mesSelecionado &&
@@ -829,7 +829,7 @@ function populaListaChamada(alunos, sala, mes, dia) {
  * @returns {boolean} true se existe duplicada, false caso contrário
  */
 function verificarChamadaDuplicada(sala, mes, dia) {
-    const chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+    const chamadasSalvas = JSON.parse(localStorage.getItem('chamadasSalvas') || '[]');
 
     // Procurar por uma chamada com a mesma sala, mês e dia
     return chamadasSalvas.some(chamada =>
@@ -857,7 +857,7 @@ function salvarChamadaAuto() {
     }
 
     // Recuperar chamadas existentes
-    let chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+    let chamadasSalvas = JSON.parse(localStorage.getItem('chamadasSalvas') || '[]');
     const chamadaOriginal = chamadasSalvas.find(c => c.id === chamadaEmEdicao);
 
     if (!chamadaOriginal) {
@@ -892,8 +892,8 @@ function salvarChamadaAuto() {
         console.log('✅ Chamada atualizada automaticamente:', chamada);
     }
 
-    // Salvar em sessionStorage
-    sessionStorage.setItem('chamadasSalvas', JSON.stringify(chamadasSalvas));
+    // Salvar em localStorage (persistente - será removido apenas após confirmação de envio ao Supabase)
+    localStorage.setItem('chamadasSalvas', JSON.stringify(chamadasSalvas));
 
     // Resetar estado de edição
     chamadaEmEdicao = null;
@@ -999,9 +999,9 @@ async function salvarChamada() {
             return;
         }
 
-        // ========== CASO 2: Chamada nova ou edição de sessionStorage ==========
+        // ========== CASO 2: Chamada nova ou edição de localStorage ==========
         // Recuperar chamadas existentes ou criar novo array
-        let chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+        let chamadasSalvas = JSON.parse(localStorage.getItem('chamadasSalvas') || '[]');
 
         let chamada;
 
@@ -1059,8 +1059,8 @@ async function salvarChamada() {
             mostrarNotificacaoSucesso('Chamada registrada com sucesso!');
         }
 
-        // Salvar em sessionStorage
-        sessionStorage.setItem('chamadasSalvas', JSON.stringify(chamadasSalvas));
+        // Salvar em localStorage (persistente - será removido apenas após confirmação de envio ao Supabase)
+        localStorage.setItem('chamadasSalvas', JSON.stringify(chamadasSalvas));
 
         // Fechar modal
         modal.style.display = 'none';
@@ -1091,7 +1091,7 @@ function renderizarCartuchosChamadaaSalvas() {
     }
 
     // Recuperar chamadas salvas e fazer uma cópia profunda para evitar ligações acidentais
-    const chamadasSalvasRaw = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+    const chamadasSalvasRaw = JSON.parse(localStorage.getItem('chamadasSalvas') || '[]');
     const chamadasSalvas = JSON.parse(JSON.stringify(chamadasSalvasRaw)); // Cópia profunda isolada
 
     // Se não houver chamadas, esconder container
@@ -1215,13 +1215,13 @@ function renderizarCartuchosChamadaaSalvas() {
  * @param {number} chamadaId - ID da chamada a remover
  */
 function removerChamada(chamadaId) {
-    let chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+    let chamadasSalvas = JSON.parse(localStorage.getItem('chamadasSalvas') || '[]');
 
     // Filtrar a chamada a ser removida
     chamadasSalvas = chamadasSalvas.filter(c => c.id !== chamadaId);
 
-    // Salvar de volta em sessionStorage
-    sessionStorage.setItem('chamadasSalvas', JSON.stringify(chamadasSalvas));
+    // Salvar de volta em localStorage (persistente)
+    localStorage.setItem('chamadasSalvas', JSON.stringify(chamadasSalvas));
 
     console.log('✅ Chamada removida com sucesso. CODX:', chamadaId);
 
@@ -1237,7 +1237,7 @@ function removerChamada(chamadaId) {
  */
 function editarChamada(chamadaId) {
     // Recuperar chamadas salvas
-    const chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+    const chamadasSalvas = JSON.parse(localStorage.getItem('chamadasSalvas') || '[]');
     const chamada = chamadasSalvas.find(c => c.id === chamadaId);
 
     if (!chamada) {
@@ -1284,7 +1284,7 @@ function editarChamada(chamadaId) {
  */
 function editarChamadaDuplicada(chamadaId) {
     // Recuperar chamadas salvas
-    const chamadasSalvas = JSON.parse(sessionStorage.getItem('chamadasSalvas') || '[]');
+    const chamadasSalvas = JSON.parse(localStorage.getItem('chamadasSalvas') || '[]');
     const chamada = chamadasSalvas.find(c => c.id === chamadaId);
 
     if (!chamada) {
