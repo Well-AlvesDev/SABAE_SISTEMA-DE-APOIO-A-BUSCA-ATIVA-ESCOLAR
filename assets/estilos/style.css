@@ -797,6 +797,70 @@ main {
     text-align: center;
 }
 
+/* Botão Gerenciar Dados */
+.btn-gerenciar-dados {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    width: 120px;
+    height: 120px;
+    background-color: #d3d3d3;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-gerenciar-dados-icon {
+    width: 60px;
+}
+
+.btn-gerenciar-dados-text {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+    text-align: center;
+}
+
+/* ========== BOTÕES GERENCIAR DADOS ========== */
+.gerenciar-buttons-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    padding: 40px 20px;
+    flex-wrap: wrap;
+}
+
+.btn-adicionar-aluno,
+.btn-editar-aluno {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 15px 25px;
+    background: linear-gradient(135deg, #3e73bf 0%, #2c5aa0 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(62, 115, 191, 0.35);
+}
+
+
+.btn-adicionar-aluno img,
+.btn-editar-aluno img {
+    width: 34px;
+}
+
 /* ========== DROPDOWN CUSTOMIZADO ========== */
 .custom-dropdown {
     position: relative;
@@ -1819,4 +1883,269 @@ main {
 
 .modal-resultado-envio button:active {
     transform: scale(0.98);
+}
+
+/* ========== MODAL ADICIONAR ALUNO ========== */
+.modal-adicionar-aluno {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10002;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.modal-adicionar-aluno.ativo {
+    display: flex;
+}
+
+.modal-adicionar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-adicionar-content {
+    position: relative;
+    z-index: 10003;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: slideUp 0.4s ease-out;
+}
+
+.modal-adicionar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.modal-adicionar-header h2 {
+    color: #333;
+    font-size: 22px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.btn-fechar-modal {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.btn-fechar-modal:hover {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.btn-fechar-modal:active {
+    background-color: #ebebeb;
+}
+
+/* Estilos do Formulário */
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select {
+    padding: 12px 14px;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #333;
+    background-color: #fafafa;
+    transition: all 0.3s ease;
+    font-family: Arial, sans-serif;
+}
+
+.form-group input::placeholder {
+    color: #999;
+    font-weight: 400;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3e73bf;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(62, 115, 191, 0.1);
+}
+
+.form-group input:disabled,
+.form-group select:disabled {
+    background-color: #f0f0f0;
+    color: #999;
+    cursor: not-allowed;
+}
+
+/* Específico para inputs de texto */
+#inputMatricula,
+#inputNome {
+    font-size: 15px;
+}
+
+/* Específico para selects */
+#selectTurma,
+#selectTurno,
+#selectStatus {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233e73bf' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+}
+
+#selectTurma option,
+#selectTurno option,
+#selectStatus option {
+    padding: 8px 12px;
+    background-color: white;
+    color: #333;
+}
+
+/* Validação de Inputs */
+.form-group input.error {
+    border-color: #f44336;
+    background-color: #fff5f5;
+}
+
+.form-group input.error:focus {
+    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
+}
+
+.form-error {
+    color: #f44336;
+    font-size: 12px;
+    margin-top: 4px;
+    display: none;
+}
+
+.form-group input.error~.form-error {
+    display: block;
+}
+
+/* Container de Botões */
+.modal-botoes {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.btn-cancelar-modal,
+.btn-enviar-modal {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-cancelar-modal {
+    background-color: #e0e0e0;
+    color: #333;
+    flex: 1;
+    min-width: 120px;
+}
+
+.btn-cancelar-modal:hover {
+    background-color: #d0d0d0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-cancelar-modal:active {
+    background-color: #c0c0c0;
+    transform: scale(0.98);
+}
+
+.btn-enviar-modal {
+    background: linear-gradient(135deg, #3e73bf 0%, #2c5aa0 100%);
+    color: white;
+    flex: 1;
+    min-width: 120px;
+    box-shadow: 0 4px 12px rgba(62, 115, 191, 0.35);
+}
+
+.btn-enviar-modal:hover {
+    box-shadow: 0 6px 16px rgba(62, 115, 191, 0.45);
+    transform: translateY(-2px);
+}
+
+.btn-enviar-modal:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(62, 115, 191, 0.35);
+}
+
+.btn-enviar-modal:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Animações */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
 }

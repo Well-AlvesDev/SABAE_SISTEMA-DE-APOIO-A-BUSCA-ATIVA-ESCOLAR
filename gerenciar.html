@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./assets/imagens/logos/sabae.png" type="image/x-icon">
+    <link rel="stylesheet" href="./assets/estilos/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>SABAE - GERENCIAR DADOS</title>
+</head>
+
+<body style="overflow: hidden;">
+
+    <div id="loader" class="loader-container">
+        <img src="./assets/imagens/logos/sabae.png" alt="" style="width: 150px;">
+        <div class="spinner"></div>
+        <p>Um momento...</p>
+    </div>
+
+    <!-- Carregar bibliotecas de configuração PRIMEIRO -->
+    <script src="./assets/lógica/supabase-config.js"></script>
+    <script src="./assets/lógica/supabase-alunos.js"></script>
+    <script src="./assets/lógica/supabase-gerar-planilha.js"></script>
+    <script src="./assets/lógica/supabase-adicionar-aluno.js"></script>
+
+    <header class="pwa-header">
+        <div class="header-left">
+            <button id="btnVoltar" class="btn-voltar"
+                style="background: #ffffff33; border: none; border-radius: 5px; cursor: pointer; padding: 6px;">
+                <i class="ri-arrow-left-line" style="font-size: 24px; color: white;"></i>
+            </button>
+            <img src="./assets/imagens/logos/sabae2.png" alt="SABAE Logo" class="header-logo"
+                style="width: 50px; height: 50px; border-radius: 10px;">
+            <span class="header-title">Gerenciar Dados</span>
+        </div>
+        <span class="header-datetime" id="headerDateTime">--:--</span>
+    </header>
+
+    <div class="user-info-bar">
+        <div class="user-info-content">
+            <span class="user-icon"><img src="./assets/imagens/ico/User_icon_2.svg" alt="" style="width: 30px;"></span>
+            <span class="user-name" id="nomeUsuarioHeader">Usuário</span>
+        </div>
+        <button class="btn-sair" id="btnSair">Desconectar <i class="ri-plug-line"></i></button>
+    </div>
+
+    <!-- Modal de Perfil do Usuário -->
+    <div id="modalPerfilUsuario" class="modal-perfil-usuario" style="display: none;">
+        <div class="modal-perfil-overlay"></div>
+        <div class="modal-perfil-content">
+            <button id="btnFecharPerfilModal" class="btn-fechar-perfil">
+                <i class="ri-close-line"></i>
+            </button>
+            <div class="perfil-usuario-body">
+                <div class="perfil-usuario-avatar">
+                    <img src="./assets/imagens/ico/User_icon_2.svg" alt="Avatar do usuário" style="width: 60px;">
+                </div>
+                <div class="perfil-usuario-info">
+                    <div class="info-item">
+                        <label>NOME DO USUÁRIO</label>
+                        <p id="perfilNomeUsuario" class="info-value nome-usuario">-</p>
+                    </div>
+                    <div class="info-item">
+                        <label>FUNÇÃO</label>
+                        <p id="perfilFuncao" class="info-value">-</p>
+                    </div>
+                    <div class="info-item">
+                        <label>ESCOLA</label>
+                        <p id="perfilCodigoEscolar" class="info-value">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="gerenciar-buttons-container">
+        <h1 style="width: 100%; text-align: center; margin-bottom: 10px; margin-top: 30px; color: #333;">Gerenciar Dados
+        </h1>
+        <button id="btnAdicionarAluno" class="btn-adicionar-aluno"><img
+                src="./assets/imagens/ico/matt-icons_contact-add.svg" alt="">
+            Adicionar novo aluno</button>
+        <button id="btnEditarAluno" class="btn-editar-aluno"><img src="./assets/imagens/ico/User-student.svg.png"
+                alt=""> Editar
+            aluno</button>
+    </div>
+
+    <!-- Modal de Busca de Matrícula para Edição -->
+    <div id="modalBuscaMatricula" class="modal-adicionar-aluno">
+        <div class="modal-adicionar-overlay"></div>
+        <div class="modal-adicionar-content" style="max-width: 350px;">
+            <div class="modal-adicionar-header">
+                <h2>Buscar Aluno para Editar</h2>
+                <button type="button" id="btnFecharModalBusca" class="btn-fechar-modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <div style="padding: 20px;">
+                <div class="form-group">
+                    <label for="inputBuscaMatricula">Digite a matrícula do aluno *</label>
+                    <input type="text" id="inputBuscaMatricula" placeholder="Digite apenas números" maxlength="10">
+                    <span class="form-error">Matrícula deve conter apenas números</span>
+                </div>
+
+                <div class="modal-botoes" style="margin-top: 20px;">
+                    <button type="button" id="btnCancelarBusca" class="btn-cancelar-modal">Cancelar</button>
+                    <button type="button" id="btnConfirmarBusca" class="btn-enviar-modal">Buscar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Adicionar Aluno -->
+    <div id="modalAdicionarAluno" class="modal-adicionar-aluno">
+        <div class="modal-adicionar-overlay"></div>
+        <div class="modal-adicionar-content">
+            <div class="modal-adicionar-header">
+                <h2>Adicionar Novo Aluno</h2>
+                <button id="btnFecharModalAluno" class="btn-fechar-modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <form id="formAdicionarAluno" onsubmit="enviarFormularioAdicionarAluno(event)">
+                <!-- Matrícula -->
+                <div class="form-group">
+                    <label for="inputMatricula">Matrícula *</label>
+                    <input type="text" id="inputMatricula" placeholder="Digite apenas números" maxlength="10" required>
+                    <span class="form-error">Matrícula deve conter apenas números</span>
+                </div>
+
+                <!-- Nome -->
+                <div class="form-group">
+                    <label for="inputNome">Nome do Aluno *</label>
+                    <input type="text" id="inputNome" placeholder="Digite o nome em MAIÚSCULAS" maxlength="100"
+                        required>
+                    <span class="form-error">Nome deve conter apenas letras e parênteses</span>
+                </div>
+
+                <!-- Turma -->
+                <div class="form-group">
+                    <label for="selectTurma">Turma *</label>
+                    <select id="selectTurma" required>
+                        <option value="">-- Selecione uma turma --</option>
+                    </select>
+                </div>
+
+                <!-- Turno -->
+                <div class="form-group">
+                    <label for="selectTurno">Turno *</label>
+                    <select id="selectTurno" required>
+                        <option value="">-- Selecione um turno --</option>
+                        <option value="MANHÃ">MANHÃ</option>
+                        <option value="TARDE">TARDE</option>
+                        <option value="NOITE">NOITE</option>
+                    </select>
+                </div>
+
+                <!-- Status -->
+                <div class="form-group">
+                    <label for="selectStatus">Status *</label>
+                    <select id="selectStatus" required>
+                        <option value="">-- Selecione um status --</option>
+                        <option value="MATRICULADO">MATRICULADO</option>
+                        <option value="TRANSFERIDO">TRANSFERIDO</option>
+                        <option value="FALECIDO">FALECIDO</option>
+                    </select>
+                </div>
+
+                <!-- Botões -->
+                <div class="modal-botoes">
+                    <button type="button" id="btnCancelarModal" class="btn-cancelar-modal">Cancelar</button>
+                    <button type="submit" class="btn-enviar-modal">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="./assets/lógica/script.js"></script>
+    <script>
+        // ========== LÓGICA DO MODAL BUSCA DE MATRÍCULA ==========
+
+        // Elementos do modal de busca
+        const modalBuscaMatricula = document.getElementById('modalBuscaMatricula');
+        const btnEditarAluno = document.getElementById('btnEditarAluno');
+        const btnFecharModalBusca = document.getElementById('btnFecharModalBusca');
+        const btnCancelarBusca = document.getElementById('btnCancelarBusca');
+        const btnConfirmarBusca = document.getElementById('btnConfirmarBusca');
+        const inputBuscaMatricula = document.getElementById('inputBuscaMatricula');
+        const modalBuscaOverlay = modalBuscaMatricula.querySelector('.modal-adicionar-overlay');
+
+        // Event listeners para modal de busca
+        btnEditarAluno.addEventListener('click', (e) => {
+            e.preventDefault();
+            abrirModalBuscaMatricula();
+        });
+
+        btnFecharModalBusca.addEventListener('click', fecharModalBuscaMatricula);
+        btnCancelarBusca.addEventListener('click', fecharModalBuscaMatricula);
+        modalBuscaOverlay.addEventListener('click', fecharModalBuscaMatricula);
+
+        btnConfirmarBusca.addEventListener('click', confirmarBuscaMatricula);
+
+        // Permitir buscar ao pressionar Enter no input
+        inputBuscaMatricula.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                confirmarBuscaMatricula();
+            }
+        });
+
+        // Validar matrícula em tempo real no input de busca
+        inputBuscaMatricula.addEventListener('input', (event) => {
+            let valor = event.target.value;
+
+            // Remover caracteres que não são números
+            valor = valor.replace(/[^\d]/g, '');
+
+            event.target.value = valor;
+
+            // Validar
+            if (valor && !validarMatricula(valor)) {
+                event.target.classList.add('error');
+            } else {
+                event.target.classList.remove('error');
+            }
+        });
+
+        // Fechar modal de busca ao pressionar ESC
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && modalBuscaMatricula.classList.contains('ativo')) {
+                fecharModalBuscaMatricula();
+            }
+        });
+
+        // ========== LÓGICA DO MODAL ADICIONAR/EDITAR ALUNO ==========
+
+        // Elementos do modal
+        const modalAdicionarAluno = document.getElementById('modalAdicionarAluno');
+        const btnAdicionarAluno = document.getElementById('btnAdicionarAluno');
+        const btnFecharModalAluno = document.getElementById('btnFecharModalAluno');
+        const btnCancelarModal = document.getElementById('btnCancelarModal');
+        const modalOverlay = document.querySelector('.modal-adicionar-overlay');
+        const inputMatricula = document.getElementById('inputMatricula');
+        const inputNome = document.getElementById('inputNome');
+        const formAdicionarAluno = document.getElementById('formAdicionarAluno');
+        const modalHeader = modalAdicionarAluno.querySelector('.modal-adicionar-header h2');
+        const btnEnviarModal = document.querySelector('.btn-enviar-modal');
+
+        // Função para abrir modal em modo adicionar
+        function abrirModalAdicionarAluno() {
+            console.log('📖 Abrindo modal de adicionar aluno...');
+
+            // Resetar estado de edição
+            modoEdicaoAluno = false;
+            alunoEmEdicaoMatricula = null;
+
+            // Atualizar interface
+            modalHeader.textContent = 'Adicionar Novo Aluno';
+            inputMatricula.disabled = false;
+            inputMatricula.style.opacity = '1';
+            inputMatricula.style.cursor = 'pointer';
+            formAdicionarAluno.onsubmit = (e) => enviarFormularioAdicionarAluno(e);
+            btnEnviarModal.textContent = 'Enviar';
+
+            modalAdicionarAluno.classList.add('ativo');
+
+            // Carregar turmas
+            console.log('🏫 Carregando turmas...');
+            popularDropdownTurmas('#selectTurma');
+
+            // Focar no primeiro input
+            setTimeout(() => {
+                inputMatricula.focus();
+            }, 100);
+        }
+
+        // Função para fechar modal
+        function fecharModalAdicionarAluno() {
+            console.log('❌ Fechando modal...');
+            modalAdicionarAluno.classList.remove('ativo');
+            formAdicionarAluno.reset();
+            inputNome.value = '';
+            inputMatricula.disabled = false;
+            inputMatricula.style.opacity = '1';
+            inputMatricula.style.cursor = 'pointer';
+
+            // Resetar estado de edição
+            modoEdicaoAluno = false;
+            alunoEmEdicaoMatricula = null;
+        }
+
+        // Event listeners
+        btnAdicionarAluno.addEventListener('click', abrirModalAdicionarAluno);
+        btnFecharModalAluno.addEventListener('click', fecharModalAdicionarAluno);
+        btnCancelarModal.addEventListener('click', fecharModalAdicionarAluno);
+        modalOverlay.addEventListener('click', fecharModalAdicionarAluno);
+
+        // Fechar modal ao pressionar ESC
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && modalAdicionarAluno.classList.contains('ativo')) {
+                fecharModalAdicionarAluno();
+            }
+        });
+
+        // ========== VALIDAÇÕES EM TEMPO REAL ==========
+
+        // Validar Matrícula em tempo real
+        inputMatricula.addEventListener('input', (event) => {
+            let valor = event.target.value;
+
+            // Remover caracteres que não são números
+            valor = valor.replace(/[^\d]/g, '');
+
+            event.target.value = valor;
+
+            // Validar
+            if (valor && !validarMatricula(valor)) {
+                event.target.classList.add('error');
+            } else {
+                event.target.classList.remove('error');
+            }
+        });
+
+        // Validar Nome em tempo real
+        inputNome.addEventListener('input', (event) => {
+            let valor = event.target.value;
+
+            // Converter para maiúsculas
+            valor = converterParaMaiusculas(valor);
+
+            // Remover caracteres inválidos (manter apenas letras, espaços e parênteses)
+            valor = valor.replace(/[^A-ZÀ-Ÿ\s()]/g, '');
+
+            event.target.value = valor;
+
+            // Validar
+            if (valor && !validarNome(valor)) {
+                event.target.classList.add('error');
+            } else {
+                event.target.classList.remove('error');
+            }
+        });
+
+        // Atualizar data e hora
+        function atualizarDataHora() {
+            const agora = new Date();
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const ano = agora.getFullYear();
+            const horas = String(agora.getHours()).padStart(2, '0');
+            const minutos = String(agora.getMinutes()).padStart(2, '0');
+
+            const dataHora = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+            const headerDateTime = document.getElementById('headerDateTime');
+            if (headerDateTime) {
+                headerDateTime.textContent = dataHora;
+            }
+        }
+
+        function agendarProximaAtualizacao() {
+            const agora = new Date();
+            const proximoSegundo = (1000 - agora.getMilliseconds());
+
+            setTimeout(() => {
+                atualizarDataHora();
+                setInterval(atualizarDataHora, 1000);
+            }, proximoSegundo);
+        }
+
+        // Modificar comportamento do formulário dependendo do modo
+        const originalFormOnsubmit = formAdicionarAluno.onsubmit;
+
+        // Substituir listener de submit do formulário
+        formAdicionarAluno.removeAttribute('onsubmit');
+        formAdicionarAluno.addEventListener('submit', (event) => {
+            if (modoEdicaoAluno) {
+                enviarFormularioEditarAluno(event);
+            } else {
+                enviarFormularioAdicionarAluno(event);
+            }
+        });
+
+        // Inicializar página quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', () => {
+            // Chamar inicialização do script.js
+            if (typeof inicializarPagina === 'function') {
+                inicializarPagina();
+            }
+
+            // Iniciar atualização de data/hora
+            agendarProximaAtualizacao();
+
+            // Configurar botão Voltar
+            const btnVoltar = document.getElementById('btnVoltar');
+            if (btnVoltar) {
+                btnVoltar.addEventListener('click', () => {
+                    window.location.href = 'index.html';
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
