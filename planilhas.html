@@ -372,6 +372,22 @@
                 <input type="hidden" id="mesValue" value="">
             </div>
 
+            <!-- Seleção de Turno (Opcional) -->
+            <div style="margin: 20px 0;">
+                <label for="turnoDropdown" style="font-weight: 400; display: block; margin-bottom: 10px;">Selecione o
+                    Turno (Opcional):</label>
+                <div id="turnoDropdown" class="custom-dropdown">
+                    <button class="dropdown-toggle" id="turnoToggle">
+                        <span class="dropdown-label">-- Todos os turnos --</span>
+                        <i class="ri-arrow-down-s-line"></i>
+                    </button>
+                    <div class="dropdown-menu" id="turnoMenu">
+                        <!-- Será preenchido por JavaScript -->
+                    </div>
+                </div>
+                <input type="hidden" id="turnoValue" value="">
+            </div>
+
             <!-- Seleção de Sala (Opcional) -->
             <div style="margin: 20px 0;">
                 <label for="salaDropdown" style="font-weight: 400; display: block; margin-bottom: 10px;">Selecione a
@@ -395,7 +411,8 @@
                 <textarea id="ordemMatriculas"
                     placeholder="Cole as matrículas em sequência (ex: 1234567890123452345678...). Cada matrícula tem 7 dígitos."
                     style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: monospace; font-size: 12px; resize: vertical; height: 60px;"></textarea>
-                <small style="color: #666; display: block; margin-top: 5px;">Deixe vazio para usar ordenação padrão do sistema (por
+                <small style="color: #666; display: block; margin-top: 5px;">Deixe vazio para usar ordenação padrão do
+                    sistema (por
                     sala e nome)</small>
             </div>
 
@@ -539,23 +556,115 @@
         }
 
         /**
-         * Preenche o dropdown de salas baseado nos dados carregados
+         * Preenche o dropdown de turnos baseado nos dados carregados
          * @param {array} dadosBrutos - Array com dados dos alunos
          */
-        function preencherSalas(dadosBrutos) {
+        function preencherTurnos(dadosBrutos) {
+            const turnoMenu = document.getElementById('turnoMenu');
+            if (!turnoMenu || !dadosBrutos || dadosBrutos.length === 0) return;
+
+            // Extrair turnos únicos dos dados
+            const turnosUnicos = new Set();
+            dadosBrutos.forEach(aluno => {
+                if (aluno.TURNO) {
+                    turnosUnicos.add(aluno.TURNO);
+                }
+            });
+
+            // Ordenar turnos
+            const turnosOrdenados = Array.from(turnosUnicos).sort();
+
+            // Limpar menu
+            turnoMenu.innerHTML = '';
+
+            // Adicionar opção "Todos os turnos"
+            const itemTodos = document.createElement('div');
+            itemTodos.className = 'dropdown-item';
+            itemTodos.textContent = '-- Todos os turnos --';
+            itemTodos.dataset.value = '';
+            itemTodos.addEventListener('click', () => {
+                const toggle = document.getElementById('turnoToggle');
+                const label = toggle.querySelector('.dropdown-label');
+                const turnoValue = document.getElementById('turnoValue');
+
+                label.textContent = '-- Todos os turnos --';
+                turnoValue.value = '';
+
+                toggle.classList.remove('active');
+                turnoMenu.classList.remove('show');
+
+                // Resetar sala ao mudar turno
+                document.getElementById('salaValue').value = '';
+                const salaToggle = document.getElementById('salaToggle');
+                const salaLabel = salaToggle.querySelector('.dropdown-label');
+                salaLabel.textContent = '-- Todas as salas --';
+
+                // Preencher salas sem filtro de turno
+                preencherSalas(dadosBrutos, '');
+            });
+            turnoMenu.appendChild(itemTodos);
+
+            // Adicionar cada turno
+            turnosOrdenados.forEach(turno => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = turno;
+                item.dataset.value = turno;
+
+                item.addEventListener('click', () => {
+                    const toggle = document.getElementById('turnoToggle');
+                    const label = toggle.querySelector('.dropdown-label');
+                    const turnoValue = document.getElementById('turnoValue');
+
+                    label.textContent = turno;
+                    turnoValue.value = turno;
+
+                    toggle.classList.remove('active');
+                    turnoMenu.classList.remove('show');
+
+                    // Resetar sala ao mudar turno
+                    document.getElementById('salaValue').value = '';
+                    const salaToggle = document.getElementById('salaToggle');
+                    const salaLabel = salaToggle.querySelector('.dropdown-label');
+                    salaLabel.textContent = '-- Todas as salas --';
+
+                    // Preencher salas filtradas pelo turno selecionado
+                    preencherSalas(dadosBrutos, turno);
+                });
+
+                turnoMenu.appendChild(item);
+            });
+
+            console.log('Turnos encontrados:', turnosOrdenados.length, turnosOrdenados);
+        }
+
+        /**
+         * Preenche o dropdown de salas baseado nos dados carregados e turno selecionado
+         * @param {array} dadosBrutos - Array com dados dos alunos
+         * @param {string} turnoSelecionado - Turno selecionado (opcional, vazio = todos)
+         */
+        function preencherSalas(dadosBrutos, turnoSelecionado = '') {
             const salaMenu = document.getElementById('salaMenu');
             if (!salaMenu || !dadosBrutos || dadosBrutos.length === 0) return;
 
-            // Extrair salas únicas dos dados
+            // Filtrar dados pelo turno se selecionado
+            let dadosFiltrados = dadosBrutos;
+            if (turnoSelecionado && turnoSelecionado !== '') {
+                dadosFiltrados = dadosBrutos.filter(aluno =>
+                    aluno.TURNO === turnoSelecionado
+                );
+            }
+
+            // Extrair salas únicas dos dados filtrados
             const salasUnicas = new Set();
-            dadosBrutos.forEach(aluno => {
+            dadosFiltrados.forEach(aluno => {
                 if (aluno.TURMA) {
                     salasUnicas.add(aluno.TURMA);
                 }
             });
 
             // Ordenar salas
-            const salasOrdenadas = Array.from(salasUnicas).sort();
+            const salasOrdenadas = Array.from(salasUnicas).sort((a, b) => compararSalas(a, b));
 
             // Limpar menu
             salaMenu.innerHTML = '';
@@ -704,18 +813,28 @@
          * Gera a planilha em formato HTML table
          * @param {array} dadosBrutos - Array com todos os dados brutos do cache
          * @param {number} mesSelecionado - Número do mês selecionado (1-12)
+         * @param {string} turnoSelecionado - Turno selecionado (opcional, vazio = todos)
          * @param {string} salaSelecionada - Sala selecionada (opcional, vazio = todas)
          */
-        function gerarPlanilhaHTML(dadosBrutos, mesSelecionado, salaSelecionada) {
+        function gerarPlanilhaHTML(dadosBrutos, mesSelecionado, turnoSelecionado, salaSelecionada) {
             console.log('=== GERANDO PLANILHA HTML ===');
             console.log('Mês selecionado:', mesSelecionado);
+            console.log('Turno selecionado:', turnoSelecionado || 'todos');
             console.log('Sala selecionada:', salaSelecionada || 'todas');
             console.log('Total alunos (brutos):', dadosBrutos.length);
 
-            // Filtrar por sala se selecionada
+            // Filtrar por turno se selecionado
             let dadosFiltrados = dadosBrutos;
+            if (turnoSelecionado && turnoSelecionado !== '') {
+                dadosFiltrados = dadosFiltrados.filter(aluno =>
+                    aluno.TURNO === turnoSelecionado
+                );
+                console.log('Alunos após filtro de turno:', dadosFiltrados.length);
+            }
+
+            // Filtrar por sala se selecionada
             if (salaSelecionada && salaSelecionada !== '') {
-                dadosFiltrados = dadosBrutos.filter(aluno =>
+                dadosFiltrados = dadosFiltrados.filter(aluno =>
                     aluno.TURMA && aluno.TURMA === salaSelecionada
                 );
                 console.log('Alunos após filtro de sala:', dadosFiltrados.length);
@@ -784,6 +903,9 @@
             // Atualizar título do modal
             const mesNome = document.getElementById('mesValue').value;
             let titulo = `Chamada - ${mesNome}`;
+            if (turnoSelecionado && turnoSelecionado !== '') {
+                titulo += ` - ${turnoSelecionado}`;
+            }
             if (salaSelecionada && salaSelecionada !== '') {
                 titulo += ` - ${salaSelecionada}`;
             }
@@ -855,14 +977,22 @@
          * Converte dados para CSV
          * @param {array} dadosBrutos - Array com todos os dados brutos
          * @param {number} mesSelecionado - Número do mês selecionado
+         * @param {string} turnoSelecionado - Turno selecionado (opcional)
          * @param {string} salaSelecionada - Sala selecionada (opcional)
          * @returns {string} Conteúdo CSV
          */
-        function converterParaCSV(dadosBrutos, mesSelecionado, salaSelecionada) {
-            // Filtrar por sala se selecionada
+        function converterParaCSV(dadosBrutos, mesSelecionado, turnoSelecionado, salaSelecionada) {
+            // Filtrar por turno se selecionado
             let dadosFiltrados = dadosBrutos;
+            if (turnoSelecionado && turnoSelecionado !== '') {
+                dadosFiltrados = dadosFiltrados.filter(aluno =>
+                    aluno.TURNO === turnoSelecionado
+                );
+            }
+
+            // Filtrar por sala se selecionada
             if (salaSelecionada && salaSelecionada !== '') {
-                dadosFiltrados = dadosBrutos.filter(aluno =>
+                dadosFiltrados = dadosFiltrados.filter(aluno =>
                     aluno.TURMA && aluno.TURMA === salaSelecionada
                 );
             }
@@ -909,14 +1039,22 @@
          * @param {array} dadosBrutos - Array com todos os dados brutos
          * @param {number} mesSelecionado - Número do mês selecionado
          * @param {string} nomeMes - Nome do mês selecionado
+         * @param {string} turnoSelecionado - Turno selecionado (opcional)
          * @param {string} salaSelecionada - Sala selecionada (opcional)
          * @returns {string} Conteúdo XML do Excel
          */
-        function converterParaExcelXML(dadosBrutos, mesSelecionado, nomeMes, salaSelecionada) {
-            // Filtrar por sala se selecionada
+        function converterParaExcelXML(dadosBrutos, mesSelecionado, nomeMes, turnoSelecionado, salaSelecionada) {
+            // Filtrar por turno se selecionado
             let dadosFiltrados = dadosBrutos;
+            if (turnoSelecionado && turnoSelecionado !== '') {
+                dadosFiltrados = dadosFiltrados.filter(aluno =>
+                    aluno.TURNO === turnoSelecionado
+                );
+            }
+
+            // Filtrar por sala se selecionada
             if (salaSelecionada && salaSelecionada !== '') {
-                dadosFiltrados = dadosBrutos.filter(aluno =>
+                dadosFiltrados = dadosFiltrados.filter(aluno =>
                     aluno.TURMA && aluno.TURMA === salaSelecionada
                 );
             }
@@ -994,6 +1132,7 @@
         function baixarCSV() {
             const dadosBrutos = recuperarDadosPlanilhaBrutos();
             const mesValue = document.getElementById('mesValue').value;
+            const turnoValue = document.getElementById('turnoValue').value;
             const salaValue = document.getElementById('salaValue').value;
             const mesNumero = obterNumeroMes(mesValue);
 
@@ -1002,12 +1141,15 @@
                 return;
             }
 
-            const csv = converterParaCSV(dadosBrutos, mesNumero, salaValue);
+            const csv = converterParaCSV(dadosBrutos, mesNumero, turnoValue, salaValue);
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
 
             let nomeArquivo = `chamada_${mesValue}`;
+            if (turnoValue && turnoValue !== '') {
+                nomeArquivo += `_${turnoValue}`;
+            }
             if (salaValue && salaValue !== '') {
                 nomeArquivo += `_${salaValue}`;
             }
@@ -1023,6 +1165,7 @@
         function baixarExcel() {
             const dadosBrutos = recuperarDadosPlanilhaBrutos();
             const mesValue = document.getElementById('mesValue').value;
+            const turnoValue = document.getElementById('turnoValue').value;
             const salaValue = document.getElementById('salaValue').value;
             const mesNumero = obterNumeroMes(mesValue);
 
@@ -1031,12 +1174,15 @@
                 return;
             }
 
-            const excelXML = converterParaExcelXML(dadosBrutos, mesNumero, mesValue, salaValue);
+            const excelXML = converterParaExcelXML(dadosBrutos, mesNumero, mesValue, turnoValue, salaValue);
             const blob = new Blob([excelXML], { type: 'application/vnd.ms-excel' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
 
             let nomeArquivo = `chamada_${mesValue}`;
+            if (turnoValue && turnoValue !== '') {
+                nomeArquivo += `_${turnoValue}`;
+            }
             if (salaValue && salaValue !== '') {
                 nomeArquivo += `_${salaValue}`;
             }
@@ -1129,8 +1275,11 @@
                 // Armazenar dados BRUTOS em sessionStorage (TODOS os meses, sem processamento)
                 armazenarDadosPlanilha(resultado.dados);
 
-                // Preencher dropdown de salas com os dados carregados
-                preencherSalas(resultado.dados);
+                // Preencher dropdown de turnos com os dados carregados
+                preencherTurnos(resultado.dados);
+
+                // Preencher dropdown de salas com os dados carregados (sem filtro de turno inicialmente)
+                preencherSalas(resultado.dados, '');
 
                 console.log('✅ Página inicializada com sucesso');
                 console.log('Dados brutos armazenados:', resultado.dados.length, 'alunos');
@@ -1147,6 +1296,7 @@
             const btnGerar = document.getElementById('btnGerarPlanilha');
             btnGerar.addEventListener('click', () => {
                 const mesSelecionado = document.getElementById('mesValue').value;
+                const turnoSelecionado = document.getElementById('turnoValue').value;
                 const salaSelecionada = document.getElementById('salaValue').value;
                 const mesNumero = obterNumeroMes(mesSelecionado);
 
@@ -1164,11 +1314,12 @@
                 }
 
                 console.log('=== GERANDO PLANILHA DO MÊS:', mesSelecionado, '(', mesNumero, ') ===');
+                console.log('Turno selecionado:', turnoSelecionado || 'todos');
                 console.log('Sala selecionada:', salaSelecionada || 'todas');
                 console.log('Total de alunos nos dados:', dadosBrutos.length);
 
-                // Gerar planilha HTML com os dados do cache (com filtro de sala)
-                const totalAlunos = gerarPlanilhaHTML(dadosBrutos, mesNumero, salaSelecionada);
+                // Gerar planilha HTML com os dados do cache (com filtro de turno e sala)
+                const totalAlunos = gerarPlanilhaHTML(dadosBrutos, mesNumero, turnoSelecionado, salaSelecionada);
             });
 
             // Botões de download
