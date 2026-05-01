@@ -220,16 +220,20 @@ async function inicializarPagina() {
             try {
                 console.log('⏳ Carregando dados iniciais...');
 
-                // Carregar todos os alunos no sessionStorage
-                const resultadoAlunos = await carregarTodosAlunosNaSessionStorage();
+                // ⭐ LIMPAR CACHE para garantir dados frescos
+                console.log('🔄 Limpando cache para garantir dados atualizados...');
+                limparCache();
+
+                // Carregar todos os alunos no sessionStorage (SEMPRE forçar recarga para ter dados frescos)
+                const resultadoAlunos = await carregarTodosAlunosNaSessionStorage(true);
                 if (resultadoAlunos.sucesso) {
                     console.log(`✓ ${resultadoAlunos.alunos.length} alunos carregados no sessionStorage`);
                 } else {
                     console.warn(`⚠️ Aviso ao carregar alunos: ${resultadoAlunos.mensagem}`);
                 }
 
-                // Carregar as salas
-                await carregarSalasNoDropdown('#salaDropdown');
+                // Carregar as salas (SEMPRE forçar recarga para ter dados frescos)
+                await carregarSalasNoDropdown('#salaDropdown', true);
                 console.log('✓ Salas carregadas com sucesso');
             } catch (erro) {
                 console.error('⚠️ Erro ao carregar dados:', erro);
