@@ -564,6 +564,18 @@ async function confirmarBuscaMatricula() {
         // Abrir modal de edição
         const modalAdicionarAluno = document.getElementById('modalAdicionarAluno');
         if (modalAdicionarAluno) {
+            // Atualizar título do header para "Editar Aluno"
+            const modalHeader = modalAdicionarAluno.querySelector('.modal-adicionar-header h2');
+            if (modalHeader) {
+                modalHeader.textContent = 'Editar Aluno';
+            }
+
+            // Atualizar texto do botão de envio
+            const btnEnviarModal = modalAdicionarAluno.querySelector('.btn-enviar-modal');
+            if (btnEnviarModal) {
+                btnEnviarModal.textContent = 'Atualizar';
+            }
+
             modalAdicionarAluno.classList.add('ativo');
             // Carregar turmas se não estiverem carregadas
             popularDropdownTurmas('#selectTurma');

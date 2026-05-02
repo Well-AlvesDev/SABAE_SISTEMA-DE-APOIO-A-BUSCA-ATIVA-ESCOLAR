@@ -745,6 +745,11 @@ main {
     transform: translateY(-1px);
 }
 
+.btn-gerenciar-dados:hover {
+    background-color: #c0c0c0;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
 .btn-registrar-icon {
     width: 50px;
     height: 80px;
@@ -831,9 +836,37 @@ main {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 30px;
-    padding: 40px 20px;
+    gap: 8px;
+    padding: 20px 20px;
     flex-wrap: wrap;
+}
+
+.info-container {
+    width: 100%;
+    background-color: #e6f2ff;
+    border-left: 4px solid #0798ff;
+    border-radius: 4px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.info-container i {
+    color: #0762ff;
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.info-container p {
+    color: #333;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+    max-width: 800px;
 }
 
 .btn-adicionar-aluno,
@@ -842,12 +875,12 @@ main {
     align-items: center;
     justify-content: center;
     gap: 12px;
-    padding: 15px 25px;
+    padding: 3px 13px;
     background: linear-gradient(135deg, #3e73bf 0%, #2c5aa0 100%);
     border: none;
     border-radius: 12px;
     color: white;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -858,7 +891,8 @@ main {
 
 .btn-adicionar-aluno img,
 .btn-editar-aluno img {
-    width: 34px;
+    width: 25px;
+    height: 34px;
 }
 
 /* ========== DROPDOWN CUSTOMIZADO ========== */

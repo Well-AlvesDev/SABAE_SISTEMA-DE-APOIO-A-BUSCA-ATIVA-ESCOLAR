@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="./assets/estilos/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <title>SABAE - GERENCIAR DADOS</title>
+    <title>SABAE - CRUD</title>
 </head>
 
 <body style="overflow: hidden;">
@@ -33,7 +33,7 @@
             </button>
             <img src="./assets/imagens/logos/sabae2.png" alt="SABAE Logo" class="header-logo"
                 style="width: 50px; height: 50px; border-radius: 10px;">
-            <span class="header-title">Gerenciar Dados</span>
+            <span class="header-title">CRUD</span>
         </div>
         <span class="header-datetime" id="headerDateTime">--:--</span>
     </header>
@@ -76,7 +76,14 @@
     </div>
 
     <div class="gerenciar-buttons-container">
-        <h1 style="width: 100%; text-align: center; margin-bottom: 10px; margin-top: 30px; color: #333;">Gerenciar Dados
+        <div class="info-container">
+            <i class="ri-information-line"></i>
+            <p>CRUD é um acrônimo para Create (Criar), Read (Ler/Visualizar), Update (Atualizar) e Delete (Excluir).
+                Representa as quatro operações básicas de manipulação de dados em bancos de dados ou sistemas de
+                software, sendo fundamental para o armazenamento persistente e gerenciamento de informações em
+                aplicações web e móveis.</p>
+        </div>
+        <h1 style="width: 100%; text-align: center; margin-bottom: 10px; color: #333; font-size: 28px;">CRUD - ALUNOS
         </h1>
         <button id="btnAdicionarAluno" class="btn-adicionar-aluno"><img
                 src="./assets/imagens/ico/matt-icons_contact-add.svg" alt="">
