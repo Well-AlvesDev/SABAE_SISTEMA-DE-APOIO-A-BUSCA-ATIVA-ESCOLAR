@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="PT-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SABAE - LOGIN</title>
+    <link rel="shortcut icon" href="./assets/imagens/logos/sabae.png" type="image/x-icon">
+    <link rel="stylesheet" href="./assets/estilos/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<style>
+    body {
+        background: white;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .login-container {
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .logo {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .logo img {
+        width: 200px;
+        height: auto;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 500;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background: rgb(35, 115, 190);
+        color: rgb(237, 237, 237);
+        border: none;
+        border-radius: 5px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    button:active {
+        transform: translateY(0);
+    }
+</style>
+
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <img src="./assets/imagens/logos/sabae-complet.png" alt="Logo SABAE"
+                style="margin-top: -30px; margin-bottom: 20px;">
+        </div>
+        <div class="sobre" style="font-size: 13px; margin-bottom: 10px; margin-top: -50px; color: #3c3c3c;">
+            <p><strong>ℹ Bem-vindo ao SABAE!</strong></p>
+            <p>Sistema de Apoio à Busca Ativa Escolar (SABAE). Projetado para facilitar a
+                identificação, registro e acompanhamento da frequência dos estudantes.</p>
+        </div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="usuario"><i class="ri-mail-line"></i> Email</label>
+                <input type="email" id="usuario" name="usuario" required placeholder="Digite seu email">
+            </div>
+
+            <div class="form-group">
+                <label for="senha"><i class="ri-lock-password-line"></i> Senha</label>
+                <input type="password" id="senha" name="senha" required placeholder="Digite sua senha">
+            </div>
+
+            <button type="submit">Entrar <i class="ri-arrow-right-line"></i></button>
+        </form>
+    </div>
+
+    <script src="./assets/lógica/supabase-config.js"></script>
+    <script src="./assets/lógica/auth.js"></script>
+
+    <script>
+        // Verificar se o usuário já está autenticado
+        window.addEventListener('load', async function () {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                // Usuário já está logado, redirecionar
+                window.location.href = 'index.html';
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('usuario').value.trim();
+            const senha = document.getElementById('senha').value;
+            const btnEntrar = document.querySelector('button[type="submit"]');
+
+            // Validar campos vazios
+            if (!email || !senha) {
+                alert('Por favor, preencha todos os campos');
+                return;
+            }
+
+            // Desabilitar botão e mostrar carregamento
+            btnEntrar.disabled = true;
+            btnEntrar.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i> Entrando...';
+
+            try {
+                // Realizar login com Supabase Auth
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: senha
+                });
+
+                if (error) {
+                    console.error('Erro de autenticação:', error);
+
+                    // Mensagens de erro mais amigáveis
+                    let mensagem = 'Erro ao fazer login';
+                    if (error.message.includes('Invalid login credentials')) {
+                        mensagem = 'Email ou senha incorretos';
+                    } else if (error.message.includes('Email not confirmed')) {
+                        mensagem = 'Email não foi confirmado. Verifique seu email';
+                    } else {
+                        mensagem = error.message;
+                    }
+
+                    alert(mensagem);
+                } else if (data.session) {
+                    console.log('✅ Login bem-sucedido!');
+
+                    // Registrar a atividade de login
+                    try {
+                        console.log('📝 Registrando login...');
+                        console.log('Email:', email);
+                        console.log('Atividade:', 'Entrou no sistema');
+
+                        const { data: resultadoAtividade, error: erroAtividade } = await supabaseClient.rpc('registrar_atividade', {
+                            p_email_usuario: email,
+                            p_atividade: 'Entrou no sistema'
+                        });
+
+                        if (erroAtividade) {
+                            console.error('❌ ERRO ao registrar login:', erroAtividade);
+                            console.error('Código:', erroAtividade.code);
+                            console.error('Mensagem:', erroAtividade.message);
+                            console.error('Detalhes:', erroAtividade);
+                        } else {
+                            console.log('✅ Login registrado com sucesso:', resultadoAtividade);
+                        }
+                    } catch (erroAtividade) {
+                        console.error('❌ ERRO inesperado ao registrar login:', erroAtividade);
+                    }
+
+                    // A sessão é gerenciada automaticamente pelo Supabase
+                    // Redirecionar para página principal após 1 segundo
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                }
+            } catch (erro) {
+                console.error('Erro inesperado:', erro);
+                alert('Erro inesperado ao fazer login. Tente novamente.');
+            } finally {
+                // Reabilitar botão
+                btnEntrar.disabled = false;
+                btnEntrar.innerHTML = 'Entrar <i class="ri-arrow-right-line"></i>';
+
+                // Limpar senha
+                document.getElementById('senha').value = '';
+            }
+        });
+    </script>
+
+    <style>
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</body>
+
+</html>
