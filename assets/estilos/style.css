@@ -2226,6 +2226,256 @@ main {
     color: #007bff;
 }
 
+.bolinha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.bolinha:hover {
+    transform: scale(1.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.bolinha-presenca {
+    background-color: #19c62d;
+    color: white;
+    border-color: #0ea925;
+}
+
+.bolinha-falta-nj {
+    background-color: #f44336;
+    color: white;
+    border-color: #d32f2f;
+}
+
+.bolinha-falta-j {
+    background-color: #2196f3;
+    color: white;
+    border-color: #1565c0;
+}
+
+.bolinha-vazia {
+    background-color: #e0e0e0;
+    color: #999;
+    border-color: #bdbdbd;
+}
+
+.dias-bolinha-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex: 1;
+}
+
+/* ========== RESPONSIVIDADE PARA MOBILE ========== */
+
+/* Telas pequenas (até 600px) */
+@media (max-width: 600px) {
+
+    /* Modal */
+    .modal-adicionar-content {
+        padding: 0 15px 15px 15px;
+        max-width: 95vw;
+        max-height: 90vh;
+    }
+
+    .modal-adicionar-header {
+        padding-top: 20px;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+
+    .modal-adicionar-header h2 {
+        font-size: 18px;
+    }
+
+    /* Dados do Aluno - Container */
+    .dados-aluno-container {
+        gap: 15px;
+    }
+
+    /* Info Header */
+    .aluno-info-header {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .aluno-info-item {
+        gap: 3px;
+    }
+
+    .aluno-info-item label {
+        font-size: 11px;
+    }
+
+    .aluno-info-item p {
+        font-size: 14px;
+    }
+
+    /* Resumo Geral */
+    .resumo-geral {
+        padding: 15px;
+    }
+
+    .resumo-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .resumo-item {
+        padding: 12px;
+    }
+
+    .resumo-item label {
+        font-size: 11px;
+    }
+
+    .resumo-item p {
+        font-size: 20px;
+    }
+
+    /* Visualização de Meses */
+    .visualizacao-meses {
+        padding: 15px;
+    }
+
+    .visualizacao-meses h3 {
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+
+    /* Linha de Mês - Layout Vertical */
+    .linha-mes {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .mes-info {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .mes-nome {
+        min-width: auto;
+        font-size: 13px;
+    }
+
+    .mes-estatisticas {
+        width: 100%;
+        gap: 10px;
+        flex-wrap: wrap;
+        font-size: 11px;
+    }
+
+    /* Bolinhas - Tamanho Reduzido e Proporcionado */
+    .dias-bolinha-container {
+        width: 100%;
+        gap: 6px;
+        justify-content: flex-start;
+    }
+
+    .bolinha {
+        width: 28px;
+        height: 28px;
+        font-size: 10px;
+        flex: 0 0 28px;
+        min-width: 28px;
+        max-width: 28px;
+    }
+
+    .bolinha:hover {
+        transform: scale(1.1);
+    }
+
+    /* Formário */
+    .form-group input,
+    .form-group select {
+        font-size: 16px;
+        padding: 14px 12px;
+    }
+
+    .modal-botoes {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-cancelar-modal,
+    .btn-enviar-modal,
+    .btn-fechar-modal {
+        font-size: 14px;
+    }
+}
+
+/* Telas médias mobile (380px a 550px) */
+@media (max-width: 550px) and (min-width: 380px) {
+    .bolinha {
+        width: 26px;
+        height: 26px;
+        font-size: 10px;
+        flex: 0 0 calc(16.66% - 4px);
+        min-width: 26px;
+        max-width: 26px;
+    }
+
+    .dias-bolinha-container {
+        gap: 4px;
+        justify-content: flex-start;
+    }
+}
+
+/* Telas muito pequenas (até 380px) */
+@media (max-width: 380px) {
+    .aluno-info-header {
+        grid-template-columns: 1fr;
+    }
+
+    .bolinha {
+        width: 22px;
+        height: 22px;
+        font-size: 9px;
+        flex: 0 0 calc(25% - 5px);
+        min-width: 22px;
+        max-width: 22px;
+    }
+
+    .dias-bolinha-container {
+        gap: 5px;
+    }
+
+    .mes-estatisticas {
+        font-size: 10px;
+        gap: 8px;
+    }
+
+    .mes-nome {
+        font-size: 12px;
+    }
+
+    .visualizacao-meses h3 {
+        font-size: 13px;
+    }
+
+    .modal-adicionar-header h2 {
+        font-size: 16px;
+    }
+}
+
+color: #007bff;
+}
+
 .dias-bolinha-container {
     display: flex;
     flex-wrap: wrap;
