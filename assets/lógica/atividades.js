@@ -3,21 +3,21 @@ async function carregarAtividades() {
     try {
         console.log('Carregando atividades...');
 
-        // Obter credenciais da sessão
-        const nomeUsuario = sessionStorage.getItem('usuario');
-        const senhaUsuario = sessionStorage.getItem('usuarioSenha');
+        // Obter usuário autenticado
+        const usuario = await obterUsuarioAtual();
 
-        // Validar se as credenciais existem
-        if (!nomeUsuario || !senhaUsuario) {
-            console.error('❌ Credenciais não encontradas na sessão');
-            exibirErroAtividades('Sessão expirou. Faça login novamente.');
+        // Validar se o usuário está autenticado
+        if (!usuario) {
+            console.error('❌ Usuário não autenticado');
+            exibirErroAtividades('Sessão expirada. Faça login novamente.');
             return;
         }
 
-        // Chamar a função RPC do Supabase com validação de credenciais
+        console.log('Usuário autenticado:', usuario.email);
+
+        // Chamar a função RPC do Supabase com o email do usuário autenticado
         const { data, error } = await supabaseClient.rpc('get_atividades', {
-            p_nomeusuario: nomeUsuario,
-            p_senha_usuario: senhaUsuario
+            p_email_usuario: usuario.email
         });
 
         if (error) {
@@ -90,8 +90,9 @@ function exibirErroAtividades(mensagem) {
 // Carregar atividades quando a página carregar
 document.addEventListener('DOMContentLoaded', () => {
     // Aguardar um pouco para garantir que o Supabase já foi carregado
-    setTimeout(() => {
-        if (verificarAutenticacao()) {
+    setTimeout(async () => {
+        const eAutenticado = await estaAutenticado();
+        if (eAutenticado) {
             carregarAtividades();
             // Recarregar atividades a cada 5 segundos (opcional)
             setInterval(carregarAtividades, 5000);

@@ -2,6 +2,7 @@
  * ==========================================
  * SABAE - Visualizar Dados do Aluno
  * Sistema para buscar e exibir dados detalhados de um aluno
+ * ✅ VERSÃO ATUALIZADA: Suporta ambas autenticações
  * ==========================================
  */
 
@@ -27,6 +28,108 @@ const diasPorMes = {
     12: 31  // Dezembro
 };
 
+// ========== NOVAS FUNÇÕES COM AUTH NATIVO ==========
+
+/**
+ * Busca dados do aluno usando autenticação nativa
+ * @param {string} matricula - Matrícula do aluno
+ * @returns {Promise<Object>} Dados do aluno com estatísticas
+ */
+async function buscarDadosAlunoNativo(matricula) {
+    try {
+        console.log('🔍 Buscando dados do aluno (AUTH NATIVO):', matricula);
+
+        // Obter usuário autenticado
+        const usuario = await obterUsuarioAtual();
+        if (!usuario || !usuario.email) {
+            throw new Error('Usuário não autenticado');
+        }
+
+        // Chamar função RPC do Supabase
+        const { data, error } = await supabaseClient.rpc('obter_dados_aluno_detalhado_nativo', {
+            p_email_usuario: usuario.email,
+            p_matricula: matricula.trim()
+        });
+
+        if (error) {
+            console.error('❌ Erro ao buscar dados:', error);
+            return {
+                sucesso: false,
+                mensagem: `Erro ao buscar dados: ${error.message}`,
+                dados: null
+            };
+        }
+
+        // Verificar se encontrou o aluno
+        if (!data || data.length === 0) {
+            console.log('⚠️ Aluno não encontrado');
+            return {
+                sucesso: false,
+                mensagem: 'Aluno não encontrado na base de dados',
+                dados: null
+            };
+        }
+
+        const alunoData = data[0];
+        console.log('✅ Dados do aluno encontrados:', alunoData);
+
+        // Calcular estatísticas para cada mês
+        const estatisticasPorMes = [];
+        for (let mes = 1; mes <= 12; mes++) {
+            const stats = calcularEstatisticasMes(alunoData, mes);
+            estatisticasPorMes.push(stats);
+        }
+
+        // Encontrar melhor e pior mês
+        const piorMes = estatisticasPorMes.reduce((pior, atual) =>
+            atual.faltasNaoJustificadas > pior.faltasNaoJustificadas ? atual : pior
+        );
+
+        const melhorMes = estatisticasPorMes.reduce((melhor, atual) =>
+            atual.percentualPresenca > melhor.percentualPresenca ? atual : melhor
+        );
+
+        // Contar totais
+        const totalFaltasNaoJustificadas = estatisticasPorMes.reduce((total, m) => total + m.faltasNaoJustificadas, 0);
+        const totalFaltasJustificadas = estatisticasPorMes.reduce((total, m) => total + m.faltasJustificadas, 0);
+        const totalDiasLecionados = estatisticasPorMes.reduce((total, m) => total + m.diasLecionados, 0);
+        const totalPresencas = estatisticasPorMes.reduce((total, m) => total + m.presencas, 0);
+        const percentualPresencaGeral = totalDiasLecionados > 0
+            ? Math.round((totalPresencas / totalDiasLecionados) * 100)
+            : 0;
+
+        return {
+            sucesso: true,
+            mensagem: 'Dados do aluno encontrados com sucesso',
+            dados: {
+                mat: alunoData.MAT,
+                nome: alunoData.NOME,
+                turma: alunoData.TURMA,
+                turno: alunoData.TURNO,
+                status: alunoData.STATUS,
+                estatisticasPorMes,
+                piorMes,
+                melhorMes,
+                totalFaltasNaoJustificadas,
+                totalFaltasJustificadas,
+                totalDiasLecionados,
+                totalPresencas,
+                percentualPresencaGeral
+            }
+        };
+    } catch (erro) {
+        console.error('❌ Erro inesperado:', erro);
+        return {
+            sucesso: false,
+            mensagem: `Erro inesperado: ${erro.message}`,
+            dados: null
+        };
+    }
+}
+
+// ========== FUNÇÕES LEGADAS (DEPRECIADAS) ==========
+
+// @deprecated Usar buscarDadosAlunoNativo() em vez disso
 /**
  * Processa dados de presença por mês
  * @param {Object} dadosAluno - Dados do aluno retornados do Supabase

@@ -103,6 +103,38 @@
     <script src="./assets/lógica/atividades.js"></script>
     <script src="./assets/lógica/script.js"></script>
 
+    <!-- Script para verificar autenticação e atualizar data/hora -->
+    <script>
+        // Verificar autenticação ao carregar a página
+        async function verificarAutenticacaoAoCarregar() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+
+                if (!session) {
+                    console.log('❌ Usuário não autenticado. Redirecionando para login...');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                console.log('✅ Usuário autenticado:', session.user.email);
+            } catch (erro) {
+                console.error('❌ Erro ao verificar autenticação:', erro);
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Verificar autenticação quando o documento carregar
+        window.addEventListener('load', verificarAutenticacaoAoCarregar);
+
+        // Listener para mudanças de autenticação
+        supabaseClient.auth.onAuthStateChange((evento, sessao) => {
+            if (evento === 'SIGNED_OUT') {
+                console.log('Sessão expirada. Redirecionando para login...');
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+
     <!-- Script para atualizar data e hora -->
     <script>
         function atualizarDataHora() {

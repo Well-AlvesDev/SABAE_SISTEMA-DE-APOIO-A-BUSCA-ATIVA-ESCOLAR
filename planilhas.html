@@ -329,6 +329,7 @@
 
     <!-- Carregar bibliotecas de configuração PRIMEIRO -->
     <script src="./assets/lógica/supabase-config.js"></script>
+    <script src="./assets/lógica/auth.js"></script>
     <script src="./assets/lógica/supabase-gerar-planilha.js"></script>
 
     <header class="pwa-header">
@@ -1246,23 +1247,28 @@
 
         // Inicializar página carregando dados automaticamente
         async function inicializarPaginaPlanilha() {
-            console.log('=== INICIALIZANDO PÁGINA DE PLANILHAS ===');
+            console.log('=== INICIALIZANDO PÁGINA DE PLANILHAS (AUTH NATIVO) ===');
 
-            // Obter credenciais do sessionStorage
-            const usuarioNome = sessionStorage.getItem('usuario');
-            const usuarioSenha = sessionStorage.getItem('usuarioSenha');
+            // Obter usuário autenticado via Supabase Auth
+            const usuario = await obterUsuarioAtual();
 
-            if (!usuarioNome || !usuarioSenha) {
-                exibirNotificacao('Credenciais não encontradas. Faça login novamente', 'erro');
+            if (!usuario || !usuario.email) {
+                exibirNotificacao('Usuário não autenticado. Faça login novamente', 'erro');
                 esconderLoaderGeracaoPlanilha();
+                // Redirecionar para login se não está autenticado
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
                 return;
             }
+
+            console.log('Usuário autenticado:', usuario.email);
 
             mostrarLoaderGeracaoPlanilha('Carregando todos os dados do banco...');
 
             try {
-                // Gerar dados da planilha (retorna TODOS os dados brutos - sem filtro de mês)
-                const resultado = await gerarDadosPlanilha(usuarioNome, usuarioSenha, 1);
+                // Gerar dados da planilha usando Auth Nativo (retorna TODOS os dados brutos - sem filtro de mês)
+                const resultado = await gerarDadosPlanilhaNativo(usuario.email, 1);
 
                 esconderLoaderGeracaoPlanilha();
 

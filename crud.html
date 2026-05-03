@@ -21,6 +21,7 @@
 
     <!-- Carregar bibliotecas de configuração PRIMEIRO -->
     <script src="./assets/lógica/supabase-config.js"></script>
+    <script src="./assets/lógica/auth.js"></script>
     <script src="./assets/lógica/supabase-alunos.js"></script>
     <script src="./assets/lógica/supabase-gerar-planilha.js"></script>
     <script src="./assets/lógica/supabase-adicionar-aluno.js"></script>
@@ -116,8 +117,12 @@
                 </div>
 
                 <div class="modal-botoes" style="margin-top: 20px;">
-                    <button type="button" id="btnCancelarBusca" class="btn-cancelar-modal">Cancelar</button>
-                    <button type="button" id="btnConfirmarBusca" class="btn-enviar-modal">Buscar</button>
+                    <button type="button" id="btnConfirmarBusca" class="btn-enviar-modal">
+                        <span class="btn-text">Buscar</span>
+                        <span class="btn-loader" style="display: none;">
+                            <i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i>
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -182,8 +187,12 @@
 
                 <!-- Botões -->
                 <div class="modal-botoes">
-                    <button type="button" id="btnCancelarModal" class="btn-cancelar-modal">Cancelar</button>
-                    <button type="submit" class="btn-enviar-modal">Enviar</button>
+                    <button type="submit" class="btn-enviar-modal">
+                        <span class="btn-text">Enviar</span>
+                        <span class="btn-loader" style="display: none;">
+                            <i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i>
+                        </span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -209,8 +218,12 @@
                 </div>
 
                 <div class="modal-botoes" style="margin-top: 20px;">
-                    <button type="button" id="btnCancelarBuscaVisualizacao" class="btn-cancelar-modal">Cancelar</button>
-                    <button type="button" id="btnConfirmarBuscaVisualizacao" class="btn-enviar-modal">Buscar</button>
+                    <button type="button" id="btnConfirmarBuscaVisualizacao" class="btn-enviar-modal">
+                        <span class="btn-text">Buscar</span>
+                        <span class="btn-loader" style="display: none;">
+                            <i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i>
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -235,7 +248,43 @@
         </div>
     </div>
     <script src="./assets/lógica/script.js"></script>
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .btn-loader {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-loader i {
+            font-size: 16px;
+        }
+        .btn-enviar-modal:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .btn-enviar-modal:disabled .btn-text {
+            display: none;
+        }
+    </style>
     <script>
+        // ========== FUNÇÕES DE CONTROLE DE LOADER EM BOTÕES ==========
+        function ativarLoaderBotao(botao) {
+            if (!botao) return;
+            const loader = botao.querySelector('.btn-loader');
+            if (loader) loader.style.display = 'inline-flex';
+            botao.disabled = true;
+        }
+
+        function desativarLoaderBotao(botao) {
+            if (!botao) return;
+            const loader = botao.querySelector('.btn-loader');
+            if (loader) loader.style.display = 'none';
+            botao.disabled = false;
+        }
+
         console.log('🚀 Iniciando script CRUD...');
 
         // Inicializar página quando o DOM estiver pronto
@@ -309,12 +358,15 @@
                     inputMatricula.style.opacity = '1';
                     inputMatricula.style.cursor = 'pointer';
                 }
-                if (btnEnviarModal) btnEnviarModal.textContent = 'Enviar';
+                if (btnEnviarModal) {
+                    const btnText = btnEnviarModal.querySelector('.btn-text');
+                    if (btnText) btnText.textContent = 'Enviar';
+                }
 
                 if (modalAdicionarAluno) modalAdicionarAluno.classList.add('ativo');
 
                 console.log('🏫 Carregando turmas...');
-                popularDropdownTurmas('#selectTurma');
+                popularDropdownTurmasNativo('#selectTurma');
 
                 setTimeout(() => {
                     if (inputMatricula) inputMatricula.focus();
@@ -338,7 +390,6 @@
             // Event listeners para modal adicionar
             if (btnAdicionarAluno) btnAdicionarAluno.addEventListener('click', abrirModalAdicionarAluno);
             if (btnFecharModalAluno) btnFecharModalAluno.addEventListener('click', fecharModalAdicionarAluno);
-            if (btnCancelarModal) btnCancelarModal.addEventListener('click', fecharModalAdicionarAluno);
             const modalOverlay = modalAdicionarAluno?.querySelector('.modal-adicionar-overlay');
             if (modalOverlay) modalOverlay.addEventListener('click', fecharModalAdicionarAluno);
 
@@ -376,11 +427,19 @@
             if (formAdicionarAluno) {
                 formAdicionarAluno.removeAttribute('onsubmit');
                 formAdicionarAluno.addEventListener('submit', (event) => {
+                    const btnEnviarModal = formAdicionarAluno.querySelector('.btn-enviar-modal');
+                    ativarLoaderBotao(btnEnviarModal);
+                    
                     if (modoEdicaoAluno) {
                         enviarFormularioEditarAluno(event);
                     } else {
                         enviarFormularioAdicionarAluno(event);
                     }
+                    
+                    // Desativar loader após um tempo (as funções externas chamarão desativar se necessário)
+                    setTimeout(() => {
+                        desativarLoaderBotao(btnEnviarModal);
+                    }, 1000);
                 });
             }
 
@@ -401,7 +460,6 @@
             }
 
             if (btnFecharModalBusca) btnFecharModalBusca.addEventListener('click', fecharModalBuscaMatricula);
-            if (btnCancelarBusca) btnCancelarBusca.addEventListener('click', fecharModalBuscaMatricula);
             if (btnConfirmarBusca) btnConfirmarBusca.addEventListener('click', confirmarBuscaMatricula);
 
             if (inputBuscaMatricula) {
@@ -446,7 +504,6 @@
             }
 
             if (btnFecharModalBuscaVisualizacao) btnFecharModalBuscaVisualizacao.addEventListener('click', fecharModalBuscaMatriculaVisualizacao);
-            if (btnCancelarBuscaVisualizacao) btnCancelarBuscaVisualizacao.addEventListener('click', fecharModalBuscaMatriculaVisualizacao);
             if (btnConfirmarBuscaVisualizacao) btnConfirmarBuscaVisualizacao.addEventListener('click', confirmarBuscaMatriculaVisualizacao);
 
             if (inputBuscaMatriculaVisualizacao) {
@@ -508,9 +565,11 @@
                     return;
                 }
 
+                ativarLoaderBotao(btnConfirmarBuscaVisualizacao);
                 mostrarLoaderProcessamento('Buscando dados do aluno...');
-                const resultado = await buscarDadosAluno(matricula);
+                const resultado = await buscarDadosAlunoNativo(matricula);
                 esconderLoaderProcessamento();
+                desativarLoaderBotao(btnConfirmarBuscaVisualizacao);
 
                 if (!resultado.sucesso) {
                     alert('❌ ' + resultado.mensagem);
@@ -543,6 +602,137 @@
                 const conteudo = document.getElementById('conteudoVisualizacaoAluno');
                 if (conteudo) {
                     conteudo.innerHTML = '';
+                }
+            }
+
+            // ========== FUNÇÕES DE SUPORTE PARA MODAIS ==========
+
+            function abrirModalBuscaMatricula() {
+                console.log('📖 Abrindo modal de busca de matrícula...');
+                if (modalBuscaMatricula) {
+                    modalBuscaMatricula.classList.add('ativo');
+                    setTimeout(() => {
+                        if (inputBuscaMatricula) inputBuscaMatricula.focus();
+                    }, 100);
+                }
+            }
+
+            function fecharModalBuscaMatricula() {
+                console.log('❌ Fechando modal de busca...');
+                if (modalBuscaMatricula) {
+                    modalBuscaMatricula.classList.remove('ativo');
+                    if (inputBuscaMatricula) inputBuscaMatricula.value = '';
+                }
+            }
+
+            async function confirmarBuscaMatricula() {
+                if (!inputBuscaMatricula) {
+                    console.error('❌ Input de busca não encontrado');
+                    alert('Erro ao buscar aluno');
+                    return;
+                }
+
+                const matricula = inputBuscaMatricula.value.trim();
+
+                if (!matricula) {
+                    alert('Por favor, digite uma matrícula');
+                    return;
+                }
+
+                if (!validarMatricula(matricula)) {
+                    alert('Matrícula inválida. Digite apenas números');
+                    return;
+                }
+
+                console.log('🔍 Buscando aluno com matrícula:', matricula);
+
+                ativarLoaderBotao(btnConfirmarBusca);
+                mostrarLoaderProcessamento('Buscando aluno...');
+                const resultado = await buscarAlunoPorMatriculaNativo(matricula);
+                removerLoaderProcessamento();
+                desativarLoaderBotao(btnConfirmarBusca);
+
+                if (resultado.sucesso) {
+                    console.log('✅ Aluno encontrado:', resultado.dados);
+
+                    fecharModalBuscaMatricula();
+
+                    modoEdicaoAluno = true;
+                    alunoEmEdicaoMatricula = resultado.dados.matricula;
+
+                    if (modalAdicionarAluno) {
+                        const modalHeader = modalAdicionarAluno.querySelector('.modal-adicionar-header h2');
+                        if (modalHeader) {
+                            modalHeader.textContent = 'Editar Aluno';
+                        }
+
+                        const btnEnviarModal = modalAdicionarAluno.querySelector('.btn-enviar-modal');
+                        if (btnEnviarModal) {
+                            const btnText = btnEnviarModal.querySelector('.btn-text');
+                            if (btnText) btnText.textContent = 'Atualizar';
+                        }
+
+                        modalAdicionarAluno.classList.add('ativo');
+                        
+                        // Aguardar carregamento das turmas antes de preencher formulário
+                        await popularDropdownTurmasNativo('#selectTurma');
+                        preencherFormularioComDadosAluno(resultado.dados);
+                    }
+                } else {
+                    console.error('❌ Erro ao buscar aluno:', resultado.mensagem);
+                    alert(resultado.mensagem);
+                }
+            }
+
+            function preencherFormularioComDadosAluno(dados) {
+                try {
+                    console.log('📝 Preenchendo formulário com dados do aluno...');
+
+                    const inputMatricula = document.getElementById('inputMatricula');
+                    const inputNome = document.getElementById('inputNome');
+                    const selectTurma = document.getElementById('selectTurma');
+                    const selectTurno = document.getElementById('selectTurno');
+                    const selectStatus = document.getElementById('selectStatus');
+
+                    if (!inputMatricula || !inputNome || !selectTurma || !selectTurno || !selectStatus) {
+                        console.error('❌ Um ou mais elementos do formulário não encontrados');
+                        return;
+                    }
+
+                    inputMatricula.value = dados.matricula;
+                    inputMatricula.disabled = true;
+                    inputMatricula.style.opacity = '0.5';
+                    inputMatricula.style.cursor = 'not-allowed';
+
+                    inputNome.value = dados.nome;
+
+                    setTimeout(() => {
+                        selectTurma.value = dados.turma;
+                        selectTurno.value = dados.turno;
+                        selectStatus.value = dados.status;
+                    }, 100);
+
+                    console.log('✅ Formulário preenchido com sucesso');
+
+                } catch (erro) {
+                    console.error('❌ Erro ao preencher formulário:', erro);
+                }
+            }
+
+            function abrirModalBuscaMatriculaVisualizacao() {
+                console.log('📖 Abrindo modal de busca para visualização...');
+                if (modalBuscaMatriculaVisualizacao && inputBuscaMatriculaVisualizacao) {
+                    modalBuscaMatriculaVisualizacao.classList.add('ativo');
+                    inputBuscaMatriculaVisualizacao.value = '';
+                    inputBuscaMatriculaVisualizacao.focus();
+                }
+            }
+
+            function fecharModalBuscaMatriculaVisualizacao() {
+                console.log('❌ Fechando modal de busca...');
+                if (modalBuscaMatriculaVisualizacao && inputBuscaMatriculaVisualizacao) {
+                    modalBuscaMatriculaVisualizacao.classList.remove('ativo');
+                    inputBuscaMatriculaVisualizacao.value = '';
                 }
             }
 

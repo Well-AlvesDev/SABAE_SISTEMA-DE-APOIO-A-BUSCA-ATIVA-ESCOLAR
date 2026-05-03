@@ -1,7 +1,7 @@
 /**
  * ==========================================
  * SABAE - Envio de Chamadas para Supabase
- * Sistema de integração com banco de dados
+ * ATUALIZADO: Agora usa autenticação nativa do Supabase (email)
  * ==========================================
  */
 
@@ -33,12 +33,264 @@ function prepararChamadasParaSupabase(chamadasSalvas) {
     return registros;
 }
 
+// ========== NOVAS FUNÇÕES COM AUTH NATIVO ==========
+
 /**
- * Envia uma chamada para o Supabase
+ * Envia uma chamada para o Supabase usando auth nativo
  * @param {Object} chamada - Objeto da chamada
  * @returns {Promise<Object>} Resultado do envio
  */
+async function enviarChamadaParaSupabaseNativo(chamada) {
+    try {
+        console.log('📤 Enviando chamada para Supabase (AUTH NATIVO)...', chamada);
+
+        // Obter usuário autenticado
+        const usuario = await obterUsuarioAtual();
+        if (!usuario || !usuario.email) {
+            throw new Error('Usuário não autenticado');
+        }
+
+        // Preparar registros da chamada
+        const registros = [];
+        const numerMes = obterNumeroMes(chamada.mes);
+        const dia = parseInt(chamada.dia);
+
+        chamada.alunos.forEach(aluno => {
+            registros.push({
+                dia: dia,
+                mes: numerMes,
+                mat: String(aluno.mat || '').trim(),
+                nome: String(aluno.nome || '').trim(),
+                presenca: String(aluno.presenca || '').trim()
+            });
+        });
+
+        // Chamar a função RPC do Supabase com email
+        const { data, error } = await supabaseClient.rpc('registrar_chamadas_lote_nativa', {
+            p_email_usuario: usuario.email,
+            p_chamadas_json: registros
+        });
+
+        if (error) {
+            console.error('❌ Erro ao enviar chamada:', error);
+            return {
+                sucesso: false,
+                mensagem: `Erro ao enviar: ${error.message}`,
+                erro: error,
+                chamada: chamada
+            };
+        }
+
+        console.log('✅ Resposta do Supabase:', data);
+
+        // Verificar resposta (data é um array quando a RPC retorna TABLE)
+        if (data && Array.isArray(data) && data.length > 0) {
+            const resultado = data[0]; // Pegar o primeiro (e único) resultado
+
+            if (resultado.total > 0) {
+                // Registrar atividade na tabela de atividades
+                const numerMesAtividade = obterNumeroMes(chamada.mes);
+                const descricaoAtividade = `Registrou chamada para ${chamada.sala} no dia ${String(chamada.dia).padStart(2, '0')}/${String(numerMesAtividade).padStart(2, '0')} com ${chamada.alunos.length} aluno(s)`;
+
+                try {
+                    await supabaseClient.rpc('registrar_atividade', {
+                        p_email_usuario: usuario.email,
+                        p_atividade: descricaoAtividade
+                    });
+                    console.log('📝 Atividade registrada:', descricaoAtividade);
+                } catch (erroAtividade) {
+                    console.warn('⚠️ Erro ao registrar atividade:', erroAtividade);
+                    // Não interromper o fluxo se falhar ao registrar atividade
+                }
+
+                return {
+                    sucesso: true,
+                    mensagem: `Registros enviados: ${resultado.sucesso}/${resultado.total}`,
+                    dados: resultado,
+                    chamada: chamada,
+                    sucessoTotal: resultado.falhados === 0
+                };
+            } else {
+                return {
+                    sucesso: false,
+                    mensagem: 'Nenhum registro foi processado',
+                    dados: resultado,
+                    chamada: chamada
+                };
+            }
+        } else {
+            return {
+                sucesso: false,
+                mensagem: 'Resposta inválida do servidor',
+                dados: data,
+                chamada: chamada
+            };
+        }
+
+    } catch (erro) {
+        console.error('❌ Erro inesperado ao enviar chamada:', erro);
+        return {
+            sucesso: false,
+            mensagem: `Erro: ${erro.message}`,
+            erro: erro,
+            chamada: chamada
+        };
+    }
+}
+
+/**
+ * Envia todas as chamadas salvas para o Supabase com barra de progresso (AUTH NATIVO)
+ * @returns {Promise<void>}
+ */
+async function enviarTodasChamadasParaSupabaseNativo() {
+    // Recuperar chamadas salvas
+    const chamadasSalvas = JSON.parse(localStorage.getItem('chamadasSalvas') || '[]');
+
+    if (chamadasSalvas.length === 0) {
+        console.warn('⚠️ Não há chamadas registradas para enviar!');
+        return;
+    }
+
+    // Criar modal se não existir (apenas verifica)
+    criarModalEnvio();
+
+    // Obter referências dos elementos do modal
+    const modalLoaderEnvio = document.getElementById('modalLoaderEnvio');
+    const progressoTexto = document.getElementById('modalLoaderProgresso');
+    const barraProgressoContainer = document.getElementById('modalLoaderBarra');
+    const detalhes = document.getElementById('modalLoaderDetalhes');
+
+    // Verificar se todos os elementos foram encontrados
+    if (!modalLoaderEnvio || !progressoTexto || !barraProgressoContainer || !detalhes) {
+        console.error('❌ Erro: Não foi possível encontrar todos os elementos do modal');
+        return;
+    }
+
+    // Mostrar modal
+    modalLoaderEnvio.style.display = 'flex';
+
+    let chamadaEnviadaTotal = 0;
+    let alunosEnviadosTotal = 0;
+    let alunosFalhadosTotal = 0;
+    const errosGerais = [];
+
+    try {
+        // Obter usuário autenticado
+        console.log('🔐 Validando usuário autenticado...');
+        const usuario = await obterUsuarioAtual();
+
+        if (!usuario || !usuario.email) {
+            throw new Error('Usuário não autenticado. Faça login novamente.');
+        }
+
+        console.log(`✅ Usuário autenticado: ${usuario.email}`);
+
+        // Enviar cada chamada
+        for (let i = 0; i < chamadasSalvas.length; i++) {
+            const chamada = chamadasSalvas[i];
+
+            // Atualizar progresso no modal
+            if (progressoTexto) {
+                progressoTexto.textContent = `${i + 1}/${chamadasSalvas.length}`;
+            }
+
+            const percentual = ((i + 1) / chamadasSalvas.length) * 100;
+            if (barraProgressoContainer) {
+                barraProgressoContainer.style.width = percentual + '%';
+            }
+
+            // Atualizar detalhes
+            if (detalhes) {
+                detalhes.textContent = `Enviando: ${chamada.sala} - Dia ${chamada.dia}/${obterNumeroMes(chamada.mes)} (${chamada.alunos.length} alunos)`;
+            }
+
+            console.log(`\n📤 Enviando chamada ${i + 1}/${chamadasSalvas.length}...`);
+            console.log('   Sala:', chamada.sala);
+            console.log('   Data:', chamada.dia + '/' + obterNumeroMes(chamada.mes));
+            console.log('   Alunos:', chamada.alunos.length);
+
+            // Enviar chamada
+            const resultado = await enviarChamadaParaSupabaseNativo(chamada);
+
+            if (resultado.sucesso) {
+                chamadaEnviadaTotal++;
+                alunosEnviadosTotal += resultado.dados.sucesso || chamada.alunos.length;
+                alunosFalhadosTotal += resultado.dados.falhados || 0;
+
+                console.log(`✅ Chamada enviada com sucesso`);
+            } else {
+                errosGerais.push(`Sala ${chamada.sala} (${chamada.dia}/${obterNumeroMes(chamada.mes)}): ${resultado.mensagem}`);
+                console.error(`❌ Erro ao enviar chamada: ${resultado.mensagem}`);
+            }
+
+            // Pequeno delay para evitar sobrecarga
+            await new Promise(resolve => setTimeout(resolve, 300));
+        }
+
+        // Fechar modal de envio
+        if (modalLoaderEnvio) {
+            modalLoaderEnvio.style.display = 'none';
+        }
+
+        // Exibir resultado
+        exibirResultadoEnvioSupabase(
+            chamadaEnviadaTotal,
+            chamadasSalvas.length,
+            alunosEnviadosTotal,
+            alunosFalhadosTotal,
+            errosGerais
+        );
+
+        // Registrar atividade resumida se houve sucesso no envio
+        if (chamadaEnviadaTotal > 0) {
+            const descricaoAtividade = `Registrou ${chamadaEnviadaTotal} chamada(s) com ${alunosEnviadosTotal} aluno(s) no banco de dados`;
+            try {
+                await supabaseClient.rpc('registrar_atividade', {
+                    p_email_usuario: usuario.email,
+                    p_atividade: descricaoAtividade
+                });
+                console.log('📝 Atividade resumida registrada:', descricaoAtividade);
+            } catch (erroAtividade) {
+                console.warn('⚠️ Erro ao registrar atividade resumida:', erroAtividade);
+                // Não interromper o fluxo se falhar ao registrar atividade
+            }
+        }
+
+        // Limpar localStorage apenas após confirmação de envio bem-sucedido
+        if (chamadaEnviadaTotal === chamadasSalvas.length && alunosFalhadosTotal === 0) {
+            localStorage.removeItem('chamadasSalvas');
+            renderizarCartuchosChamadaaSalvas();
+            console.log('✅ Todas as chamadas foram enviadas e removidas da memória');
+        }
+
+        // Esconder modal de loader
+        esconderModalLoaderEnvio();
+
+    } catch (erro) {
+        console.error('❌ Erro crítico durante envio:', erro);
+        esconderModalLoaderEnvio();
+
+        exibirResultadoEnvioSupabase(
+            chamadaEnviadaTotal,
+            chamadasSalvas.length,
+            alunosEnviadosTotal,
+            alunosFalhadosTotal,
+            [...errosGerais, `Erro crítico: ${erro.message}`]
+        );
+    } finally {
+        esconderModalLoaderEnvio();
+    }
+}
+
+// ========== FUNÇÕES LEGADAS (DEPRECIADAS) ==========
+// ⚠️ Estas funções foram mantidas apenas para compatibilidade
+// Use as versões com sufixo "_nativo" para novo código
+
+/**
+ * @deprecated Use enviarChamadaParaSupabaseNativo() em vez desta função
+ */
 async function enviarChamadaParaSupabase(chamada) {
+    console.warn('⚠️ enviarChamadaParaSupabase() foi depreciada. Use enviarChamadaParaSupabaseNativo()');
     try {
         console.log('📤 Enviando chamada para Supabase...', chamada);
 
@@ -114,10 +366,10 @@ async function enviarChamadaParaSupabase(chamada) {
 }
 
 /**
- * Envia todas as chamadas salvas para o Supabase com barra de progresso
- * @returns {Promise<void>}
+ * @deprecated Use enviarTodasChamadasParaSupabaseNativo() em vez desta função
  */
 async function enviarTodasChamadasParaSupabase() {
+    console.warn('⚠️ enviarTodasChamadasParaSupabase() foi depreciada. Use enviarTodasChamadasParaSupabaseNativo()');
     // Recuperar chamadas salvas
     const chamadasSalvas = JSON.parse(localStorage.getItem('chamadasSalvas') || '[]');
 
@@ -378,10 +630,10 @@ function exibirResultadoEnvioSupabase(chamadasEnviadas, totalChamadas, alunosEnv
 function inicializarBotaoEnvioSupabase() {
     // Listener para o evento de confirmação do modal
     document.addEventListener('confirmarEnvioChamas', () => {
-        enviarTodasChamadasParaSupabase();
+        enviarTodasChamadasParaSupabaseNativo();
     });
 
-    console.log('✓ Funcionalidade de envio para Supabase inicializada');
+    console.log('✓ Funcionalidade de envio para Supabase inicializada (AUTH NATIVO)');
 }
 
 // Inicializar quando o DOM estiver pronto

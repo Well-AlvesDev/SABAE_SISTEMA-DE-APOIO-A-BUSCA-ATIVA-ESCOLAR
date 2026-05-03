@@ -275,3 +275,65 @@ function recuperarDadosPlanilha() {
         return null;
     }
 }
+
+
+// ============================================================
+// ✅ NOVAS FUNÇÕES COM SUPORTE A AUTH NATIVO DO SUPABASE
+// ============================================================
+
+/**
+ * Busca os dados brutos do Supabase usando autenticação nativa
+ * Usa email do usuário autenticado em vez de username/senha
+ * @param {string} emailUsuario - Email do usuário autenticado
+ * @param {number} mesSelecionado - Mês selecionado (1-12) - não usado, mantido para compatibilidade
+ * @returns {Promise<object>} Objeto com status e dados brutos da planilha
+ */
+async function gerarDadosPlanilhaNativo(emailUsuario, mesSelecionado) {
+    try {
+        console.log('=== INICIANDO BUSCA DE DADOS BRUTOS (AUTH NATIVO) ===');
+        console.log('Email do usuário:', emailUsuario);
+
+        // Chamar a função RPC do Supabase nativa
+        const { data, error } = await supabaseClient.rpc('gerar_dados_planilha_nativo', {
+            p_email_usuario: emailUsuario,
+            p_mes_selecionado: mesSelecionado
+        });
+
+        if (error) {
+            console.error('❌ Erro ao buscar dados:', error);
+            return {
+                sucesso: false,
+                mensagem: `Erro ao conectar com o servidor: ${error.message}`,
+                dados: null
+            };
+        }
+
+        if (!data || data.length === 0) {
+            console.warn('⚠️ Nenhum dado retornado do servidor');
+            return {
+                sucesso: false,
+                mensagem: 'Nenhum aluno encontrado ou erro de autenticação',
+                dados: null
+            };
+        }
+
+        console.log('✅ Dados retornados com sucesso');
+        console.log(`Total de alunos: ${data.length}`);
+        console.log('Primeiro aluno (raw):', JSON.stringify(data[0], null, 2));
+
+        return {
+            sucesso: true,
+            mensagem: `Dados carregados com sucesso! ${data.length} aluno(s) encontrado(s)`,
+            dados: data,
+            totalAlunos: data.length
+        };
+
+    } catch (erro) {
+        console.error('❌ Erro inesperado:', erro);
+        return {
+            sucesso: false,
+            mensagem: `Erro inesperado: ${erro.message}`,
+            dados: null
+        };
+    }
+}

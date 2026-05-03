@@ -1,8 +1,270 @@
 /**
  * Cliente Supabase para adicionar novo aluno à tabela SABAE-DATA
- * Valida credenciais e insere novo aluno se a matrícula não existir
+ * 
+ * ✅ VERSÃO ATUALIZADA: Suporta ambas autenticações
+ * - Funções nativas (com email) para novo sistema
+ * - Funções legadas (com username/senha) para compatibilidade
  */
 
+// ========== FUNÇÕES DE VALIDAÇÃO E UTILITÁRIOS ==========
+
+// Função para validar matrícula (apenas números)
+function validarMatricula(valor) {
+    return /^\d*$/.test(valor);
+}
+
+// Função para validar nome (apenas letras e parênteses)
+function validarNome(valor) {
+    return /^[A-ZÀ-Ÿ\s()]*$/.test(valor);
+}
+
+// Função para converter nome para maiúsculas
+function converterParaMaiusculas(valor) {
+    return valor.toUpperCase();
+}
+
+// ========== NOVAS FUNÇÕES COM AUTH NATIVO ==========
+
+/**
+ * Adicionar novo aluno usando autenticação nativa
+ * @param {string} matricula - Matrícula do aluno
+ * @param {string} nome - Nome do aluno
+ * @param {string} turma - Turma do aluno
+ * @param {string} turno - Turno (MANHÃ, TARDE, NOITE)
+ * @param {string} status - Status (MATRICULADO, TRANSFERIDO, FALECIDO)
+ * @returns {Promise<Object>} { sucesso, mensagem, dados }
+ */
+async function adicionarNovoAlunoNativo(matricula, nome, turma, turno, status) {
+    try {
+        console.log('➕ Adicionando novo aluno (AUTH NATIVO)...');
+        console.log('Dados:', { matricula, nome, turma, turno, status });
+
+        // Obter usuário autenticado
+        const usuario = await obterUsuarioAtual();
+        if (!usuario || !usuario.email) {
+            throw new Error('Usuário não autenticado');
+        }
+
+        console.log(`👤 Usuário autenticado: ${usuario.email}`);
+
+        // Chamar função RPC com email do usuário autenticado
+        const { data, error } = await supabaseClient.rpc('adicionar_aluno_nativo', {
+            p_email_usuario: usuario.email,
+            p_matricula: matricula,
+            p_nome: nome,
+            p_turma: turma,
+            p_turno: turno,
+            p_status: status
+        });
+
+        console.log('Resposta do Supabase:', { data, error });
+
+        if (error) {
+            console.error('❌ Erro ao adicionar aluno:', error);
+            return {
+                sucesso: false,
+                mensagem: `Erro ao conectar com o servidor: ${error.message}`
+            };
+        }
+
+        // Verificar resposta
+        if (!data || !data.sucesso) {
+            console.warn('⚠️ Operação não bem-sucedida:', data?.mensagem);
+            return {
+                sucesso: false,
+                mensagem: data?.mensagem || 'Erro ao adicionar aluno'
+            };
+        }
+
+        console.log('✅ Aluno adicionado com sucesso!');
+
+        // Limpar cache de alunos para forçar recarga na próxima vez
+        limparCacheAlunos();
+
+        return {
+            sucesso: true,
+            mensagem: 'Aluno adicionado com sucesso',
+            dados: data.dados
+        };
+
+    } catch (erro) {
+        console.error('❌ Erro inesperado ao adicionar aluno:', erro);
+        return {
+            sucesso: false,
+            mensagem: `Erro inesperado: ${erro.message}`
+        };
+    }
+}
+
+/**
+ * Buscar aluno por matrícula usando autenticação nativa
+ * @param {string} matricula - Matrícula do aluno
+ * @returns {Promise<Object>} { sucesso, mensagem, dados }
+ */
+async function buscarAlunoPorMatriculaNativo(matricula) {
+    try {
+        console.log('🔍 Buscando aluno com matrícula:', matricula);
+
+        // Obter usuário autenticado
+        const usuario = await obterUsuarioAtual();
+        if (!usuario || !usuario.email) {
+            throw new Error('Usuário não autenticado');
+        }
+
+        // Chamar função RPC com email
+        const { data, error } = await supabaseClient.rpc('buscar_aluno_por_matricula_nativo', {
+            p_email_usuario: usuario.email,
+            p_matricula: matricula
+        });
+
+        console.log('Resposta do Supabase:', { data, error });
+
+        if (error) {
+            console.error('❌ Erro ao buscar aluno:', error);
+            return {
+                sucesso: false,
+                mensagem: `Erro ao conectar com o servidor: ${error.message}`
+            };
+        }
+
+        // Verificar resposta
+        if (!data || !data.sucesso) {
+            console.warn('⚠️ Operação não bem-sucedida:', data?.mensagem);
+            return {
+                sucesso: false,
+                mensagem: data?.mensagem || 'Erro ao buscar aluno'
+            };
+        }
+
+        console.log('✅ Aluno encontrado!', data.dados);
+        return {
+            sucesso: true,
+            mensagem: 'Aluno encontrado com sucesso',
+            dados: data.dados
+        };
+
+    } catch (erro) {
+        console.error('❌ Erro inesperado ao buscar aluno:', erro);
+        return {
+            sucesso: false,
+            mensagem: `Erro inesperado: ${erro.message}`
+        };
+    }
+}
+
+/**
+ * Atualizar aluno usando autenticação nativa
+ * @param {string} matricula - Matrícula do aluno
+ * @param {string} nome - Novo nome
+ * @param {string} turma - Nova turma
+ * @param {string} turno - Novo turno
+ * @param {string} status - Novo status
+ * @returns {Promise<Object>} { sucesso, mensagem, dados }
+ */
+async function atualizarAlunoNativo(matricula, nome, turma, turno, status) {
+    try {
+        console.log('✏️ Atualizando aluno (AUTH NATIVO)...');
+        console.log('Dados:', { matricula, nome, turma, turno, status });
+
+        // Obter usuário autenticado
+        const usuario = await obterUsuarioAtual();
+        if (!usuario || !usuario.email) {
+            throw new Error('Usuário não autenticado');
+        }
+
+        // Chamar função RPC com email
+        const { data, error } = await supabaseClient.rpc('atualizar_aluno_nativo', {
+            p_email_usuario: usuario.email,
+            p_matricula: matricula,
+            p_nome: nome,
+            p_turma: turma,
+            p_turno: turno,
+            p_status: status
+        });
+
+        console.log('Resposta do Supabase:', { data, error });
+
+        if (error) {
+            console.error('❌ Erro ao atualizar aluno:', error);
+            return {
+                sucesso: false,
+                mensagem: `Erro ao conectar com o servidor: ${error.message}`
+            };
+        }
+
+        // Verificar resposta
+        if (!data || !data.sucesso) {
+            console.warn('⚠️ Operação não bem-sucedida:', data?.mensagem);
+            return {
+                sucesso: false,
+                mensagem: data?.mensagem || 'Erro ao atualizar aluno'
+            };
+        }
+
+        console.log('✅ Aluno atualizado com sucesso!');
+
+        // Limpar cache de alunos para forçar recarga
+        limparCacheAlunos();
+
+        return {
+            sucesso: true,
+            mensagem: 'Aluno atualizado com sucesso',
+            dados: data.dados
+        };
+
+    } catch (erro) {
+        console.error('❌ Erro inesperado ao atualizar aluno:', erro);
+        return {
+            sucesso: false,
+            mensagem: `Erro inesperado: ${erro.message}`
+        };
+    }
+}
+
+/**
+ * Carregar turmas disponíveis usando autenticação nativa
+ * @param {boolean} forcarRecarga - Ignorar cache
+ * @returns {Promise<Array>} Lista de turmas
+ */
+async function carregarTurmasParaModalNativo(forcarRecarga = false) {
+    try {
+        console.log('🏫 Carregando turmas para o modal (AUTH NATIVO)...');
+
+        // Obter usuário autenticado
+        const usuario = await obterUsuarioAtual();
+        if (!usuario || !usuario.email) {
+            throw new Error('Usuário não autenticado');
+        }
+
+        // Chamar função RPC com email
+        const { data, error } = await supabaseClient.rpc('obter_turmas_disponiveis_nativo', {
+            p_email_usuario: usuario.email
+        });
+
+        if (error) {
+            console.error('❌ Erro ao obter turmas:', error);
+            return [];
+        }
+
+        if (!data || data.length === 0) {
+            console.log('⚠️ Nenhuma turma encontrada');
+            return [];
+        }
+
+        // Extrair nomes das turmas
+        const turmas = data.map(item => item.turma).filter(turma => turma);
+        console.log(`✅ ${turmas.length} turmas carregadas`);
+        return turmas;
+
+    } catch (erro) {
+        console.error('❌ Erro ao carregar turmas:', erro);
+        return [];
+    }
+}
+
+// ========== FUNÇÕES LEGADAS (DEPRECIADAS) - COMPATIBILIDADE ==========
+
+// @deprecated Usar versões com sufixo "Nativo" em vez disso
 // Função para adicionar novo aluno
 async function adicionarNovoAluno(matricula, nome, turma, turno, status) {
     try {
@@ -122,21 +384,41 @@ async function carregarTurmasParaModal() {
     }
 }
 
-// Função para validar matrícula (apenas números)
-function validarMatricula(valor) {
-    return /^\d*$/.test(valor);
+// ========== FUNÇÕES PARA POPULAR DROPDOWNS ==========
+
+/**
+ * Popular dropdown de turmas usando autenticação nativa
+ * @param {string} seletor - Seletor do elemento select
+ */
+async function popularDropdownTurmasNativo(seletor) {
+    try {
+        const turmas = await carregarTurmasParaModalNativo();
+        const dropdown = document.querySelector(seletor);
+
+        if (!dropdown) {
+            console.error(`❌ Elemento ${seletor} não encontrado`);
+            return;
+        }
+
+        // Limpar opções existentes (mantém primeira opção placeholder se houver)
+        const opcoes = dropdown.querySelectorAll('option:not(:first-child)');
+        opcoes.forEach(opcao => opcao.remove());
+
+        // Adicionar novas opções
+        turmas.forEach(turma => {
+            const option = document.createElement('option');
+            option.value = turma;
+            option.textContent = turma;
+            dropdown.appendChild(option);
+        });
+
+        console.log(`✅ Dropdown de turmas populado com ${turmas.length} opções`);
+    } catch (erro) {
+        console.error('❌ Erro ao popular dropdown:', erro);
+    }
 }
 
-// Função para validar nome (apenas letras e parênteses)
-function validarNome(valor) {
-    return /^[A-ZÀ-Ÿ\s()]*$/.test(valor);
-}
-
-// Função para converter nome para maiúsculas
-function converterParaMaiusculas(valor) {
-    return valor.toUpperCase();
-}
-
+// @deprecated Usar popularDropdownTurmasNativo() em vez disso
 // Função para Popular dropdown de turmas
 async function popularDropdownTurmas(seletor) {
     try {
@@ -253,8 +535,8 @@ async function enviarFormularioAdicionarAluno(event) {
         // Mostrar loader
         mostrarLoaderProcessamento('Adicionando aluno...');
 
-        // Chamar função para adicionar aluno
-        const resultado = await adicionarNovoAluno(
+        // Chamar função para adicionar aluno (usando auth nativo)
+        const resultado = await adicionarNovoAlunoNativo(
             matricula,
             nome,
             turma,
@@ -573,7 +855,8 @@ async function confirmarBuscaMatricula() {
             // Atualizar texto do botão de envio
             const btnEnviarModal = modalAdicionarAluno.querySelector('.btn-enviar-modal');
             if (btnEnviarModal) {
-                btnEnviarModal.textContent = 'Atualizar';
+                const btnText = btnEnviarModal.querySelector('.btn-text');
+                if (btnText) btnText.textContent = 'Atualizar';
             }
 
             modalAdicionarAluno.classList.add('ativo');
@@ -696,8 +979,8 @@ async function enviarFormularioEditarAluno(event) {
         // Mostrar loader
         mostrarLoaderProcessamento('Atualizando aluno...');
 
-        // Chamar função para atualizar aluno
-        const resultado = await atualizarAluno(
+        // Chamar função para atualizar aluno (usando auth nativo)
+        const resultado = await atualizarAlunoNativo(
             matricula,
             nome,
             turma,

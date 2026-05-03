@@ -1,7 +1,6 @@
 // Função para verificar se o usuário está logado
-function verificarAutenticacao() {
-    const usuarioLogado = sessionStorage.getItem('usuarioLogado');
-    return usuarioLogado === 'true';
+async function verificarAutenticacao() {
+    return await estaAutenticado();
 }
 
 // Variável para armazenar o ID da chamada sendo editada
@@ -194,19 +193,20 @@ function inicializarDropdownCustomizado() {
 
 // Função para executar após o loader
 async function inicializarPagina() {
-    if (verificarAutenticacao()) {
-        // Recuperar e exibir nome do usuário
-        const nomeUsuario = sessionStorage.getItem('usuario');
-        if (nomeUsuario) {
+    if (await verificarAutenticacao()) {
+        // Recuperar e exibir email do usuário autenticado
+        const usuario = await obterUsuarioAtual();
+        if (usuario) {
+            const email = usuario.email;
             const spanNomeUsuario = document.getElementById('nomeUsuario');
             if (spanNomeUsuario) {
-                spanNomeUsuario.textContent = nomeUsuario;
+                spanNomeUsuario.textContent = email;
             }
 
             // Também atualizar o header
             const spanNomeUsuarioHeader = document.getElementById('nomeUsuarioHeader');
             if (spanNomeUsuarioHeader) {
-                spanNomeUsuarioHeader.textContent = nomeUsuario;
+                spanNomeUsuarioHeader.textContent = email;
             }
         }
 
@@ -225,7 +225,7 @@ async function inicializarPagina() {
                 limparCache();
 
                 // Carregar todos os alunos no sessionStorage (SEMPRE forçar recarga para ter dados frescos)
-                const resultadoAlunos = await carregarTodosAlunosNaSessionStorage(true);
+                const resultadoAlunos = await carregarTodosAlunosNaSessionStorageNativo(true);
                 if (resultadoAlunos.sucesso) {
                     console.log(`✓ ${resultadoAlunos.alunos.length} alunos carregados no sessionStorage`);
                 } else {
@@ -233,7 +233,7 @@ async function inicializarPagina() {
                 }
 
                 // Carregar as salas (SEMPRE forçar recarga para ter dados frescos)
-                await carregarSalasNoDropdown('#salaDropdown', true);
+                await carregarSalasNoDropdownNativo('#salaDropdown', true);
                 console.log('✓ Salas carregadas com sucesso');
             } catch (erro) {
                 console.error('⚠️ Erro ao carregar dados:', erro);
@@ -261,34 +261,42 @@ document.addEventListener('DOMContentLoaded', inicializarPagina);
 const btnSair = document.getElementById('btnSair');
 if (btnSair) {
     btnSair.addEventListener('click', async () => {
-        // Obter nome do usuário e senha antes de limpar a sessão
-        const nomeUsuario = sessionStorage.getItem('usuario');
-        const senhaUsuario = sessionStorage.getItem('usuarioSenha');
+        // Obter email do usuário autenticado antes de fazer logout
+        const usuario = await obterUsuarioAtual();
 
         // Registrar a atividade de saída
-        if (nomeUsuario && senhaUsuario) {
+        if (usuario && usuario.email) {
             try {
-                console.log('Registrando saída do sistema...');
+                console.log('📝 Registrando logout...');
+                console.log('Email:', usuario.email);
+                console.log('Atividade:', 'Saiu do sistema');
+
                 const { data: resultadoAtividade, error: erroAtividade } = await supabaseClient.rpc('registrar_atividade', {
-                    p_nomeusuario: nomeUsuario,
-                    p_senha_usuario: senhaUsuario,
+                    p_email_usuario: usuario.email,
                     p_atividade: 'Saiu do sistema'
                 });
 
                 if (erroAtividade) {
-                    console.error('⚠️ Erro ao registrar logout:', erroAtividade);
+                    console.error('❌ ERRO ao registrar logout:', erroAtividade);
+                    console.error('Código:', erroAtividade.code);
+                    console.error('Mensagem:', erroAtividade.message);
+                    console.error('Detalhes:', erroAtividade);
                 } else {
                     console.log('✅ Logout registrado com sucesso:', resultadoAtividade);
                 }
             } catch (erroAtividade) {
-                console.error('⚠️ Erro ao registrar logout:', erroAtividade);
+                console.error('❌ ERRO inesperado ao registrar logout:', erroAtividade);
             }
         }
 
-        // Limpar dados da sessão
-        sessionStorage.removeItem('usuarioLogado');
-        sessionStorage.removeItem('usuario');
-        sessionStorage.removeItem('usuarioSenha');
+        // Fazer logout do Supabase Auth
+        const { error } = await supabaseClient.auth.signOut();
+
+        if (error) {
+            console.error('❌ Erro ao fazer logout:', error);
+        } else {
+            console.log('✅ Logout realizado com sucesso');
+        }
 
         // Redirecionar para página de login
         window.location.href = 'login.html';
@@ -564,7 +572,7 @@ function inicializarBotaoIniciarRegistro() {
             // ========== NOVA LÓGICA: Verificar se existe chamada no Supabase ==========
             console.log(`🔍 Verificando se existe chamada no Supabase para ${salaSelecionada} - ${diaSelecionado}/${obterNumeroMes(mesSelecionado)}`);
 
-            const resultadoChamadaSupabase = await buscarChamadaSupabaseParaEditar(
+            const resultadoChamadaSupabase = await buscarChamadaSupabaseParaEditarNativo(
                 salaSelecionada,
                 parseInt(diaSelecionado),
                 mesSelecionado
@@ -942,7 +950,15 @@ async function salvarChamada() {
     try {
         // ========== CASO 1: Edição do Supabase - Enviar direto para Supabase ==========
         if (chamadaEmEdicaoVeioDoSupabase && chamadaSupabaseEmEdicao) {
-            console.log('📤 Enviando edição direto para Supabase (não salvando em sessionStorage)...');
+            console.log('📤 Enviando edição direto para Supabase (AUTH NATIVO)...');
+
+            // Obter usuário autenticado
+            const usuario = await obterUsuarioAtual();
+            if (!usuario || !usuario.email) {
+                throw new Error('Sessão expirada. Faça login novamente.');
+            }
+
+            console.log(`👤 Atualizando como: ${usuario.email}`);
 
             // Coletar presença de cada aluno
             const alunos = [];
@@ -966,18 +982,9 @@ async function salvarChamada() {
                 presenca: String(aluno.presenca || '').trim()
             }));
 
-            // Obter credenciais da sessão
-            const nomeUsuario = sessionStorage.getItem('usuario');
-            const senhaUsuario = sessionStorage.getItem('usuarioSenha');
-
-            if (!nomeUsuario || !senhaUsuario) {
-                throw new Error('Sessão expirada. Credenciais não encontradas.');
-            }
-
-            // Chamar a função RPC do Supabase com a nova função que atualiza por mês
-            const { data, error } = await supabaseClient.rpc('registrar_chamadas_lote_atualizar_mes', {
-                p_nome_usuario: nomeUsuario,
-                p_senha_usuario: senhaUsuario,
+            // Chamar a função RPC do Supabase com auth nativo (USAR FUNÇÃO DE EDIÇÃO)
+            const { data, error } = await supabaseClient.rpc('editar_chamadas_lote_nativa', {
+                p_email_usuario: usuario.email,
                 p_chamadas_json: registros
             });
 
@@ -985,8 +992,32 @@ async function salvarChamada() {
                 throw new Error(error.message || 'Erro ao salvar chamada');
             }
 
-            console.log('✅ Edição enviada com sucesso para Supabase:', data);
+            // Verificar resposta (data é um array quando a RPC retorna TABLE)
+            if (!data || !Array.isArray(data) || data.length === 0) {
+                throw new Error('Resposta inválida do servidor');
+            }
+
+            const resultado = data[0];
+            if (resultado.total === 0) {
+                throw new Error('Nenhum registro foi atualizado. Verifique os dados e tente novamente.');
+            }
+
+            console.log('✅ Edição enviada com sucesso para Supabase:', resultado);
             mostrarNotificacaoSucesso('Chamada atualizada no banco de dados com sucesso!');
+
+            // Registrar atividade de edição
+            const numerMesAtividade = obterNumeroMes(chamadaSupabaseEmEdicao.mes);
+            const descricaoAtividade = `Editou chamada para ${chamadaSupabaseEmEdicao.sala} no dia ${String(chamadaSupabaseEmEdicao.dia).padStart(2, '0')}/${String(numerMesAtividade).padStart(2, '0')} com ${alunos.length} aluno(s)`;
+            try {
+                await supabaseClient.rpc('registrar_atividade', {
+                    p_email_usuario: usuario.email,
+                    p_atividade: descricaoAtividade
+                });
+                console.log('📝 Atividade de edição registrada:', descricaoAtividade);
+            } catch (erroAtividade) {
+                console.warn('⚠️ Erro ao registrar atividade de edição:', erroAtividade);
+                // Não interromper o fluxo se falhar ao registrar atividade
+            }
 
             // Resetar estado de edição
             chamadaEmEdicao = null;
