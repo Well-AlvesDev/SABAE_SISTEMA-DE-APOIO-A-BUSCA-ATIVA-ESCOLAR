@@ -1885,6 +1885,364 @@ main {
     overflow-y: auto;
 }
 
+/* ========== BOTÃO VISUALIZAR ALUNO ========== */
+.btn-visualizar-aluno {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 3px 13px;
+    background: linear-gradient(135deg, #3e73bf 0%, #2c5aa0 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(62, 115, 191, 0.35);
+}
+
+.btn-visualizar-aluno:hover {
+    box-shadow: 0 6px 16px rgba(62, 115, 191, 0.45);
+}
+
+.btn-visualizar-aluno:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(62, 115, 191, 0.25);
+}
+
+.btn-visualizar-aluno img {
+    width: 25px;
+    height: 28px;
+}
+
+/* ========== VISUALIZAÇÃO DE DADOS DO ALUNO ========== */
+.dados-aluno-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.aluno-info-header {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    border-left: 4px solid #3e73bf;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.aluno-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.aluno-info-item label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.aluno-info-item p {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    word-break: break-word;
+}
+
+/* Resumo Geral */
+.resumo-geral {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.resumo-geral h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.resumo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.resumo-item {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid #3e73bf;
+    text-align: center;
+}
+
+.resumo-item label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.resumo-item p {
+    font-size: 24px;
+    font-weight: 700;
+    color: #3e73bf;
+    margin: 0;
+}
+
+.valor-presenca {
+    color: #19c62d !important;
+}
+
+.valor-falta-nj {
+    color: #f44336 !important;
+}
+
+.valor-falta-j {
+    color: #ff9800 !important;
+}
+
+/* Destaques */
+.destaques {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.destaque-item {
+    padding: 20px;
+    border-radius: 8px;
+    color: white;
+    text-align: center;
+}
+
+.destaque-item h4 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.destaque-mes {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.destaque-valor {
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0.95;
+}
+
+.melhor-mes {
+    background: linear-gradient(135deg, #19c62d 0%, #0ea925 100%);
+    box-shadow: 0 4px 12px rgba(25, 198, 45, 0.3);
+}
+
+.pior-mes {
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+/* Estatísticas por Mês */
+.estatisticas-mensais {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.estatisticas-mensais h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.meses-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.mes-card {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    border-left: 4px solid #3e73bf;
+    transition: all 0.3s ease;
+}
+
+.mes-card:hover {
+    background: #f5f5f5;
+    border-color: #3e73bf;
+    box-shadow: 0 2px 8px rgba(62, 115, 191, 0.15);
+}
+
+.mes-card.mes-alerta {
+    border-left-color: #ff9800;
+    background: #fffbf0;
+}
+
+.mes-card.mes-alerta:hover {
+    border-color: #ff9800;
+    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.15);
+}
+
+.mes-card h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mes-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+}
+
+.stat-valor {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+}
+
+.stat-valor.presenca {
+    color: #19c62d;
+}
+
+.stat-valor.falta-nj {
+    color: #f44336;
+}
+
+.stat-valor.falta-j {
+    color: #ff9800;
+}
+
+/* Visualização de Presença por Mês */
+.visualizacao-meses {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.visualizacao-meses h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.linha-mes {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #f9f9f9;
+    border-radius: 6px;
+    border-left: 4px solid #3e73bf;
+}
+
+.mes-nome {
+    min-width: 120px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.dias-bolinha-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex: 1;
+}
+
+.bolinha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.bolinha:hover {
+    transform: scale(1.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.bolinha-presenca {
+    background-color: #19c62d;
+    color: white;
+    border-color: #0ea925;
+}
+
+.bolinha-falta-nj {
+    background-color: #f44336;
+    color: white;
+    border-color: #d32f2f;
+}
+
+.bolinha-falta-j {
+    background-color: #2196f3;
+    color: white;
+    border-color: #1565c0;
+}
+
+.bolinha-vazia {
+    background-color: #e0e0e0;
+    color: #999;
+    border-color: #bdbdbd;
+}
+
 #modalResultadoDetalhes strong {
     display: block;
     margin-bottom: 8px;

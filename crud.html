@@ -24,6 +24,7 @@
     <script src="./assets/lógica/supabase-alunos.js"></script>
     <script src="./assets/lógica/supabase-gerar-planilha.js"></script>
     <script src="./assets/lógica/supabase-adicionar-aluno.js"></script>
+    <script src="./assets/lógica/supabase-visualizar-aluno.js"></script>
 
     <header class="pwa-header">
         <div class="header-left">
@@ -90,6 +91,9 @@
             Adicionar novo aluno</button>
         <button id="btnEditarAluno" class="btn-editar-aluno"><img src="./assets/imagens/ico/User-student.svg.png"
                 alt=""> Editar
+            aluno</button>
+        <button id="btnVisualizarAluno" class="btn-visualizar-aluno"><img src="./assets/imagens/ico/User_icon_2.svg"
+                alt=""> Visualizar
             aluno</button>
     </div>
 
@@ -184,214 +188,89 @@
             </form>
         </div>
     </div>
+
+    <!-- Modal de Busca de Matrícula para Visualizar -->
+    <div id="modalBuscaMatriculaVisualizacao" class="modal-adicionar-aluno">
+        <div class="modal-adicionar-overlay"></div>
+        <div class="modal-adicionar-content" style="max-width: 350px;">
+            <div class="modal-adicionar-header">
+                <h2>Buscar Aluno para Visualizar</h2>
+                <button type="button" id="btnFecharModalBuscaVisualizacao" class="btn-fechar-modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <div style="padding: 20px;">
+                <div class="form-group">
+                    <label for="inputBuscaMatriculaVisualizacao">Digite a matrícula do aluno *</label>
+                    <input type="text" id="inputBuscaMatriculaVisualizacao" placeholder="Digite apenas números"
+                        maxlength="10">
+                    <span class="form-error">Matrícula deve conter apenas números</span>
+                </div>
+
+                <div class="modal-botoes" style="margin-top: 20px;">
+                    <button type="button" id="btnCancelarBuscaVisualizacao" class="btn-cancelar-modal">Cancelar</button>
+                    <button type="button" id="btnConfirmarBuscaVisualizacao" class="btn-enviar-modal">Buscar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Visualização de Dados do Aluno -->
+    <div id="modalVisualizarAluno" class="modal-adicionar-aluno">
+        <div class="modal-adicionar-overlay"></div>
+        <div class="modal-adicionar-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-adicionar-header">
+                <h2>Dados do Aluno</h2>
+                <button type="button" id="btnFecharModalVisualizacao" class="btn-fechar-modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <div style="padding: 20px;">
+                <div id="conteudoVisualizacaoAluno">
+                    <!-- Será preenchido dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="./assets/lógica/script.js"></script>
     <script>
-        // ========== LÓGICA DO MODAL BUSCA DE MATRÍCULA ==========
-
-        // Elementos do modal de busca
-        const modalBuscaMatricula = document.getElementById('modalBuscaMatricula');
-        const btnEditarAluno = document.getElementById('btnEditarAluno');
-        const btnFecharModalBusca = document.getElementById('btnFecharModalBusca');
-        const btnCancelarBusca = document.getElementById('btnCancelarBusca');
-        const btnConfirmarBusca = document.getElementById('btnConfirmarBusca');
-        const inputBuscaMatricula = document.getElementById('inputBuscaMatricula');
-        const modalBuscaOverlay = modalBuscaMatricula.querySelector('.modal-adicionar-overlay');
-
-        // Event listeners para modal de busca
-        btnEditarAluno.addEventListener('click', (e) => {
-            e.preventDefault();
-            abrirModalBuscaMatricula();
-        });
-
-        btnFecharModalBusca.addEventListener('click', fecharModalBuscaMatricula);
-        btnCancelarBusca.addEventListener('click', fecharModalBuscaMatricula);
-        modalBuscaOverlay.addEventListener('click', fecharModalBuscaMatricula);
-
-        btnConfirmarBusca.addEventListener('click', confirmarBuscaMatricula);
-
-        // Permitir buscar ao pressionar Enter no input
-        inputBuscaMatricula.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                confirmarBuscaMatricula();
-            }
-        });
-
-        // Validar matrícula em tempo real no input de busca
-        inputBuscaMatricula.addEventListener('input', (event) => {
-            let valor = event.target.value;
-
-            // Remover caracteres que não são números
-            valor = valor.replace(/[^\d]/g, '');
-
-            event.target.value = valor;
-
-            // Validar
-            if (valor && !validarMatricula(valor)) {
-                event.target.classList.add('error');
-            } else {
-                event.target.classList.remove('error');
-            }
-        });
-
-        // Fechar modal de busca ao pressionar ESC
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && modalBuscaMatricula.classList.contains('ativo')) {
-                fecharModalBuscaMatricula();
-            }
-        });
-
-        // ========== LÓGICA DO MODAL ADICIONAR/EDITAR ALUNO ==========
-
-        // Elementos do modal
-        const modalAdicionarAluno = document.getElementById('modalAdicionarAluno');
-        const btnAdicionarAluno = document.getElementById('btnAdicionarAluno');
-        const btnFecharModalAluno = document.getElementById('btnFecharModalAluno');
-        const btnCancelarModal = document.getElementById('btnCancelarModal');
-        const modalOverlay = document.querySelector('.modal-adicionar-overlay');
-        const inputMatricula = document.getElementById('inputMatricula');
-        const inputNome = document.getElementById('inputNome');
-        const formAdicionarAluno = document.getElementById('formAdicionarAluno');
-        const modalHeader = modalAdicionarAluno.querySelector('.modal-adicionar-header h2');
-        const btnEnviarModal = document.querySelector('.btn-enviar-modal');
-
-        // Função para abrir modal em modo adicionar
-        function abrirModalAdicionarAluno() {
-            console.log('📖 Abrindo modal de adicionar aluno...');
-
-            // Resetar estado de edição
-            modoEdicaoAluno = false;
-            alunoEmEdicaoMatricula = null;
-
-            // Atualizar interface
-            modalHeader.textContent = 'Adicionar Novo Aluno';
-            inputMatricula.disabled = false;
-            inputMatricula.style.opacity = '1';
-            inputMatricula.style.cursor = 'pointer';
-            btnEnviarModal.textContent = 'Enviar';
-
-            modalAdicionarAluno.classList.add('ativo');
-
-            // Carregar turmas
-            console.log('🏫 Carregando turmas...');
-            popularDropdownTurmas('#selectTurma');
-
-            // Focar no primeiro input
-            setTimeout(() => {
-                inputMatricula.focus();
-            }, 100);
-        }
-
-        // Função para fechar modal
-        function fecharModalAdicionarAluno() {
-            console.log('❌ Fechando modal...');
-            modalAdicionarAluno.classList.remove('ativo');
-            formAdicionarAluno.reset();
-            inputNome.value = '';
-            inputMatricula.disabled = false;
-            inputMatricula.style.opacity = '1';
-            inputMatricula.style.cursor = 'pointer';
-
-            // Resetar estado de edição
-            modoEdicaoAluno = false;
-            alunoEmEdicaoMatricula = null;
-        }
-
-        // Event listeners
-        btnAdicionarAluno.addEventListener('click', abrirModalAdicionarAluno);
-        btnFecharModalAluno.addEventListener('click', fecharModalAdicionarAluno);
-        btnCancelarModal.addEventListener('click', fecharModalAdicionarAluno);
-        modalOverlay.addEventListener('click', fecharModalAdicionarAluno);
-
-        // Fechar modal ao pressionar ESC
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && modalAdicionarAluno.classList.contains('ativo')) {
-                fecharModalAdicionarAluno();
-            }
-        });
-
-        // ========== VALIDAÇÕES EM TEMPO REAL ==========
-
-        // Validar Matrícula em tempo real
-        inputMatricula.addEventListener('input', (event) => {
-            let valor = event.target.value;
-
-            // Remover caracteres que não são números
-            valor = valor.replace(/[^\d]/g, '');
-
-            event.target.value = valor;
-
-            // Validar
-            if (valor && !validarMatricula(valor)) {
-                event.target.classList.add('error');
-            } else {
-                event.target.classList.remove('error');
-            }
-        });
-
-        // Validar Nome em tempo real
-        inputNome.addEventListener('input', (event) => {
-            let valor = event.target.value;
-
-            // Converter para maiúsculas
-            valor = converterParaMaiusculas(valor);
-
-            // Remover caracteres inválidos (manter apenas letras, espaços e parênteses)
-            valor = valor.replace(/[^A-ZÀ-Ÿ\s()]/g, '');
-
-            event.target.value = valor;
-
-            // Validar
-            if (valor && !validarNome(valor)) {
-                event.target.classList.add('error');
-            } else {
-                event.target.classList.remove('error');
-            }
-        });
-
-        // Atualizar data e hora
-        function atualizarDataHora() {
-            const agora = new Date();
-            const dia = String(agora.getDate()).padStart(2, '0');
-            const mes = String(agora.getMonth() + 1).padStart(2, '0');
-            const ano = agora.getFullYear();
-            const horas = String(agora.getHours()).padStart(2, '0');
-            const minutos = String(agora.getMinutes()).padStart(2, '0');
-
-            const dataHora = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
-            const headerDateTime = document.getElementById('headerDateTime');
-            if (headerDateTime) {
-                headerDateTime.textContent = dataHora;
-            }
-        }
-
-        function agendarProximaAtualizacao() {
-            const agora = new Date();
-            const proximoSegundo = (1000 - agora.getMilliseconds());
-
-            setTimeout(() => {
-                atualizarDataHora();
-                setInterval(atualizarDataHora, 1000);
-            }, proximoSegundo);
-        }
-
-        // Modificar comportamento do formulário dependendo do modo
-        const originalFormOnsubmit = formAdicionarAluno.onsubmit;
-
-        // Substituir listener de submit do formulário
-        formAdicionarAluno.removeAttribute('onsubmit');
-        formAdicionarAluno.addEventListener('submit', (event) => {
-            if (modoEdicaoAluno) {
-                enviarFormularioEditarAluno(event);
-            } else {
-                enviarFormularioAdicionarAluno(event);
-            }
-        });
+        console.log('🚀 Iniciando script CRUD...');
 
         // Inicializar página quando o DOM estiver pronto
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('✅ DOM pronto! Inicializando...');
+
             // Chamar inicialização do script.js
             if (typeof inicializarPagina === 'function') {
                 inicializarPagina();
+            }
+
+            // Atualizar data e hora
+            function atualizarDataHora() {
+                const agora = new Date();
+                const dia = String(agora.getDate()).padStart(2, '0');
+                const mes = String(agora.getMonth() + 1).padStart(2, '0');
+                const ano = agora.getFullYear();
+                const horas = String(agora.getHours()).padStart(2, '0');
+                const minutos = String(agora.getMinutes()).padStart(2, '0');
+
+                const dataHora = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+                const headerDateTime = document.getElementById('headerDateTime');
+                if (headerDateTime) {
+                    headerDateTime.textContent = dataHora;
+                }
+            }
+
+            function agendarProximaAtualizacao() {
+                const agora = new Date();
+                const proximoSegundo = (1000 - agora.getMilliseconds());
+
+                setTimeout(() => {
+                    atualizarDataHora();
+                    setInterval(atualizarDataHora, 1000);
+                }, proximoSegundo);
             }
 
             // Iniciar atualização de data/hora
@@ -404,6 +283,288 @@
                     window.location.href = 'index.html';
                 });
             }
+
+            // ========== SETUP DOS MODAIS EDITAR E ADICIONAR ==========
+
+            const formAdicionarAluno = document.getElementById('formAdicionarAluno');
+            const btnAdicionarAluno = document.getElementById('btnAdicionarAluno');
+            const btnFecharModalAluno = document.getElementById('btnFecharModalAluno');
+            const btnCancelarModal = document.getElementById('btnCancelarModal');
+            const modalAdicionarAluno = document.getElementById('modalAdicionarAluno');
+            const inputMatricula = document.getElementById('inputMatricula');
+            const inputNome = document.getElementById('inputNome');
+
+            // Função para abrir modal em modo adicionar
+            function abrirModalAdicionarAluno() {
+                console.log('📖 Abrindo modal de adicionar aluno...');
+                modoEdicaoAluno = false;
+                alunoEmEdicaoMatricula = null;
+
+                const modalHeader = modalAdicionarAluno?.querySelector('.modal-adicionar-header h2');
+                const btnEnviarModal = modalAdicionarAluno?.querySelector('.btn-enviar-modal');
+
+                if (modalHeader) modalHeader.textContent = 'Adicionar Novo Aluno';
+                if (inputMatricula) {
+                    inputMatricula.disabled = false;
+                    inputMatricula.style.opacity = '1';
+                    inputMatricula.style.cursor = 'pointer';
+                }
+                if (btnEnviarModal) btnEnviarModal.textContent = 'Enviar';
+
+                if (modalAdicionarAluno) modalAdicionarAluno.classList.add('ativo');
+
+                console.log('🏫 Carregando turmas...');
+                popularDropdownTurmas('#selectTurma');
+
+                setTimeout(() => {
+                    if (inputMatricula) inputMatricula.focus();
+                }, 100);
+            }
+
+            function fecharModalAdicionarAluno() {
+                console.log('❌ Fechando modal...');
+                if (modalAdicionarAluno) modalAdicionarAluno.classList.remove('ativo');
+                if (formAdicionarAluno) formAdicionarAluno.reset();
+                if (inputNome) inputNome.value = '';
+                if (inputMatricula) {
+                    inputMatricula.disabled = false;
+                    inputMatricula.style.opacity = '1';
+                    inputMatricula.style.cursor = 'pointer';
+                }
+                modoEdicaoAluno = false;
+                alunoEmEdicaoMatricula = null;
+            }
+
+            // Event listeners para modal adicionar
+            if (btnAdicionarAluno) btnAdicionarAluno.addEventListener('click', abrirModalAdicionarAluno);
+            if (btnFecharModalAluno) btnFecharModalAluno.addEventListener('click', fecharModalAdicionarAluno);
+            if (btnCancelarModal) btnCancelarModal.addEventListener('click', fecharModalAdicionarAluno);
+            const modalOverlay = modalAdicionarAluno?.querySelector('.modal-adicionar-overlay');
+            if (modalOverlay) modalOverlay.addEventListener('click', fecharModalAdicionarAluno);
+
+            // Validações em tempo real
+            if (inputMatricula) {
+                inputMatricula.addEventListener('input', (event) => {
+                    let valor = event.target.value;
+                    valor = valor.replace(/[^\d]/g, '');
+                    event.target.value = valor;
+
+                    if (valor && !validarMatricula(valor)) {
+                        event.target.classList.add('error');
+                    } else {
+                        event.target.classList.remove('error');
+                    }
+                });
+            }
+
+            if (inputNome) {
+                inputNome.addEventListener('input', (event) => {
+                    let valor = event.target.value;
+                    valor = converterParaMaiusculas(valor);
+                    valor = valor.replace(/[^A-ZÀ-Ÿ\s()]/g, '');
+                    event.target.value = valor;
+
+                    if (valor && !validarNome(valor)) {
+                        event.target.classList.add('error');
+                    } else {
+                        event.target.classList.remove('error');
+                    }
+                });
+            }
+
+            // Modificar comportamento do formulário
+            if (formAdicionarAluno) {
+                formAdicionarAluno.removeAttribute('onsubmit');
+                formAdicionarAluno.addEventListener('submit', (event) => {
+                    if (modoEdicaoAluno) {
+                        enviarFormularioEditarAluno(event);
+                    } else {
+                        enviarFormularioAdicionarAluno(event);
+                    }
+                });
+            }
+
+            // ========== LÓGICA DO MODAL EDITAR ALUNO ==========
+
+            const modalBuscaMatricula = document.getElementById('modalBuscaMatricula');
+            const btnEditarAluno = document.getElementById('btnEditarAluno');
+            const btnFecharModalBusca = document.getElementById('btnFecharModalBusca');
+            const btnCancelarBusca = document.getElementById('btnCancelarBusca');
+            const btnConfirmarBusca = document.getElementById('btnConfirmarBusca');
+            const inputBuscaMatricula = document.getElementById('inputBuscaMatricula');
+
+            if (btnEditarAluno) {
+                btnEditarAluno.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    abrirModalBuscaMatricula();
+                });
+            }
+
+            if (btnFecharModalBusca) btnFecharModalBusca.addEventListener('click', fecharModalBuscaMatricula);
+            if (btnCancelarBusca) btnCancelarBusca.addEventListener('click', fecharModalBuscaMatricula);
+            if (btnConfirmarBusca) btnConfirmarBusca.addEventListener('click', confirmarBuscaMatricula);
+
+            if (inputBuscaMatricula) {
+                inputBuscaMatricula.addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') {
+                        confirmarBuscaMatricula();
+                    }
+                });
+
+                inputBuscaMatricula.addEventListener('input', (event) => {
+                    let valor = event.target.value;
+                    valor = valor.replace(/[^\d]/g, '');
+                    event.target.value = valor;
+
+                    if (valor && !validarMatricula(valor)) {
+                        event.target.classList.add('error');
+                    } else {
+                        event.target.classList.remove('error');
+                    }
+                });
+            }
+
+            const modalBuscaOverlay = modalBuscaMatricula?.querySelector('.modal-adicionar-overlay');
+            if (modalBuscaOverlay) modalBuscaOverlay.addEventListener('click', fecharModalBuscaMatricula);
+
+            // ========== LÓGICA DO MODAL VISUALIZAR ALUNO ==========
+
+            const modalBuscaMatriculaVisualizacao = document.getElementById('modalBuscaMatriculaVisualizacao');
+            const btnVisualizarAluno = document.getElementById('btnVisualizarAluno');
+            const btnFecharModalBuscaVisualizacao = document.getElementById('btnFecharModalBuscaVisualizacao');
+            const btnCancelarBuscaVisualizacao = document.getElementById('btnCancelarBuscaVisualizacao');
+            const btnConfirmarBuscaVisualizacao = document.getElementById('btnConfirmarBuscaVisualizacao');
+            const inputBuscaMatriculaVisualizacao = document.getElementById('inputBuscaMatriculaVisualizacao');
+            const modalVisualizarAluno = document.getElementById('modalVisualizarAluno');
+            const btnFecharModalVisualizacao = document.getElementById('btnFecharModalVisualizacao');
+
+            if (btnVisualizarAluno) {
+                btnVisualizarAluno.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    abrirModalBuscaMatriculaVisualizacao();
+                });
+            }
+
+            if (btnFecharModalBuscaVisualizacao) btnFecharModalBuscaVisualizacao.addEventListener('click', fecharModalBuscaMatriculaVisualizacao);
+            if (btnCancelarBuscaVisualizacao) btnCancelarBuscaVisualizacao.addEventListener('click', fecharModalBuscaMatriculaVisualizacao);
+            if (btnConfirmarBuscaVisualizacao) btnConfirmarBuscaVisualizacao.addEventListener('click', confirmarBuscaMatriculaVisualizacao);
+
+            if (inputBuscaMatriculaVisualizacao) {
+                inputBuscaMatriculaVisualizacao.addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') {
+                        confirmarBuscaMatriculaVisualizacao();
+                    }
+                });
+
+                inputBuscaMatriculaVisualizacao.addEventListener('input', (event) => {
+                    let valor = event.target.value;
+                    valor = valor.replace(/[^\d]/g, '');
+                    event.target.value = valor;
+
+                    if (valor && !validarMatricula(valor)) {
+                        event.target.classList.add('error');
+                    } else {
+                        event.target.classList.remove('error');
+                    }
+                });
+            }
+
+            const modalBuscaVisualizacaoOverlay = modalBuscaMatriculaVisualizacao?.querySelector('.modal-adicionar-overlay');
+            if (modalBuscaVisualizacaoOverlay) modalBuscaVisualizacaoOverlay.addEventListener('click', fecharModalBuscaMatriculaVisualizacao);
+
+            if (btnFecharModalVisualizacao) btnFecharModalVisualizacao.addEventListener('click', fecharModalVisualizarAluno);
+            const modalVisualizacaoOverlay = modalVisualizarAluno?.querySelector('.modal-adicionar-overlay');
+            if (modalVisualizacaoOverlay) modalVisualizacaoOverlay.addEventListener('click', fecharModalVisualizarAluno);
+
+            // ========== FUNÇÕES DE SUPORTE ==========
+
+            function abrirModalBuscaMatriculaVisualizacao() {
+                console.log('📖 Abrindo modal de busca para visualização...');
+                if (modalBuscaMatriculaVisualizacao && inputBuscaMatriculaVisualizacao) {
+                    modalBuscaMatriculaVisualizacao.classList.add('ativo');
+                    inputBuscaMatriculaVisualizacao.value = '';
+                    inputBuscaMatriculaVisualizacao.focus();
+                }
+            }
+
+            function fecharModalBuscaMatriculaVisualizacao() {
+                console.log('❌ Fechando modal de busca...');
+                if (modalBuscaMatriculaVisualizacao && inputBuscaMatriculaVisualizacao) {
+                    modalBuscaMatriculaVisualizacao.classList.remove('ativo');
+                    inputBuscaMatriculaVisualizacao.value = '';
+                }
+            }
+
+            async function confirmarBuscaMatriculaVisualizacao() {
+                const matricula = inputBuscaMatriculaVisualizacao?.value?.trim();
+
+                if (!matricula) {
+                    alert('Por favor, digite uma matrícula');
+                    return;
+                }
+
+                if (!validarMatricula(matricula)) {
+                    alert('Matrícula inválida. Digite apenas números');
+                    return;
+                }
+
+                mostrarLoaderProcessamento('Buscando dados do aluno...');
+                const resultado = await buscarDadosAluno(matricula);
+                esconderLoaderProcessamento();
+
+                if (!resultado.sucesso) {
+                    alert('❌ ' + resultado.mensagem);
+                    return;
+                }
+
+                fecharModalBuscaMatriculaVisualizacao();
+                exibirDadosAluno(resultado.dados);
+            }
+
+            function exibirDadosAluno(dados) {
+                console.log('📊 Exibindo dados do aluno:', dados);
+
+                const conteudo = document.getElementById('conteudoVisualizacaoAluno');
+                if (!conteudo) return;
+
+                const html = formatarDadosAlunoParaExibicao(dados);
+                conteudo.innerHTML = html;
+
+                if (modalVisualizarAluno) {
+                    modalVisualizarAluno.classList.add('ativo');
+                }
+            }
+
+            function fecharModalVisualizarAluno() {
+                console.log('❌ Fechando modal de visualização...');
+                if (modalVisualizarAluno) {
+                    modalVisualizarAluno.classList.remove('ativo');
+                }
+                const conteudo = document.getElementById('conteudoVisualizacaoAluno');
+                if (conteudo) {
+                    conteudo.innerHTML = '';
+                }
+            }
+
+            // ========== ESC KEY HANDLER ==========
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    if (modalAdicionarAluno?.classList.contains('ativo')) {
+                        fecharModalAdicionarAluno();
+                    }
+                    if (modalBuscaMatricula?.classList.contains('ativo')) {
+                        fecharModalBuscaMatricula();
+                    }
+                    if (modalBuscaMatriculaVisualizacao?.classList.contains('ativo')) {
+                        fecharModalBuscaMatriculaVisualizacao();
+                    }
+                    if (modalVisualizarAluno?.classList.contains('ativo')) {
+                        fecharModalVisualizarAluno();
+                    }
+                }
+            });
+
+            console.log('✅ Página CRUD inicializada com sucesso!');
         });
     </script>
 </body>
