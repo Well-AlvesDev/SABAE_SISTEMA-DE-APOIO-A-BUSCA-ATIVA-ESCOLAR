@@ -259,8 +259,15 @@ function formatarDadosAlunoParaExibicao(dados) {
     dados.estatisticasPorMes.forEach(mes => {
         html += `
                 <div class="linha-mes">
-                    <div class="mes-nome">
-                        <strong>${mes.mesNome}</strong>
+                    <div class="mes-info">
+                        <div class="mes-nome">
+                            <strong>${mes.mesNome}</strong>
+                        </div>
+                        <div class="mes-estatisticas">
+                            <span class="stat-p">P: ${mes.presencas}</span>
+                            <span class="stat-fnj">FNJ: ${mes.faltasNaoJustificadas}</span>
+                            <span class="stat-fj">FJ: ${mes.faltasJustificadas}</span>
+                        </div>
                     </div>
                     <div class="dias-bolinha-container">`;
 
@@ -292,6 +299,12 @@ function formatarDadosAlunoParaExibicao(dados) {
     });
 
     html += `
+            </div>
+
+            <!-- Rodapé Fixo -->
+            <div class="aluno-info-footer">
+                <div class="footer-aluno-nome">${dados.nome}</div>
+                <div class="footer-aluno-sala">Sala: ${dados.turma}</div>
             </div>
         </div>`;
 
