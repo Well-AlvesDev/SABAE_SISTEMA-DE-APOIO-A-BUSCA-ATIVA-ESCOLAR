@@ -250,21 +250,30 @@
     <script src="./assets/lógica/script.js"></script>
     <style>
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
+
         .btn-loader {
             display: inline-flex;
             align-items: center;
             gap: 6px;
         }
+
         .btn-loader i {
             font-size: 16px;
         }
+
         .btn-enviar-modal:disabled {
             opacity: 0.7;
             cursor: not-allowed;
         }
+
         .btn-enviar-modal:disabled .btn-text {
             display: none;
         }
@@ -429,13 +438,13 @@
                 formAdicionarAluno.addEventListener('submit', (event) => {
                     const btnEnviarModal = formAdicionarAluno.querySelector('.btn-enviar-modal');
                     ativarLoaderBotao(btnEnviarModal);
-                    
+
                     if (modoEdicaoAluno) {
                         enviarFormularioEditarAluno(event);
                     } else {
                         enviarFormularioAdicionarAluno(event);
                     }
-                    
+
                     // Desativar loader após um tempo (as funções externas chamarão desativar se necessário)
                     setTimeout(() => {
                         desativarLoaderBotao(btnEnviarModal);
@@ -673,7 +682,7 @@
                         }
 
                         modalAdicionarAluno.classList.add('ativo');
-                        
+
                         // Aguardar carregamento das turmas antes de preencher formulário
                         await popularDropdownTurmasNativo('#selectTurma');
                         preencherFormularioComDadosAluno(resultado.dados);

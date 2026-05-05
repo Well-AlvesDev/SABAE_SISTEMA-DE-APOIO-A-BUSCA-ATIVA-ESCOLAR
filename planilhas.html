@@ -183,6 +183,30 @@
             font-weight: bold;
         }
 
+        /* Aluno não cadastrado */
+        .aluno-nao-cadastrado {
+            background: #ff5252 !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        .aluno-nao-cadastrado td {
+            background: #ff5252 !important;
+            color: white;
+            border-color: #c62828;
+        }
+
+        .aluno-nao-cadastrado td:nth-child(2) {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60px;
+            text-align: center;
+            white-space: normal;
+            word-wrap: break-word;
+            font-size: 12px;
+        }
+
         /* Responsividade */
         @media (max-width: 768px) {
             .modal-planilha-content {
@@ -410,7 +434,7 @@
                 <label for="ordemMatriculas" style="font-weight: 400; display: block; margin-bottom: 10px;">Ordem de
                     Matrículas (Opcional):</label>
                 <textarea id="ordemMatriculas"
-                    placeholder="Cole as matrículas em sequência (ex: 1234567890123452345678...). Cada matrícula tem 7 dígitos."
+                    placeholder="Cole as matrículas em sequência (ex: 1234567890123452345678...). O sistema suporta matrículas de qualquer comprimento."
                     style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: monospace; font-size: 12px; resize: vertical; height: 60px;"></textarea>
                 <small style="color: #666; display: block; margin-top: 5px;">Deixe vazio para usar ordenação padrão do
                     sistema (por
@@ -844,11 +868,15 @@
             // Extrair ordem de matrículas do input
             const ordemMatriculas = extrairMatriculasDoInput();
 
-            // Ordenar alunos conforme as prioridades
-            dadosFiltrados = ordenarAlunos(dadosFiltrados, salaSelecionada, ordemMatriculas);
-            console.log('Alunos após ordenação');
+            // Ordenar alunos conforme as prioridades (agora retorna objeto com alunos e alunosNaoCadastrados)
+            const resultadoOrdenacao = ordenarAlunos(dadosFiltrados, salaSelecionada, ordemMatriculas);
+            const alunosOrdenados = resultadoOrdenacao.alunos;
+            const alunosNaoCadastrados = resultadoOrdenacao.alunosNaoCadastrados;
 
-            console.log('Primeiro aluno sample:', JSON.stringify(dadosFiltrados[0], null, 2));
+            console.log('Alunos após ordenação:', alunosOrdenados.length);
+            console.log('Alunos não cadastrados:', alunosNaoCadastrados.length);
+
+            console.log('Primeiro aluno sample:', JSON.stringify(alunosOrdenados[0], null, 2));
 
             const tabela = document.getElementById('tabelaPlanilha');
             let html = '<thead><tr>';
@@ -866,34 +894,51 @@
             }
             html += '</tr></thead><tbody>';
 
-            // Dados dos alunos
-            dadosFiltrados.forEach((aluno, idx) => {
+            // Dados dos alunos (cadastrados e não cadastrados)
+            alunosOrdenados.forEach((aluno, idx) => {
+                const ehNaoCadastrado = aluno._nao_cadastrado === true;
                 const par = idx % 2 === 0;
-                html += `<tr style="background: ${par ? '#ffffff' : '#f5f5f5'};">`;
+
+                // Se for não cadastrado, usar cores vermelhas. Se for cadastrado, usar alternância
+                let bgColor = ehNaoCadastrado ? '#ff5252' : (par ? '#ffffff' : '#f5f5f5');
+                let textColor = ehNaoCadastrado ? 'color: white; font-weight: bold;' : '';
+                let bgStyle = ehNaoCadastrado ? 'background: #ff5252;' : `background: ${bgColor};`;
+
+                html += `<tr style="${bgStyle}">`;
 
                 // Colunas fixas
-                html += `<td style="text-align: left;">${aluno.MAT || ''}</td>`;
-                html += `<td style="text-align: left; white-space: nowrap;">${aluno.NOME || ''}</td>`;
-                html += `<td>${aluno.TURMA || ''}</td>`;
-                html += `<td>${aluno.TURNO || ''}</td>`;
-                html += `<td>${aluno.STATUS || ''}</td>`;
+                html += `<td style="text-align: left; ${textColor}">${aluno.MAT || ''}</td>`;
+                html += `<td style="text-align: left; white-space: ${ehNaoCadastrado ? 'normal' : 'nowrap'}; ${textColor} ${ehNaoCadastrado ? 'min-height: 80px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 10px;' : ''}">${aluno.NOME || ''}</td>`;
+                html += `<td style="${textColor}">${aluno.TURMA || ''}</td>`;
+                html += `<td style="${textColor}">${aluno.TURNO || ''}</td>`;
+                html += `<td style="${textColor}">${aluno.STATUS || ''}</td>`;
 
                 // Dias 1 a 31 - usar função flexível para obter valor da coluna
                 for (let dia = 1; dia <= 31; dia++) {
-                    const colunaDia = obterValorColunaDia(aluno, dia);
-                    const presenca = processarColunaDiaParaMes(colunaDia, mesSelecionado);
+                    let presenca = '';
 
-                    // Classe conforme tipo de presença
-                    let classePresenca = '';
-                    if (presenca === 'P') {
-                        classePresenca = 'presenca-p';
-                    } else if (presenca === 'FJ') {
-                        classePresenca = 'presenca-fj';
-                    } else if (presenca === 'FNJ') {
-                        classePresenca = 'presenca-fnj';
+                    if (!ehNaoCadastrado) {
+                        const colunaDia = obterValorColunaDia(aluno, dia);
+                        presenca = processarColunaDiaParaMes(colunaDia, mesSelecionado);
                     }
 
-                    html += `<td class="${classePresenca}">${presenca}</td>`;
+                    // Classe conforme tipo de presença (apenas para alunos cadastrados)
+                    let classePresenca = '';
+                    if (!ehNaoCadastrado) {
+                        if (presenca === 'P') {
+                            classePresenca = 'presenca-p';
+                        } else if (presenca === 'FJ') {
+                            classePresenca = 'presenca-fj';
+                        } else if (presenca === 'FNJ') {
+                            classePresenca = 'presenca-fnj';
+                        }
+                    }
+
+                    if (ehNaoCadastrado) {
+                        html += `<td style="color: white; background: #ff5252;"></td>`;
+                    } else {
+                        html += `<td class="${classePresenca}">${presenca}</td>`;
+                    }
                 }
                 html += '</tr>';
             });
@@ -915,7 +960,7 @@
             // Abrir modal
             abrirModalPlanilha();
 
-            return dadosFiltrados.length;
+            return alunosOrdenados.length + alunosNaoCadastrados.length;
         }
 
         /**
@@ -1001,8 +1046,10 @@
             // Extrair ordem de matrículas do input
             const ordemMatriculas = extrairMatriculasDoInput();
 
-            // Ordenar alunos conforme as prioridades
-            dadosFiltrados = ordenarAlunos(dadosFiltrados, salaSelecionada, ordemMatriculas);
+            // Ordenar alunos conforme as prioridades (agora retorna objeto com alunos e alunosNaoCadastrados)
+            const resultadoOrdenacao = ordenarAlunos(dadosFiltrados, salaSelecionada, ordemMatriculas);
+            const alunosOrdenados = resultadoOrdenacao.alunos;
+            const alunosNaoCadastrados = resultadoOrdenacao.alunosNaoCadastrados;
 
             let csv = 'MAT,NOME,TURMA,TURNO,STATUS';
 
@@ -1012,8 +1059,9 @@
             }
             csv += '\n';
 
-            // Dados dos alunos
-            dadosFiltrados.forEach(aluno => {
+            // Dados dos alunos (cadastrados e não cadastrados)
+            alunosOrdenados.forEach(aluno => {
+                const ehNaoCadastrado = aluno._nao_cadastrado === true;
                 const linha = [
                     `"${aluno.MAT || ''}"`,
                     `"${aluno.NOME || ''}"`,
@@ -1023,10 +1071,15 @@
                 ];
 
                 for (let dia = 1; dia <= 31; dia++) {
-                    const colunaDia = obterValorColunaDia(aluno, dia);
-                    const presenca = processarColunaDiaParaMes(colunaDia, mesSelecionado);
-                    // Converter para maiúsculo
-                    linha.push(presenca ? presenca.toUpperCase() : '');
+                    if (ehNaoCadastrado) {
+                        // Aluno não cadastrado - células vazias
+                        linha.push('');
+                    } else {
+                        // Aluno cadastrado - processar presença
+                        const colunaDia = obterValorColunaDia(aluno, dia);
+                        const presenca = processarColunaDiaParaMes(colunaDia, mesSelecionado);
+                        linha.push(presenca ? presenca.toUpperCase() : '');
+                    }
                 }
 
                 csv += linha.join(',') + '\n';
@@ -1063,8 +1116,10 @@
             // Extrair ordem de matrículas do input
             const ordemMatriculas = extrairMatriculasDoInput();
 
-            // Ordenar alunos conforme as prioridades
-            dadosFiltrados = ordenarAlunos(dadosFiltrados, salaSelecionada, ordemMatriculas);
+            // Ordenar alunos conforme as prioridades (agora retorna objeto com alunos e alunosNaoCadastrados)
+            const resultadoOrdenacao = ordenarAlunos(dadosFiltrados, salaSelecionada, ordemMatriculas);
+            const alunosOrdenados = resultadoOrdenacao.alunos;
+            const alunosNaoCadastrados = resultadoOrdenacao.alunosNaoCadastrados;
 
             let xml = '<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?>';
             xml += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ';
@@ -1083,10 +1138,29 @@
             xml += '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>';
             xml += '</Borders>';
             xml += '</Style>';
+            // Estilo para alunos não cadastrados (fundo vermelho)
+            xml += '<Style ss:ID="naoCadastradoStyle">';
+            xml += '<Alignment ss:Horizontal="Center" ss:Vertical="Center"/>';
+            xml += '<Font ss:Size="9" ss:Color="#FFFFFF" ss:Bold="1"/>';
+            xml += '<Interior ss:Color="#FF5252" ss:Pattern="Solid"/>';
+            xml += '<Borders>';
+            xml += '<Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>';
+            xml += '<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>';
+            xml += '<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>';
+            xml += '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>';
+            xml += '</Borders>';
+            xml += '</Style>';
             xml += '</Styles>';
 
             xml += '<Worksheet ss:Name="Chamada ' + nomeMes + '">';
             xml += '<Table>';
+
+            // Definir largura das colunas
+            xml += '<Column ss:Width="60"/>'; // Coluna A (MAT)
+            xml += '<Column ss:Width="572"/>'; // Coluna B (NOME) - 572 pixels
+            xml += '<Column ss:Width="80"/>'; // Coluna C (TURMA)
+            xml += '<Column ss:Width="70"/>'; // Coluna D (TURNO)
+            xml += '<Column ss:Width="70"/>'; // Coluna E (STATUS)
 
             // Header
             let header = '<Row><Cell><Data ss:Type="String">MAT</Data></Cell>';
@@ -1100,25 +1174,42 @@
             header += '</Row>';
             xml += header;
 
-            // Dados
-            dadosFiltrados.forEach(aluno => {
+            // Dados dos alunos (cadastrados e não cadastrados)
+            alunosOrdenados.forEach(aluno => {
+                const ehNaoCadastrado = aluno._nao_cadastrado === true;
                 let row = '<Row>';
-                row += '<Cell><Data ss:Type="String">' + (aluno.MAT || '') + '</Data></Cell>';
-                row += '<Cell><Data ss:Type="String">' + (aluno.NOME || '') + '</Data></Cell>';
-                row += '<Cell><Data ss:Type="String">' + (aluno.TURMA || '') + '</Data></Cell>';
-                row += '<Cell><Data ss:Type="String">' + (aluno.TURNO || '') + '</Data></Cell>';
-                row += '<Cell><Data ss:Type="String">' + (aluno.STATUS || '') + '</Data></Cell>';
 
-                for (let dia = 1; dia <= 31; dia++) {
-                    const colunaDia = obterValorColunaDia(aluno, dia);
-                    const presenca = processarColunaDiaParaMes(colunaDia, mesSelecionado);
+                if (ehNaoCadastrado) {
+                    // Estilo para alunos não cadastrados
+                    row += '<Cell ss:StyleID="naoCadastradoStyle"><Data ss:Type="String">' + (aluno.MAT || '') + '</Data></Cell>';
+                    row += '<Cell ss:StyleID="naoCadastradoStyle"><Data ss:Type="String">' + (aluno.NOME || '') + '</Data></Cell>';
+                    row += '<Cell ss:StyleID="naoCadastradoStyle"><Data ss:Type="String"></Data></Cell>';
+                    row += '<Cell ss:StyleID="naoCadastradoStyle"><Data ss:Type="String"></Data></Cell>';
+                    row += '<Cell ss:StyleID="naoCadastradoStyle"><Data ss:Type="String"></Data></Cell>';
 
-                    // Converter para maiúsculo
-                    const presencaUpper = presenca ? presenca.toUpperCase() : '';
+                    for (let dia = 1; dia <= 31; dia++) {
+                        row += '<Cell ss:StyleID="naoCadastradoStyle"><Data ss:Type="String"></Data></Cell>';
+                    }
+                } else {
+                    // Estilo para alunos cadastrados
+                    row += '<Cell><Data ss:Type="String">' + (aluno.MAT || '') + '</Data></Cell>';
+                    row += '<Cell><Data ss:Type="String">' + (aluno.NOME || '') + '</Data></Cell>';
+                    row += '<Cell><Data ss:Type="String">' + (aluno.TURMA || '') + '</Data></Cell>';
+                    row += '<Cell><Data ss:Type="String">' + (aluno.TURNO || '') + '</Data></Cell>';
+                    row += '<Cell><Data ss:Type="String">' + (aluno.STATUS || '') + '</Data></Cell>';
 
-                    // Aplicar estilo com borda preta e centralizado (fundo branco padrão)
-                    row += '<Cell ss:StyleID="presencaStyle"><Data ss:Type="String">' + presencaUpper + '</Data></Cell>';
+                    for (let dia = 1; dia <= 31; dia++) {
+                        const colunaDia = obterValorColunaDia(aluno, dia);
+                        const presenca = processarColunaDiaParaMes(colunaDia, mesSelecionado);
+
+                        // Converter para maiúsculo
+                        const presencaUpper = presenca ? presenca.toUpperCase() : '';
+
+                        // Aplicar estilo com borda preta e centralizado (fundo branco padrão)
+                        row += '<Cell ss:StyleID="presencaStyle"><Data ss:Type="String">' + presencaUpper + '</Data></Cell>';
+                    }
                 }
+
                 row += '</Row>';
                 xml += row;
             });
@@ -1341,8 +1432,13 @@
         }
 
         /**
-         * Extrai as matrículas do input de ordem
-         * @returns {array} Array com matrículas extraídas (7 dígitos cada)
+         * Extrai matrículas do textarea, aceita qualquer comprimento de número
+         * Suporta:
+         * - Um número por linha (formato recomendado ao colar)
+         * - Números separados por vírgula
+         * - Números separados por espaço
+         * - Números mistos (com quebras de linha, espaços e vírgulas)
+         * @returns {array} Array com matrículas válidas ou null
          */
         function extrairMatriculasDoInput() {
             const ordemMatriculas = document.getElementById('ordemMatriculas');
@@ -1350,16 +1446,22 @@
                 return null;
             }
 
-            const textoMatriculas = ordemMatriculas.value.trim().replace(/\s+/g, '');
+            const textoMatriculas = ordemMatriculas.value.trim();
             const matriculas = [];
 
-            // Extrair de 7 em 7 dígitos
-            for (let i = 0; i < textoMatriculas.length; i += 7) {
-                const matricula = textoMatriculas.substring(i, i + 7);
-                if (matricula.length === 7 && /^\d{7}$/.test(matricula)) {
-                    matriculas.push(matricula);
+            // Dividir por quebras de linha, vírgulas e espaços múltiplos
+            // Mantém flexibilidade para diferentes formatos de entrada
+            const separadores = /[\n\r,\s]+/;
+            const partes = textoMatriculas.split(separadores);
+
+            // Validar cada parte como número válido (qualquer comprimento)
+            partes.forEach(parte => {
+                const parte_limpa = parte.trim();
+                // Aceita números de 1 ou mais dígitos (não precisa ser 7)
+                if (/^\d+$/.test(parte_limpa) && parte_limpa.length > 0) {
+                    matriculas.push(parte_limpa);
                 }
-            }
+            });
 
             return matriculas.length > 0 ? matriculas : null;
         }
@@ -1425,14 +1527,15 @@
          * 1. Se ordem de matrículas foi fornecida, usar essa ordem
          * 2. Se não há ordem e não há sala específica, ordenar por sala+nome
          * 3. Se há sala específica, ordenar por nome alfabético
+         * Retorna um objeto com alunos cadastrados e não cadastrados
          * @param {array} alunos - Array com alunos
          * @param {string} salaSelecionada - Sala selecionada (vazio se nenhuma)
          * @param {array} ordemMatriculas - Array com matrículas em ordem (null se não fornecido)
-         * @returns {array} Array com alunos ordenados
+         * @returns {object} Objeto {alunos: [], alunosNaoCadastrados: []}
          */
         function ordenarAlunos(alunos, salaSelecionada, ordemMatriculas) {
             if (!alunos || alunos.length === 0) {
-                return alunos;
+                return { alunos: alunos || [], alunosNaoCadastrados: [] };
             }
 
             // Prioridade 1: Se houver ordem de matrículas
@@ -1441,6 +1544,7 @@
 
                 // Criar novo array ordenado pelas matrículas
                 const alunosOrdenados = [];
+                const alunosNaoCadastrados = [];
                 const alunosNaoEncontrados = [...alunos];
 
                 // Adicionar alunos na ordem das matrículas
@@ -1451,26 +1555,48 @@
                     if (idxAluno >= 0) {
                         alunosOrdenados.push(alunosNaoEncontrados[idxAluno]);
                         alunosNaoEncontrados.splice(idxAluno, 1);
+                    } else {
+                        // Matrícula NÃO encontrada no sistema - criar objeto com marcador
+                        // Manter na posição da ordem fornecida
+                        const alunoNaoCadastrado = {
+                            MAT: mat,
+                            NOME: 'ESSA MATRÍCULA AINDA NÃO FOI CADASTRADA NO SISTEMA DO SABAE',
+                            TURMA: '',
+                            TURNO: '',
+                            STATUS: '',
+                            _nao_cadastrado: true
+                        };
+                        alunosOrdenados.push(alunoNaoCadastrado);
+                        alunosNaoCadastrados.push(alunoNaoCadastrado);
                     }
                 });
 
-                // Adicionar alunos não encontrados na ordem original
+                // Adicionar alunos não encontrados (que não estavam na ordem de matrículas) na ordem original
                 alunosOrdenados.push(...alunosNaoEncontrados);
-                return alunosOrdenados;
+
+                return {
+                    alunos: alunosOrdenados,
+                    alunosNaoCadastrados: alunosNaoCadastrados
+                };
             }
 
             // Prioridade 3: Se há sala específica selecionada, ordenar apenas por nome
             if (salaSelecionada && salaSelecionada !== '') {
-                return alunos.sort((a, b) => {
+                const alunosOrdenados = alunos.sort((a, b) => {
                     const nomeA = (a.NOME || a.nome || '').toUpperCase();
                     const nomeB = (b.NOME || b.nome || '').toUpperCase();
                     return nomeA.localeCompare(nomeB, 'pt-BR');
                 });
+
+                return {
+                    alunos: alunosOrdenados,
+                    alunosNaoCadastrados: []
+                };
             }
 
             // Prioridade 2: Sem ordem de matrículas e sem sala específica
             // Ordenar por sala e depois por nome
-            return alunos.sort((a, b) => {
+            const alunosOrdenados = alunos.sort((a, b) => {
                 const salaA = a.TURMA || a.sala || '';
                 const salaB = b.TURMA || b.sala || '';
 
@@ -1485,6 +1611,11 @@
                 const nomeB = (b.NOME || b.nome || '').toUpperCase();
                 return nomeA.localeCompare(nomeB, 'pt-BR');
             });
+
+            return {
+                alunos: alunosOrdenados,
+                alunosNaoCadastrados: []
+            };
         }
 
         // Executar inicialização assim que o DOM estiver pronto
@@ -1498,7 +1629,7 @@
             const btnVoltar = document.getElementById('btnVoltar');
             if (btnVoltar) {
                 btnVoltar.addEventListener('click', () => {
-                    window.history.back();
+                    window.location.href = 'index.html';
                 });
             }
         });
