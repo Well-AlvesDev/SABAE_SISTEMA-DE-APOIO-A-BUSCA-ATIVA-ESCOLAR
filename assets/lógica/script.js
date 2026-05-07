@@ -778,13 +778,29 @@ function populaListaChamada(alunos, sala, mes, dia) {
         itemDiv.className = 'item-chamada';
         itemDiv.dataset.alunoId = aluno.mat;
 
+        // Adicionar classe se aluno foi transferido
+        if (aluno.status && aluno.status.toLowerCase() === 'transferido') {
+            itemDiv.classList.add('transferido');
+        }
+
         // Informa\u00e7\u00f5es do aluno
         const infoDiv = document.createElement('div');
         infoDiv.className = 'item-chamada-info';
-        infoDiv.innerHTML = `
-            <div class="item-chamada-nome">${aluno.nome}</div>
-            <div class="item-chamada-matricula">Mat\u00edcula: ${aluno.mat}</div>
-        `;
+
+        let htmlConteudo = '';
+        if (aluno.status && aluno.status.toLowerCase() === 'transferido') {
+            htmlConteudo = `
+                <div class="item-chamada-aviso">Aluno(a) transferido!</div>
+                <div class="item-chamada-nome">${aluno.nome}</div>
+                <div class="item-chamada-matricula">Mat\u00edcula: ${aluno.mat}</div>
+            `;
+        } else {
+            htmlConteudo = `
+                <div class="item-chamada-nome">${aluno.nome}</div>
+                <div class="item-chamada-matricula">Mat\u00edcula: ${aluno.mat}</div>
+            `;
+        }
+        infoDiv.innerHTML = htmlConteudo;
 
         // Op\u00e7\u00f5es de presença
         const opcoesDiv = document.createElement('div');
@@ -802,10 +818,12 @@ function populaListaChamada(alunos, sala, mes, dia) {
             btn.textContent = opcao.label;
             btn.dataset.valor = opcao.valor;
 
-            // Marcar 'P' como padrão
-            if (opcao.valor === 'P') {
+            // Definir presença padrão: FNJ para transferidos, P para os demais
+            const presencaPadrao = (aluno.status && aluno.status.toLowerCase() === 'transferido') ? 'FNJ' : 'P';
+
+            if (opcao.valor === presencaPadrao) {
                 btn.classList.add('selecionado');
-                itemDiv.dataset.presenca = 'P';
+                itemDiv.dataset.presenca = presencaPadrao;
             }
 
             btn.addEventListener('click', () => {
@@ -1444,13 +1462,29 @@ function populaListaChamadaComDados(alunos, chamadaSalva) {
         itemDiv.className = 'item-chamada';
         itemDiv.dataset.alunoId = aluno.mat;
 
+        // Adicionar classe se aluno foi transferido
+        if (aluno.status && aluno.status.toLowerCase() === 'transferido') {
+            itemDiv.classList.add('transferido');
+        }
+
         // Informações do aluno
         const infoDiv = document.createElement('div');
         infoDiv.className = 'item-chamada-info';
-        infoDiv.innerHTML = `
-            <div class="item-chamada-nome">${aluno.nome}</div>
-            <div class="item-chamada-matricula">Matrícula: ${aluno.mat}</div>
-        `;
+
+        let htmlConteudo = '';
+        if (aluno.status && aluno.status.toLowerCase() === 'transferido') {
+            htmlConteudo = `
+                <div class="item-chamada-aviso">Aluno(a) transferido!</div>
+                <div class="item-chamada-nome">${aluno.nome}</div>
+                <div class="item-chamada-matricula">Matrícula: ${aluno.mat}</div>
+            `;
+        } else {
+            htmlConteudo = `
+                <div class="item-chamada-nome">${aluno.nome}</div>
+                <div class="item-chamada-matricula">Matrícula: ${aluno.mat}</div>
+            `;
+        }
+        infoDiv.innerHTML = htmlConteudo;
 
         // Opções de presença
         const opcoesDiv = document.createElement('div');
@@ -1468,10 +1502,15 @@ function populaListaChamadaComDados(alunos, chamadaSalva) {
             btn.textContent = opcao.label;
             btn.dataset.valor = opcao.valor;
 
-            // Se este aluno tinha uma presença registrada, marcar o botão
-            if (presenças[aluno.mat] === opcao.valor) {
+            // Definir presença padrão: FNJ para transferidos, P para os demais
+            const presencaPadrao = (aluno.status && aluno.status.toLowerCase() === 'transferido') ? 'FNJ' : 'P';
+            const presencaSalva = presenças[aluno.mat];
+            const presencaParaMostrar = presencaSalva !== undefined ? presencaSalva : presencaPadrao;
+
+            // Se este aluno tinha uma presença registrada ou usa o padrão, marcar o botão
+            if (presencaParaMostrar === opcao.valor) {
                 btn.classList.add('selecionado');
-                itemDiv.dataset.presenca = opcao.valor;
+                itemDiv.dataset.presenca = presencaParaMostrar;
             }
 
             btn.addEventListener('click', () => {

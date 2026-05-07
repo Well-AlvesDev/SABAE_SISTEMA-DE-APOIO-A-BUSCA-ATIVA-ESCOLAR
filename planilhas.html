@@ -339,11 +339,160 @@
                 font-size: 16px;
             }
         }
+
+        /* Modal de Aviso de Ordenação */
+        .modal-aviso-ordenacao {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-aviso-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-aviso-content {
+            position: relative;
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalAvisoSlideIn 0.3s ease-out;
+            text-align: center;
+        }
+
+        @keyframes modalAvisoSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-aviso-content h2 {
+            margin: 0 0 15px 0;
+            font-size: 22px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .modal-aviso-content p {
+            margin: 0 0 15px 0;
+            font-size: 15px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .modal-aviso-content .info-importante {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            text-align: left;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .modal-aviso-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+
+        .modal-aviso-buttons button {
+            padding: 12px 32px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 140px;
+        }
+
+        #btnCancelarAviso {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        #btnCancelarAviso:hover {
+            background: #d0d0d0;
+        }
+
+        #btnProsseguirAviso {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+        }
+
+        #btnProsseguirAviso:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4);
+        }
+
+        #btnProsseguirAviso:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .countdown-badge {
+            display: inline-block;
+            background: #ff9800;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .modal-aviso-content {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .modal-aviso-content h2 {
+                font-size: 18px;
+            }
+
+            .modal-aviso-buttons {
+                flex-direction: column;
+            }
+
+            .modal-aviso-buttons button {
+                width: 100%;
+            }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body style="overflow: hidden;">
+<body>
 
     <div id="loader" class="loader-container">
         <img src="./assets/imagens/logos/sabae.png" alt="" style="width: 150px;">
@@ -439,6 +588,15 @@
                 <small style="color: #666; display: block; margin-top: 5px;">Deixe vazio para usar ordenação padrão do
                     sistema (por
                     sala e nome)</small>
+
+                <!-- Toggle para deixar em branco alunos transferidos -->
+                <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px; font-size: 13px;">
+                    <input type="checkbox" id="deixarTransferidosEmBranco" checked
+                        style="width: 18px; height: 18px; cursor: pointer;">
+                    <label for="deixarTransferidosEmBranco"
+                        style="margin: 0; cursor: pointer; font-weight: 400; color: #333;">Células de alunos com status
+                        'TRANSFERIDO' devem ser deixadas em branco na planilha. (opcional)</label>
+                </div>
             </div>
 
             <!-- Botão Gerar Planilha -->
@@ -480,6 +638,34 @@
                 </div>
             </div>
 
+            <!-- Modal de Aviso de Ordenação Padrão -->
+            <div id="modalAvisoOrdenacao" class="modal-aviso-ordenacao" style="display: none;">
+                <div class="modal-aviso-overlay"></div>
+                <div class="modal-aviso-content">
+                    <h2><i class="ri-alert-line" style="color: #ff9800; margin-right: 8px;"></i>Atenção</h2>
+                    <p>Você não forneceu uma ordem de matrículas personalizada. Isso Pode causar atribuições de
+                        frequência incorretas na planilha do BUSCA ATIVA se os alunos não estiverem na mesma ordem em
+                        que estão no SABAE.</p>
+                    <div class="info-importante">
+                        <strong>Será utilizada a ordenação padrão:</strong>
+                        <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+                            <li>Ordenação por sala (ex: 1°A, 1°B, 2°A...)</li>
+                            <li>Dentro de cada sala, ordenação alfabética por nome</li>
+                            <li>Salas dos módulos da noite (MOD) aparecem por último</li>
+                        </ul>
+                    </div>
+                    <p style="font-weight: 500; color: #555;">Deseja continuar com esta ordenação?</p>
+                    <div class="modal-aviso-buttons">
+                        <button id="btnCancelarAviso" class="btn">
+                            <i class="ri-close-line"></i> Cancelar
+                        </button>
+                        <button id="btnProsseguirAviso" class="btn" disabled>
+                            <i class="ri-check-line"></i> Prosseguir
+                            <span class="countdown-badge" id="countdownBadge" style="display: none;">10s</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
         </div>
     </main>
@@ -914,17 +1100,24 @@
                 html += `<td style="${textColor}">${aluno.STATUS || ''}</td>`;
 
                 // Dias 1 a 31 - usar função flexível para obter valor da coluna
+                // Verificar se deve deixar transferidos em branco
+                const deixarTransferidosEmBranco = document.getElementById('deixarTransferidosEmBranco').checked;
+                const ehTransferido = aluno.STATUS && aluno.STATUS.toLowerCase() === 'transferido';
+
                 for (let dia = 1; dia <= 31; dia++) {
                     let presenca = '';
 
-                    if (!ehNaoCadastrado) {
+                    // Se é transferido e toggle está ativado, deixar em branco
+                    if (ehTransferido && deixarTransferidosEmBranco) {
+                        presenca = '';
+                    } else if (!ehNaoCadastrado) {
                         const colunaDia = obterValorColunaDia(aluno, dia);
                         presenca = processarColunaDiaParaMes(colunaDia, mesSelecionado);
                     }
 
                     // Classe conforme tipo de presença (apenas para alunos cadastrados)
                     let classePresenca = '';
-                    if (!ehNaoCadastrado) {
+                    if (!ehNaoCadastrado && !(ehTransferido && deixarTransferidosEmBranco)) {
                         if (presenca === 'P') {
                             classePresenca = 'presenca-p';
                         } else if (presenca === 'FJ') {
@@ -969,7 +1162,7 @@
         function abrirModalPlanilha() {
             const modal = document.getElementById('modalPlanilha');
             modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+            document.body.classList.add('modal-aberto');
         }
 
         /**
@@ -978,7 +1171,7 @@
         function fecharModalPlanilha() {
             const modal = document.getElementById('modalPlanilha');
             modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
+            document.body.classList.remove('modal-aberto');
         }
 
         /**
@@ -1062,6 +1255,9 @@
             // Dados dos alunos (cadastrados e não cadastrados)
             alunosOrdenados.forEach(aluno => {
                 const ehNaoCadastrado = aluno._nao_cadastrado === true;
+                const deixarTransferidosEmBranco = document.getElementById('deixarTransferidosEmBranco').checked;
+                const ehTransferido = aluno.STATUS && aluno.STATUS.toLowerCase() === 'transferido';
+
                 const linha = [
                     `"${aluno.MAT || ''}"`,
                     `"${aluno.NOME || ''}"`,
@@ -1073,6 +1269,9 @@
                 for (let dia = 1; dia <= 31; dia++) {
                     if (ehNaoCadastrado) {
                         // Aluno não cadastrado - células vazias
+                        linha.push('');
+                    } else if (ehTransferido && deixarTransferidosEmBranco) {
+                        // Aluno transferido e toggle ativado - células vazias
                         linha.push('');
                     } else {
                         // Aluno cadastrado - processar presença
@@ -1198,12 +1397,18 @@
                     row += '<Cell><Data ss:Type="String">' + (aluno.TURNO || '') + '</Data></Cell>';
                     row += '<Cell><Data ss:Type="String">' + (aluno.STATUS || '') + '</Data></Cell>';
 
-                    for (let dia = 1; dia <= 31; dia++) {
-                        const colunaDia = obterValorColunaDia(aluno, dia);
-                        const presenca = processarColunaDiaParaMes(colunaDia, mesSelecionado);
+                    const deixarTransferidosEmBranco = document.getElementById('deixarTransferidosEmBranco').checked;
+                    const ehTransferido = aluno.STATUS && aluno.STATUS.toLowerCase() === 'transferido';
 
-                        // Converter para maiúsculo
-                        const presencaUpper = presenca ? presenca.toUpperCase() : '';
+                    for (let dia = 1; dia <= 31; dia++) {
+                        let presencaUpper = '';
+
+                        if (!(ehTransferido && deixarTransferidosEmBranco)) {
+                            const colunaDia = obterValorColunaDia(aluno, dia);
+                            const presenca = processarColunaDiaParaMes(colunaDia, mesSelecionado);
+                            // Converter para maiúsculo
+                            presencaUpper = presenca ? presenca.toUpperCase() : '';
+                        }
 
                         // Aplicar estilo com borda preta e centralizado (fundo branco padrão)
                         row += '<Cell ss:StyleID="presencaStyle"><Data ss:Type="String">' + presencaUpper + '</Data></Cell>';
@@ -1294,7 +1499,7 @@
                 }
                 loader.classList.remove('escondido');
                 loader.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
+                document.body.classList.add('modal-aberto');
             }
         }
 
@@ -1303,7 +1508,7 @@
             const loader = document.getElementById('loader');
             if (loader) {
                 loader.classList.add('escondido');
-                document.body.style.overflow = 'auto';
+                document.body.classList.remove('modal-aberto');
             }
         }
 
@@ -1388,6 +1593,73 @@
             }
         }
 
+        /**
+         * Exibe o modal de aviso sobre ordenação padrão com contagem regressiva
+         * @param {function} callback - Função a executar ao confirmar
+         */
+        function exibirModalAvisoOrdenacao(callback) {
+            const modal = document.getElementById('modalAvisoOrdenacao');
+            const btnProsseguir = document.getElementById('btnProsseguirAviso');
+            const btnCancelar = document.getElementById('btnCancelarAviso');
+            const countdownBadge = document.getElementById('countdownBadge');
+
+            // Mostrar modal
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-aberto');
+
+            // Desabilitar botão prosseguir e iniciar contagem regressiva
+            btnProsseguir.disabled = true;
+            countdownBadge.style.display = 'inline-block';
+            let tempoRestante = 10;
+
+            // Atualizar badge a cada segundo
+            const intervalContagem = setInterval(() => {
+                tempoRestante--;
+                countdownBadge.textContent = tempoRestante + 's';
+
+                // Quando termina a contagem, habilitar botão
+                if (tempoRestante <= 0) {
+                    clearInterval(intervalContagem);
+                    btnProsseguir.disabled = false;
+                    countdownBadge.style.display = 'none';
+                }
+            }, 1000);
+
+            // Botão prosseguir
+            const handleProsseguir = () => {
+                clearInterval(intervalContagem);
+                modal.style.display = 'none';
+                document.body.classList.remove('modal-aberto');
+                btnProsseguir.removeEventListener('click', handleProsseguir);
+                btnCancelar.removeEventListener('click', handleCancelar);
+                if (callback) callback();
+            };
+
+            // Botão cancelar
+            const handleCancelar = () => {
+                clearInterval(intervalContagem);
+                modal.style.display = 'none';
+                document.body.classList.remove('modal-aberto');
+                btnProsseguir.removeEventListener('click', handleProsseguir);
+                btnCancelar.removeEventListener('click', handleCancelar);
+            };
+
+            btnProsseguir.addEventListener('click', handleProsseguir);
+            btnCancelar.addEventListener('click', handleCancelar);
+
+            // Fechar ao clicar no overlay
+            const overlay = modal.querySelector('.modal-aviso-overlay');
+            const handleOverlay = () => {
+                clearInterval(intervalContagem);
+                modal.style.display = 'none';
+                document.body.classList.remove('modal-aberto');
+                overlay.removeEventListener('click', handleOverlay);
+                btnProsseguir.removeEventListener('click', handleProsseguir);
+                btnCancelar.removeEventListener('click', handleCancelar);
+            };
+            overlay.addEventListener('click', handleOverlay);
+        }
+
         // Ação do botão gerar - usa dados do cache
         function inicializarBotaoGerar() {
             const btnGerar = document.getElementById('btnGerarPlanilha');
@@ -1410,10 +1682,30 @@
                     return;
                 }
 
+                // Verificar se há ordem de matrícula fornecida
+                const ordemMatriculas = extrairMatriculasDoInput();
+
+                // Se não há ordem de matrícula, mostrar modal de aviso
+                if (!ordemMatriculas || ordemMatriculas.length === 0) {
+                    exibirModalAvisoOrdenacao(() => {
+                        console.log('=== GERANDO PLANILHA DO MÊS:', mesSelecionado, '(', mesNumero, ') ===');
+                        console.log('Turno selecionado:', turnoSelecionado || 'todos');
+                        console.log('Sala selecionada:', salaSelecionada || 'todas');
+                        console.log('Total de alunos nos dados:', dadosBrutos.length);
+                        console.log('Usando ordenação PADRÃO (sem ordem de matrícula personalizada)');
+
+                        // Gerar planilha HTML com os dados do cache (com filtro de turno e sala)
+                        const totalAlunos = gerarPlanilhaHTML(dadosBrutos, mesNumero, turnoSelecionado, salaSelecionada);
+                    });
+                    return;
+                }
+
+                // Se há ordem de matrícula, gerar diretamente sem aviso
                 console.log('=== GERANDO PLANILHA DO MÊS:', mesSelecionado, '(', mesNumero, ') ===');
                 console.log('Turno selecionado:', turnoSelecionado || 'todos');
                 console.log('Sala selecionada:', salaSelecionada || 'todas');
                 console.log('Total de alunos nos dados:', dadosBrutos.length);
+                console.log('Usando ordem de matrícula PERSONALIZADA:', ordemMatriculas.length, 'matrículas');
 
                 // Gerar planilha HTML com os dados do cache (com filtro de turno e sala)
                 const totalAlunos = gerarPlanilhaHTML(dadosBrutos, mesNumero, turnoSelecionado, salaSelecionada);
