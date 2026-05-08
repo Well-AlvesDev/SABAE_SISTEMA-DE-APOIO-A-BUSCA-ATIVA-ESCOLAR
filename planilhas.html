@@ -108,6 +108,25 @@
             flex-wrap: wrap;
         }
 
+        .aviso-ordenacao-matriculas {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            color: #1565c0;
+            font-size: 13px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .aviso-ordenacao-matriculas i {
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
         .tabela-container {
             flex: 1;
             overflow: auto;
@@ -629,6 +648,11 @@
                                 <i class="ri-file-text-line"></i> CSV
                             </button>
                         </div>
+                        <div id="avisoOrdenacaoMatriculas" class="aviso-ordenacao-matriculas" style="display: none;">
+                            <i class="ri-information-line"></i>
+                            Os alunos que não tiveram sua matrícula informada na ordem de matrícula têm seu nome em
+                            vermelho e não serão inclusos na planilha baixada.
+                        </div>
                         <div class="tabela-container">
                             <table id="tabelaPlanilha">
                                 <!-- Conteúdo gerado por JavaScript -->
@@ -1083,6 +1107,7 @@
             // Dados dos alunos (cadastrados e não cadastrados)
             alunosOrdenados.forEach((aluno, idx) => {
                 const ehNaoCadastrado = aluno._nao_cadastrado === true;
+                const ehNaOrdemFornecida = aluno._na_ordem_fornecida === true;
                 const par = idx % 2 === 0;
 
                 // Se for não cadastrado, usar cores vermelhas. Se for cadastrado, usar alternância
@@ -1094,7 +1119,17 @@
 
                 // Colunas fixas
                 html += `<td style="text-align: left; ${textColor}">${aluno.MAT || ''}</td>`;
-                html += `<td style="text-align: left; white-space: ${ehNaoCadastrado ? 'normal' : 'nowrap'}; ${textColor} ${ehNaoCadastrado ? 'min-height: 80px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 10px;' : ''}">${aluno.NOME || ''}</td>`;
+
+                // Cor vermelha no nome se não está na ordem fornecida
+                let styleNome = `text-align: left; white-space: ${ehNaoCadastrado ? 'normal' : 'nowrap'}; ${textColor}`;
+                if (!ehNaoCadastrado && !ehNaOrdemFornecida) {
+                    styleNome += ' color: #d32f2f; font-weight: 600;';
+                }
+                if (ehNaoCadastrado) {
+                    styleNome += ' min-height: 80px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 10px;';
+                }
+
+                html += `<td style="${styleNome}">${aluno.NOME || ''}</td>`;
                 html += `<td style="${textColor}">${aluno.TURMA || ''}</td>`;
                 html += `<td style="${textColor}">${aluno.TURNO || ''}</td>`;
                 html += `<td style="${textColor}">${aluno.STATUS || ''}</td>`;
@@ -1149,6 +1184,14 @@
                 titulo += ` - ${salaSelecionada}`;
             }
             document.getElementById('tituloPlanilha').textContent = titulo;
+
+            // Mostrar/esconder aviso de ordenação apenas se ordem de matrícula foi fornecida
+            const avisoOrdenacao = document.getElementById('avisoOrdenacaoMatriculas');
+            if (ordemMatriculas && ordemMatriculas.length > 0) {
+                avisoOrdenacao.style.display = 'flex';
+            } else {
+                avisoOrdenacao.style.display = 'none';
+            }
 
             // Abrir modal
             abrirModalPlanilha();
@@ -1241,8 +1284,14 @@
 
             // Ordenar alunos conforme as prioridades (agora retorna objeto com alunos e alunosNaoCadastrados)
             const resultadoOrdenacao = ordenarAlunos(dadosFiltrados, salaSelecionada, ordemMatriculas);
-            const alunosOrdenados = resultadoOrdenacao.alunos;
+            let alunosOrdenados = resultadoOrdenacao.alunos;
             const alunosNaoCadastrados = resultadoOrdenacao.alunosNaoCadastrados;
+
+            // Se ordem de matrículas foi fornecida, filtrar apenas alunos que foram inclusos nela
+            // (excluir alunos com nome vermelho que têm _na_ordem_fornecida === false)
+            if (ordemMatriculas && ordemMatriculas.length > 0) {
+                alunosOrdenados = alunosOrdenados.filter(aluno => aluno._na_ordem_fornecida === true);
+            }
 
             let csv = 'MAT,NOME,TURMA,TURNO,STATUS';
 
@@ -1317,8 +1366,14 @@
 
             // Ordenar alunos conforme as prioridades (agora retorna objeto com alunos e alunosNaoCadastrados)
             const resultadoOrdenacao = ordenarAlunos(dadosFiltrados, salaSelecionada, ordemMatriculas);
-            const alunosOrdenados = resultadoOrdenacao.alunos;
+            let alunosOrdenados = resultadoOrdenacao.alunos;
             const alunosNaoCadastrados = resultadoOrdenacao.alunosNaoCadastrados;
+
+            // Se ordem de matrículas foi fornecida, filtrar apenas alunos que foram inclusos nela
+            // (excluir alunos com nome vermelho que têm _na_ordem_fornecida === false)
+            if (ordemMatriculas && ordemMatriculas.length > 0) {
+                alunosOrdenados = alunosOrdenados.filter(aluno => aluno._na_ordem_fornecida === true);
+            }
 
             let xml = '<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?>';
             xml += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ';
@@ -1349,6 +1404,11 @@
             xml += '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>';
             xml += '</Borders>';
             xml += '</Style>';
+            // Estilo para nome não na ordem fornecida (texto vermelho)
+            xml += '<Style ss:ID="nomeNaoOrdenacaoStyle">';
+            xml += '<Alignment ss:Horizontal="Left" ss:Vertical="Center"/>';
+            xml += '<Font ss:Size="9" ss:Color="#D32F2F" ss:Bold="1"/>';
+            xml += '</Style>';
             xml += '</Styles>';
 
             xml += '<Worksheet ss:Name="Chamada ' + nomeMes + '">';
@@ -1376,6 +1436,7 @@
             // Dados dos alunos (cadastrados e não cadastrados)
             alunosOrdenados.forEach(aluno => {
                 const ehNaoCadastrado = aluno._nao_cadastrado === true;
+                const ehNaOrdemFornecida = aluno._na_ordem_fornecida === true;
                 let row = '<Row>';
 
                 if (ehNaoCadastrado) {
@@ -1392,7 +1453,12 @@
                 } else {
                     // Estilo para alunos cadastrados
                     row += '<Cell><Data ss:Type="String">' + (aluno.MAT || '') + '</Data></Cell>';
-                    row += '<Cell><Data ss:Type="String">' + (aluno.NOME || '') + '</Data></Cell>';
+
+                    // Usar estilo especial para nome não na ordem fornecida
+                    const styleNome = !ehNaOrdemFornecida ? 'nomeNaoOrdenacaoStyle' : undefined;
+                    const cellNomeAttr = styleNome ? ' ss:StyleID="' + styleNome + '"' : '';
+                    row += '<Cell' + cellNomeAttr + '><Data ss:Type="String">' + (aluno.NOME || '') + '</Data></Cell>';
+
                     row += '<Cell><Data ss:Type="String">' + (aluno.TURMA || '') + '</Data></Cell>';
                     row += '<Cell><Data ss:Type="String">' + (aluno.TURNO || '') + '</Data></Cell>';
                     row += '<Cell><Data ss:Type="String">' + (aluno.STATUS || '') + '</Data></Cell>';
@@ -1845,7 +1911,10 @@
                         (a.MAT || a.mat || '').toString().trim() === mat.trim()
                     );
                     if (idxAluno >= 0) {
-                        alunosOrdenados.push(alunosNaoEncontrados[idxAluno]);
+                        // Aluno encontrado - marcar que está na ordem fornecida
+                        const aluno = alunosNaoEncontrados[idxAluno];
+                        aluno._na_ordem_fornecida = true;
+                        alunosOrdenados.push(aluno);
                         alunosNaoEncontrados.splice(idxAluno, 1);
                     } else {
                         // Matrícula NÃO encontrada no sistema - criar objeto com marcador
@@ -1856,7 +1925,8 @@
                             TURMA: '',
                             TURNO: '',
                             STATUS: '',
-                            _nao_cadastrado: true
+                            _nao_cadastrado: true,
+                            _na_ordem_fornecida: true
                         };
                         alunosOrdenados.push(alunoNaoCadastrado);
                         alunosNaoCadastrados.push(alunoNaoCadastrado);
@@ -1864,6 +1934,10 @@
                 });
 
                 // Adicionar alunos não encontrados (que não estavam na ordem de matrículas) na ordem original
+                // Marcar que NÃO estão na ordem fornecida
+                alunosNaoEncontrados.forEach(aluno => {
+                    aluno._na_ordem_fornecida = false;
+                });
                 alunosOrdenados.push(...alunosNaoEncontrados);
 
                 return {
@@ -1878,6 +1952,11 @@
                     const nomeA = (a.NOME || a.nome || '').toUpperCase();
                     const nomeB = (b.NOME || b.nome || '').toUpperCase();
                     return nomeA.localeCompare(nomeB, 'pt-BR');
+                });
+
+                // Marcar todos como na ordem fornecida (pois nenhuma ordem foi fornecida)
+                alunosOrdenados.forEach(aluno => {
+                    aluno._na_ordem_fornecida = true;
                 });
 
                 return {
@@ -1902,6 +1981,11 @@
                 const nomeA = (a.NOME || a.nome || '').toUpperCase();
                 const nomeB = (b.NOME || b.nome || '').toUpperCase();
                 return nomeA.localeCompare(nomeB, 'pt-BR');
+            });
+
+            // Marcar todos como na ordem fornecida (pois nenhuma ordem foi fornecida)
+            alunosOrdenados.forEach(aluno => {
+                aluno._na_ordem_fornecida = true;
             });
 
             return {
