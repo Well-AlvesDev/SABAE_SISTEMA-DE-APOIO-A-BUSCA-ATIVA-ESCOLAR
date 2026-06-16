@@ -1799,3 +1799,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// Gerenciamento de Anotações
+document.addEventListener('DOMContentLoaded', () => {
+    const notasTextarea = document.getElementById('notasTextarea');
+
+    if (notasTextarea) {
+        // Carregar anotações salvas ao iniciar
+        const notasSalvas = localStorage.getItem('sabae_notas');
+        if (notasSalvas) {
+            notasTextarea.value = notasSalvas;
+            // Ajustar altura inicial se houver conteúdo salvo
+            ajustarAlturaTextarea(notasTextarea);
+        }
+
+        // Função para ajustar a altura do textarea automaticamente
+        function ajustarAlturaTextarea(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 500) + 'px';
+        }
+
+        // Salvar anotações ao digitar (com debounce para otimizar)
+        let timeoutSalvar;
+        notasTextarea.addEventListener('input', () => {
+            // Ajustar altura conforme digitação
+            ajustarAlturaTextarea(notasTextarea);
+
+            // Salvar anotações com debounce
+            clearTimeout(timeoutSalvar);
+            timeoutSalvar = setTimeout(() => {
+                localStorage.setItem('sabae_notas', notasTextarea.value);
+                console.log('✅ Anotações salvas automaticamente');
+            }, 1000);
+        });
+    }
+});
