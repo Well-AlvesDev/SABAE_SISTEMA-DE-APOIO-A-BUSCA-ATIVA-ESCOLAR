@@ -9,8 +9,24 @@
     <link rel="stylesheet" href="./assets/estilos/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5108068051421110"
-     crossorigin="anonymous"></script>
+    <script>
+        (function () {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            const isLocal = ['localhost', '127.0.0.1', ''].includes(hostname) || protocol === 'file:';
+
+            if (isLocal || protocol !== 'https:') return;
+
+            const adScript = document.createElement('script');
+            adScript.async = true;
+            adScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5108068051421110';
+            adScript.crossOrigin = 'anonymous';
+            adScript.onerror = function () {
+                console.info('AdSense não carregou neste ambiente ou foi bloqueado pelo navegador.');
+            };
+            document.head.appendChild(adScript);
+        })();
+    </script>
 </head>
 
 <body>
