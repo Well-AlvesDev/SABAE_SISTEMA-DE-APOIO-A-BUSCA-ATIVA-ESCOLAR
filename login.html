@@ -82,6 +82,34 @@
     button:active {
         transform: translateY(0);
     }
+
+    .secondary-btn {
+        margin-top: 10px;
+        background: #fffdf2;
+        color: rgb(190, 143, 35);
+        border: 1px solid rgb(190, 174, 35);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px;
+        border-radius: 5px;
+        font-size: 13px;
+        font-weight: 400;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .secondary-btn:hover {
+        background: #fffae6;
+        transform: translateY(-1px);
+    }
+
+    .secondary-btn i {
+        margin-right: 6px;
+        font-size: 14px;
+        color: inherit;
+        font-weight: 600;
+    }
 </style>
 
 <body>
@@ -107,6 +135,8 @@
             </div>
 
             <button type="submit">Entrar <i class="ri-arrow-right-line"></i></button>
+            <a href="./index.html" class="secondary-btn"><i class="ri-logout-box-r-line"></i> Alternar modo de
+                entrada</a>
         </form>
     </div>
 
