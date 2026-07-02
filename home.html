@@ -147,7 +147,7 @@
 
                 if (!session) {
                     console.log('❌ Usuário não autenticado. Redirecionando para login...');
-                    window.location.href = 'login.html';
+                    window.location.replace('./login.html');
                     return;
                 }
 
@@ -165,7 +165,7 @@
         supabaseClient.auth.onAuthStateChange((evento, sessao) => {
             if (evento === 'SIGNED_OUT') {
                 console.log('Sessão expirada. Redirecionando para login...');
-                window.location.href = 'login.html';
+                window.location.replace('./login.html');
             }
         });
 

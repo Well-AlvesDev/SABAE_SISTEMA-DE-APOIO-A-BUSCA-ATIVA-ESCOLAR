@@ -18,6 +18,20 @@ async function obterSessaoAtual() {
     }
 }
 
+function redirecionarParaHome() {
+    if (window.location.pathname.endsWith('/home.html')) {
+        return;
+    }
+    window.location.replace('./home.html');
+}
+
+function redirecionarParaLogin() {
+    if (window.location.pathname.endsWith('/login.html')) {
+        return;
+    }
+    window.location.replace('./login.html');
+}
+
 /**
  * Obtém o usuário autenticado atual
  * @returns {Promise<Object>} Objeto com dados do usuário ou null
@@ -69,11 +83,11 @@ supabaseClient.auth.onAuthStateChange((evento, sessao) => {
 
     if (evento === 'SIGNED_IN') {
         console.log('✅ Usuário logado:', sessao?.user?.email);
-        // Pode-se disparar eventos customizados aqui se necessário
+        redirecionarParaHome();
     } else if (evento === 'SIGNED_OUT') {
         console.log('❌ Usuário deslogado');
-        // Limpar dados locais se necessário
         sessionStorage.clear();
+        redirecionarParaLogin();
     } else if (evento === 'USER_UPDATED') {
         console.log('🔄 Dados do usuário atualizados');
     }

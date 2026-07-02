@@ -118,8 +118,7 @@
         window.addEventListener('load', async function () {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                // Usuário já está logado, redirecionar
-                window.location.href = 'home.html';
+                window.location.replace('./home.html');
             }
         });
 
@@ -188,10 +187,8 @@
                     }
 
                     // A sessão é gerenciada automaticamente pelo Supabase
-                    // Redirecionar para página principal após 1 segundo
-                    setTimeout(() => {
-                        window.location.href = 'home.html';
-                    }, 1000);
+                    // Redirecionar imediatamente para a página principal
+                    window.location.replace('./home.html');
                 }
             } catch (erro) {
                 console.error('Erro inesperado:', erro);
