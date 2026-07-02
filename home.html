@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="PT-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SABAE - SISTEMA DE APOIO À BUSCA ATIVA ESCOLAR</title>
+    <link rel="shortcut icon" href="./assets/imagens/logos/sabae.png" type="image/x-icon">
+    <link rel="stylesheet" href="./assets/estilos/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        (function () {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            const isLocal = ['localhost', '127.0.0.1', ''].includes(hostname) || protocol === 'file:';
+
+            if (isLocal || protocol !== 'https:') return;
+
+            const adScript = document.createElement('script');
+            adScript.async = true;
+            adScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5108068051421110';
+            adScript.crossOrigin = 'anonymous';
+            adScript.onerror = function () {
+                console.info('AdSense não carregou neste ambiente ou foi bloqueado pelo navegador.');
+            };
+            document.head.appendChild(adScript);
+        })();
+    </script>
+</head>
+
+<body>
+
+    <div id="loader" class="loader-container">
+        <img src="./assets/imagens/logos/sabae.png" alt="" style="width: 150px;">
+        <div class="spinner"></div>
+        <p>Um momento...</p>
+    </div>
+
+    <header class="pwa-header">
+        <div class="header-left">
+            <img src="./assets/imagens/logos/sabae2.png" alt="SABAE Logo" class="header-logo"
+                style="width: 50px; height: 50px; border-radius: 10px;">
+            <span class="header-title">SABAE</span>
+        </div>
+        <span class="header-datetime" id="headerDateTime">--:--</span>
+    </header>
+
+    <div class="user-info-bar">
+        <div class="user-info-content">
+            <span class="user-icon"><img src="./assets/imagens/ico/User_icon_2.svg" alt="" style="width: 30px;"></span>
+            <span class="user-name" id="nomeUsuarioHeader">Usuário</span>
+        </div>
+        <button class="btn-sair" id="btnSair">Desconectar <i class="ri-plug-line"></i></button>
+    </div>
+
+
+    <!-- Registro de Atividades -->
+    <section class="registro-de-atividades">
+        <div class="aprest" style="margin-bottom: 10px; font-size: 10px; color: #2d2d2d; text-align: center;">
+            <h1>Sistema de Apoio à Busca Ativa Escolar</h1>
+        </div>
+        <div class="atividades-container collapsed" id="atividadesContainer">
+            <div class="atividades-header" id="atividadesHeader" role="button" aria-expanded="false" tabindex="0">
+                <div class="atividades-header-title">
+                    <img src="./assets/imagens/ico/databaseprocess_basededatos_12922 (1).png" alt=""
+                        class="atividades-header-icon">
+                    <h2>Registro de Atividades</h2>
+                </div>
+                <button type="button" class="atividades-toggle" id="atividadesToggle" aria-label="Expandir atividades">
+                    <i class="ri-arrow-down-s-line"></i>
+                </button>
+            </div>
+            <div class="atividades-list" id="atividadesList" aria-hidden="true">
+                <div class="atividade-item loading">
+                    <span>Carregando atividades...</span>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <main>
+        <a href="./chamada.html" class="btn-registrar-chamadas">
+            <img src="./assets/imagens/ico/User-library.svg" alt="Registrar Chamadas" class="btn-registrar-icon">
+            <span class="btn-registrar-text">Registrar/Editar Chamadas</span>
+        </a>
+        <a href="./planilhas.html" class="btn-gerar-planilha">
+            <img src="./assets/imagens/ico/Spreadsheet.svg" alt="Gerar Planilha" class="btn-gerar-planilha-icon">
+            <span class="btn-gerar-planilha-text">Gerar Planilhas</span>
+        </a>
+        <a href="./crud.html" class="btn-gerenciar-dados">
+            <img src="./assets/imagens/ico/config-aluno.svg" alt="Gerenciar Dados" class="btn-gerenciar-dados-icon">
+            <span class="btn-gerenciar-dados-text">CRUD</span>
+        </a>
+    </main>
+
+    <!-- Bloco de Anotações -->
+    <section class="notas-container">
+        <div class="notas-header">
+            <h3><i class="ri-sticky-note-2-line"></i> Anotações</h3>
+            <p style="font-size: 12px;">Anote informações importantes e coisas que você precisa lembrar.</p>
+        </div>
+        <textarea id="notasTextarea" class="notas-textarea" placeholder="Digite suas anotações aqui..."></textarea>
+    </section>
+
+    <!-- Modal de Perfil do Usuário -->
+    <div id="modalPerfilUsuario" class="modal-perfil-usuario" style="display: none;">
+        <div class="modal-perfil-overlay"></div>
+        <div class="modal-perfil-content">
+            <button id="btnFecharPerfilModal" class="btn-fechar-perfil">
+                <i class="ri-close-line"></i>
+            </button>
+            <div class="perfil-usuario-body">
+                <div class="perfil-usuario-avatar">
+                    <img src="./assets/imagens/ico/User_icon_2.svg" alt="Avatar do usuário" style="width: 60px;">
+                </div>
+                <div class="perfil-usuario-info">
+                    <div class="info-item">
+                        <label>NOME DO USUÁRIO</label>
+                        <p id="perfilNomeUsuario" class="info-value nome-usuario">-</p>
+                    </div>
+                    <div class="info-item">
+                        <label>FUNÇÃO</label>
+                        <p id="perfilFuncao" class="info-value">-</p>
+                    </div>
+                    <div class="info-item">
+                        <label>ESCOLA</label>
+                        <p id="perfilCodigoEscolar" class="info-value">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./assets/lógica/supabase-config.js"></script>
+    <script src="./assets/lógica/auth.js"></script>
+    <script src="./assets/lógica/supabase-alunos.js"></script>
+    <script src="./assets/lógica/atividades.js"></script>
+    <script src="./assets/lógica/script.js"></script>
+
+    <!-- Script para verificar autenticação e atualizar data/hora -->
+    <script>
+        // Verificar autenticação ao carregar a página
+        async function verificarAutenticacaoAoCarregar() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+
+                if (!session) {
+                    console.log('❌ Usuário não autenticado. Redirecionando para login...');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                console.log('✅ Usuário autenticado:', session.user.email);
+            } catch (erro) {
+                console.error('❌ Erro ao verificar autenticação:', erro);
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Verificar autenticação quando o documento carregar
+        window.addEventListener('load', verificarAutenticacaoAoCarregar);
+
+        // Listener para mudanças de autenticação
+        supabaseClient.auth.onAuthStateChange((evento, sessao) => {
+            if (evento === 'SIGNED_OUT') {
+                console.log('Sessão expirada. Redirecionando para login...');
+                window.location.href = 'login.html';
+            }
+        });
+
+        const atividadesContainer = document.getElementById('atividadesContainer');
+        const atividadesHeader = document.getElementById('atividadesHeader');
+        const atividadesList = document.getElementById('atividadesList');
+        const atividadesToggle = document.getElementById('atividadesToggle');
+
+        function alternarAtividades() {
+            if (!atividadesContainer || !atividadesHeader || !atividadesList || !atividadesToggle) return;
+            const estaExpandido = !atividadesContainer.classList.contains('collapsed');
+            atividadesContainer.classList.toggle('collapsed');
+            atividadesHeader.setAttribute('aria-expanded', String(!estaExpandido));
+            atividadesList.setAttribute('aria-hidden', String(estaExpandido));
+            atividadesToggle.setAttribute('aria-label', estaExpandido ? 'Expandir atividades' : 'Recolher atividades');
+        }
+
+        if (atividadesHeader) {
+            atividadesHeader.addEventListener('click', alternarAtividades);
+            atividadesHeader.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    alternarAtividades();
+                }
+            });
+        }
+    </script>
+
+    <!-- Script para atualizar data e hora -->
+    <script>
+        function atualizarDataHora() {
+            const agora = new Date();
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const ano = agora.getFullYear();
+            const horas = String(agora.getHours()).padStart(2, '0');
+            const minutos = String(agora.getMinutes()).padStart(2, '0');
+
+            const dataHora = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+            document.getElementById('headerDateTime').textContent = dataHora;
+        }
+
+        function agendarProximaAtualizacao() {
+            const agora = new Date();
+            // Calcula quantos milissegundos faltam para o próximo segundo
+            const proximoSegundo = (1000 - agora.getMilliseconds());
+
+            setTimeout(() => {
+                atualizarDataHora();
+                // Após a primeira atualização sincronizada, atualiza a cada segundo
+                setInterval(atualizarDataHora, 1000);
+            }, proximoSegundo);
+        }
+
+        // Atualizar ao carregar (sincronizado com o segundo exato)
+        agendarProximaAtualizacao();
+    </script>
+
+</html>

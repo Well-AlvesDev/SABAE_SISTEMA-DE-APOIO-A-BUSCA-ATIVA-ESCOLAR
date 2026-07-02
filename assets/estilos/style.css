@@ -12,6 +12,7 @@ body {
 
 body.modal-aberto {
     overflow: hidden;
+
 }
 
 /* Loader */
@@ -70,7 +71,7 @@ body.modal-aberto {
     justify-content: space-between;
     align-items: center;
     padding: 12px 20px;
-    background: linear-gradient(135deg, #3e73bf 0%, #2c5aa0 100%);
+    background: linear-gradient(135deg, #3880e4 0%, #174ea1 100%);
     color: white;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     position: sticky;
@@ -85,8 +86,8 @@ body.modal-aberto {
 }
 
 .header-title {
-    font-size: 18px;
-    font-weight: 400;
+    font-size: 25px;
+    font-weight: 600;
     letter-spacing: 1px;
     color: #f0f0f0;
 }
@@ -571,7 +572,7 @@ body.modal-aberto {
     }
 
     .header-title {
-        font-size: 14px;
+        font-size: 16px;
     }
 
 
@@ -604,7 +605,8 @@ body.modal-aberto {
 /* Registro de Atividades */
 .registro-de-atividades {
     padding: 20px;
-    max-width: 1200px;
+    width: 100%;
+    max-width: 720px;
     margin: 0 auto;
 }
 
@@ -613,15 +615,49 @@ body.modal-aberto {
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    width: 100%;
 }
 
-.atividades-container h2 {
-    padding: 20px;
+.atividades-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
     background: linear-gradient(135deg, #3e73bf 0%, #2c5aa0 100%);
     color: white;
+    cursor: pointer;
+    user-select: none;
+}
+
+.atividades-header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.atividades-header h2 {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
+    padding: 20px 0;
+}
+
+.atividades-header-icon {
+    width: 30px;
+}
+
+.atividades-toggle {
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .atividades-list {
@@ -629,6 +665,22 @@ body.modal-aberto {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    transition: max-height 0.3s ease, opacity 0.25s ease;
+    opacity: 1;
+}
+
+.atividades-container.collapsed .atividades-list {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.atividades-toggle i {
+    transition: transform 0.3s ease;
+}
+
+.atividades-container:not(.collapsed) .atividades-toggle i {
+    transform: rotate(180deg);
 }
 
 .atividade-item {
@@ -732,7 +784,7 @@ main {
     gap: 15px;
     width: 120px;
     height: 120px;
-    background-color: #d3d3d3;
+    background-color: #e7e7e7;
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -762,7 +814,7 @@ main {
 
 .btn-registrar-text {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     margin-bottom: 5px;
     color: #333;
     text-align: center;
@@ -777,7 +829,7 @@ main {
     gap: 15px;
     width: 120px;
     height: 120px;
-    background-color: #d3d3d3;
+    background-color: #e7e7e7;
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -801,7 +853,7 @@ main {
 
 .btn-gerar-planilha-text {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     margin-bottom: 5px;
     color: #333;
     text-align: center;
@@ -816,7 +868,7 @@ main {
     gap: 15px;
     width: 120px;
     height: 120px;
-    background-color: #d3d3d3;
+    background-color: #e7e7e7;
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -830,7 +882,7 @@ main {
 
 .btn-gerenciar-dados-text {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     margin-bottom: 5px;
     color: #333;
     text-align: center;
@@ -2869,7 +2921,9 @@ main {
     display: flex;
     flex-direction: column;
     padding: 20px;
-    margin: 20px;
+    margin: 20px auto;
+    max-width: 720px;
+    width: calc(100% - 40px);
     background-color: #d4a67400;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);

@@ -1,195 +1,93 @@
 <!DOCTYPE html>
-<html lang="PT-BR">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SABAE - SISTEMA DE APOIO À BUSCA ATIVA ESCOLAR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2c5aa0">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5108068051421110"
+        crossorigin="anonymous"></script>
+    <title>SABAE - Escolha seu perfil</title>
     <link rel="shortcut icon" href="./assets/imagens/logos/sabae.png" type="image/x-icon">
     <link rel="stylesheet" href="./assets/estilos/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        (function () {
-            const protocol = window.location.protocol;
-            const hostname = window.location.hostname;
-            const isLocal = ['localhost', '127.0.0.1', ''].includes(hostname) || protocol === 'file:';
 
-            if (isLocal || protocol !== 'https:') return;
-
-            const adScript = document.createElement('script');
-            adScript.async = true;
-            adScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5108068051421110';
-            adScript.crossOrigin = 'anonymous';
-            adScript.onerror = function () {
-                console.info('AdSense não carregou neste ambiente ou foi bloqueado pelo navegador.');
-            };
-            document.head.appendChild(adScript);
-        })();
-    </script>
 </head>
 
 <body>
-
-    <div id="loader" class="loader-container">
-        <img src="./assets/imagens/logos/sabae.png" alt="" style="width: 150px;">
-        <div class="spinner"></div>
-        <p>Um momento...</p>
-    </div>
-
     <header class="pwa-header">
         <div class="header-left">
-            <img src="./assets/imagens/logos/sabae2.png" alt="SABAE Logo" class="header-logo"
-                style="width: 50px; height: 50px; border-radius: 10px;">
-            <span class="header-title">SABAE</span>
+            <img src="./assets/imagens/logos/sabae.png" alt="Logo SABAE"
+                style="width: 42px; height: 42px; border-radius: 10px;">
+            <div>
+                <div class="header-title">SABAE</div>
+                <div class="header-datetime">Escolha seu perfil para continuar</div>
+            </div>
         </div>
-        <span class="header-datetime" id="headerDateTime">--:--</span>
     </header>
 
-    <div class="user-info-bar">
-        <div class="user-info-content">
-            <span class="user-icon"><img src="./assets/imagens/ico/User_icon_2.svg" alt="" style="width: 30px;"></span>
-            <span class="user-name" id="nomeUsuarioHeader">Usuário</span>
-        </div>
-        <button class="btn-sair" id="btnSair">Desconectar <i class="ri-plug-line"></i></button>
-    </div>
+    <main style="padding: 24px; max-width: 980px; margin: 0 auto;">
+        <section
+            style="text-align: center; margin-bottom: 28px; display: flex; flex-direction: column; gap: 16px; align-items: center;">
+            <h1 style="font-size: 28px; color: #1f325f; margin-bottom: 10px;">Bem-vindo ao SABAE</h1>
+            <p style="max-width: 720px; margin: 0 auto; color: #4d4d4d; line-height: 1.5; font-size: 13px;">
+                Este sistema foi desenvolvido para apoiar a Busca Ativa Escolar com uma navegação segura e clara.
+                Selecione abaixo o perfil que corresponde a você e acesse as funções corretas.
+            </p>
 
+        </section>
 
-    <!-- Registro de Atividades -->
-    <section class="registro-de-atividades">
-        <div class="aprest" style="margin-bottom: 10px; font-size: 12px;">
-            <h1>Sistema de Apoio à Busca Ativa Escolar</h1>
-        </div>
-        <div class="atividades-container">
-            <h2><img src="./assets/imagens/ico/databaseprocess_basededatos_12922 (1).png" alt=""
-                    style="width: 30px; margin-left: 10px; vertical-align: middle;"> Registro de Atividades</h2>
-            <div class="atividades-list" id="atividadesList">
-                <div class="atividade-item loading">
-                    <span>Carregando atividades...</span>
+        <section class="option-grid"
+            style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+            <article class="option-card"
+                style="background: white; border-radius: 18px; box-shadow: 0 18px 50px rgba(38, 79, 143, 0.12); padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div
+                        style="width: 56px; height: 56px; border-radius: 18px; background: #e7f0ff; display: grid; place-items: center; color: #235fbd; font-size: 24px;">
+                        <img src="./assets/imagens/ico/System-users-3.svg" alt="">
+                    </div>
+                    <div>
+                        <h2 style="font-size: 20px; margin: 0; color: #21325b;">Sou aluno</h2>
+                        <p style="margin: 6px 0 0; color: #5f6f8d; font-size: 14px;">
+                            Acompanhe sua frequência, gráficos e o ranking geral de alunos com maior presença nas aulas.
+                        </p>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-    </section>
-    <main>
-        <a href="./chamada.html" class="btn-registrar-chamadas">
-            <img src="./assets/imagens/ico/User-library.svg" alt="Registrar Chamadas" class="btn-registrar-icon">
-            <span class="btn-registrar-text">Registrar/Editar Chamadas</span>
-        </a>
-        <a href="./planilhas.html" class="btn-gerar-planilha">
-            <img src="./assets/imagens/ico/Spreadsheet.svg" alt="Gerar Planilha" class="btn-gerar-planilha-icon">
-            <span class="btn-gerar-planilha-text">Gerar Planilhas</span>
-        </a>
-        <a href="./crud.html" class="btn-gerenciar-dados">
-            <img src="./assets/imagens/ico/config-aluno.svg" alt="Gerenciar Dados" class="btn-gerenciar-dados-icon">
-            <span class="btn-gerenciar-dados-text">CRUD</span>
-        </a>
+                <a href="página-estudante.html" class="option-button"
+                    style="display: inline-flex; align-items: center; justify-content: center; padding: 14px 20px; background: #3e73bf; color: white; text-decoration: none; border-radius: 12px; font-weight: 600; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                    Entrar como aluno
+                </a>
+            </article>
+
+            <article class="option-card"
+                style="background: white; border-radius: 18px; box-shadow: 0 18px 50px rgba(38, 79, 143, 0.12); padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div
+                        style="width: 56px; height: 56px; border-radius: 18px; background: #f0eef7; display: grid; place-items: center; color: #6e4bb2; font-size: 24px;">
+                        <img src="./assets/imagens/ico/User-library.svg" alt="" style="width: 40px;">
+                    </div>
+                    <div>
+                        <h2 style="font-size: 20px; margin: 0; color: #21325b;">Sou monitor</h2>
+                        <p style="margin: 6px 0 0; color: #5f6f8d; font-size: 14px;">
+                            Acesse o painel de gestão, relatórios e chamada.
+                        </p>
+                    </div>
+                </div>
+                <a href="login.html" class="option-button"
+                    style="display: inline-flex; align-items: center; justify-content: center; padding: 14px 20px; background: #2c5aa0; color: white; text-decoration: none; border-radius: 12px; font-weight: 600; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                    Entrar como monitor
+                </a>
+            </article>
+        </section>
+
     </main>
 
-    <!-- Bloco de Anotações -->
-    <section class="notas-container">
-        <div class="notas-header">
-            <h3><i class="ri-sticky-note-2-line"></i> Anotações</h3>
-            <p style="font-size: 12px;">Anote informações importantes e coisas que você precisa lembrar.</p>
-        </div>
-        <textarea id="notasTextarea" class="notas-textarea" placeholder="Digite suas anotações aqui..."></textarea>
-    </section>
-
-    <!-- Modal de Perfil do Usuário -->
-    <div id="modalPerfilUsuario" class="modal-perfil-usuario" style="display: none;">
-        <div class="modal-perfil-overlay"></div>
-        <div class="modal-perfil-content">
-            <button id="btnFecharPerfilModal" class="btn-fechar-perfil">
-                <i class="ri-close-line"></i>
-            </button>
-            <div class="perfil-usuario-body">
-                <div class="perfil-usuario-avatar">
-                    <img src="./assets/imagens/ico/User_icon_2.svg" alt="Avatar do usuário" style="width: 60px;">
-                </div>
-                <div class="perfil-usuario-info">
-                    <div class="info-item">
-                        <label>NOME DO USUÁRIO</label>
-                        <p id="perfilNomeUsuario" class="info-value nome-usuario">-</p>
-                    </div>
-                    <div class="info-item">
-                        <label>FUNÇÃO</label>
-                        <p id="perfilFuncao" class="info-value">-</p>
-                    </div>
-                    <div class="info-item">
-                        <label>ESCOLA</label>
-                        <p id="perfilCodigoEscolar" class="info-value">-</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="./assets/lógica/supabase-config.js"></script>
-    <script src="./assets/lógica/auth.js"></script>
-    <script src="./assets/lógica/supabase-alunos.js"></script>
-    <script src="./assets/lógica/atividades.js"></script>
-    <script src="./assets/lógica/script.js"></script>
-
-    <!-- Script para verificar autenticação e atualizar data/hora -->
     <script>
-        // Verificar autenticação ao carregar a página
-        async function verificarAutenticacaoAoCarregar() {
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-
-                if (!session) {
-                    console.log('❌ Usuário não autenticado. Redirecionando para login...');
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                console.log('✅ Usuário autenticado:', session.user.email);
-            } catch (erro) {
-                console.error('❌ Erro ao verificar autenticação:', erro);
-                window.location.href = 'login.html';
-            }
-        }
-
-        // Verificar autenticação quando o documento carregar
-        window.addEventListener('load', verificarAutenticacaoAoCarregar);
-
-        // Listener para mudanças de autenticação
-        supabaseClient.auth.onAuthStateChange((evento, sessao) => {
-            if (evento === 'SIGNED_OUT') {
-                console.log('Sessão expirada. Redirecionando para login...');
-                window.location.href = 'login.html';
-            }
+        document.querySelectorAll('.option-button').forEach(button => {
+            button.addEventListener('mouseover', () => button.style.transform = 'translateY(-1px)');
+            button.addEventListener('mouseout', () => button.style.transform = 'translateY(0)');
         });
     </script>
-
-    <!-- Script para atualizar data e hora -->
-    <script>
-        function atualizarDataHora() {
-            const agora = new Date();
-            const dia = String(agora.getDate()).padStart(2, '0');
-            const mes = String(agora.getMonth() + 1).padStart(2, '0');
-            const ano = agora.getFullYear();
-            const horas = String(agora.getHours()).padStart(2, '0');
-            const minutos = String(agora.getMinutes()).padStart(2, '0');
-
-            const dataHora = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
-            document.getElementById('headerDateTime').textContent = dataHora;
-        }
-
-        function agendarProximaAtualizacao() {
-            const agora = new Date();
-            // Calcula quantos milissegundos faltam para o próximo segundo
-            const proximoSegundo = (1000 - agora.getMilliseconds());
-
-            setTimeout(() => {
-                atualizarDataHora();
-                // Após a primeira atualização sincronizada, atualiza a cada segundo
-                setInterval(atualizarDataHora, 1000);
-            }, proximoSegundo);
-        }
-
-        // Atualizar ao carregar (sincronizado com o segundo exato)
-        agendarProximaAtualizacao();
-    </script>
+</body>
 
 </html>

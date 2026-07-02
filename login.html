@@ -119,7 +119,7 @@
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 // Usuário já está logado, redirecionar
-                window.location.href = 'index.html';
+                window.location.href = 'home.html';
             }
         });
 
@@ -190,7 +190,7 @@
                     // A sessão é gerenciada automaticamente pelo Supabase
                     // Redirecionar para página principal após 1 segundo
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        window.location.href = 'home.html';
                     }, 1000);
                 }
             } catch (erro) {
