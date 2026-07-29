@@ -172,7 +172,97 @@ $$;
 
 GRANT EXECUTE ON FUNCTION buscar_aluno_por_matricula_nativo(TEXT, TEXT) TO authenticated;
 
--- ========== FUNÇÃO 3: Atualizar Aluno ==========
+-- ========== FUNÇÃO 3: Buscar Aluno por Matrícula e Nome ==========
+
+DROP FUNCTION IF EXISTS buscar_aluno_por_matricula_nome_nativo(TEXT, TEXT, TEXT);
+
+CREATE OR REPLACE FUNCTION buscar_aluno_por_matricula_nome_nativo(
+    p_email_usuario TEXT,
+    p_matricula TEXT,
+    p_nome TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_aluno RECORD;
+    v_mat_limpo TEXT := LOWER(TRIM(p_matricula));
+    v_nome_limpo TEXT := LOWER(TRIM(p_nome));
+BEGIN
+    SELECT "MAT", "NOME", "TURMA", "TURNO", "STATUS",
+           "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+           "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+           "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"
+    INTO v_aluno
+    FROM "SABAE-DATA"
+    WHERE LOWER(TRIM("MAT")) = v_mat_limpo
+      AND LOWER(TRIM("NOME")) = v_nome_limpo;
+
+    IF v_aluno IS NULL THEN
+        RETURN jsonb_build_object(
+            'sucesso', false,
+            'mensagem', 'Aluno não encontrado',
+            'codigo', 'ALUNO_NAO_ENCONTRADO'
+        );
+    END IF;
+
+    RETURN jsonb_build_object(
+        'sucesso', true,
+        'mensagem', 'Aluno encontrado com sucesso',
+        'dados', jsonb_build_object(
+            'matricula', v_aluno."MAT",
+            'nome', v_aluno."NOME",
+            'turma', v_aluno."TURMA",
+            'turno', v_aluno."TURNO",
+            'status', v_aluno."STATUS",
+            '1', v_aluno."1",
+            '2', v_aluno."2",
+            '3', v_aluno."3",
+            '4', v_aluno."4",
+            '5', v_aluno."5",
+            '6', v_aluno."6",
+            '7', v_aluno."7",
+            '8', v_aluno."8",
+            '9', v_aluno."9",
+            '10', v_aluno."10",
+            '11', v_aluno."11",
+            '12', v_aluno."12",
+            '13', v_aluno."13",
+            '14', v_aluno."14",
+            '15', v_aluno."15",
+            '16', v_aluno."16",
+            '17', v_aluno."17",
+            '18', v_aluno."18",
+            '19', v_aluno."19",
+            '20', v_aluno."20",
+            '21', v_aluno."21",
+            '22', v_aluno."22",
+            '23', v_aluno."23",
+            '24', v_aluno."24",
+            '25', v_aluno."25",
+            '26', v_aluno."26",
+            '27', v_aluno."27",
+            '28', v_aluno."28",
+            '29', v_aluno."29",
+            '30', v_aluno."30",
+            '31', v_aluno."31"
+        )
+    );
+
+EXCEPTION WHEN OTHERS THEN
+    RETURN jsonb_build_object(
+        'sucesso', false,
+        'mensagem', 'Erro ao buscar aluno: ' || SQLERRM,
+        'codigo', 'ERRO_CONSULTA'
+    );
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION buscar_aluno_por_matricula_nome_nativo(TEXT, TEXT, TEXT) TO authenticated;
+
+-- ========== FUNÇÃO 4: Atualizar Aluno ==========
 
 DROP FUNCTION IF EXISTS atualizar_aluno_nativo(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
 

@@ -172,6 +172,49 @@
         color: #203650;
     }
 
+    .loader-overlay {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(32, 54, 80, 0.65);
+        z-index: 999;
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+    }
+
+    .loader-overlay.active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: all;
+    }
+
+    .loader-box {
+        width: 220px;
+        padding: 24px;
+        background: #ffffff;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.16);
+    }
+
+    .loader-spinner {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 18px;
+        border: 6px solid #d1d9e0;
+        border-top-color: #2878c9;
+        border-radius: 50%;
+    }
+
+    .loader-text {
+        font-size: 15px;
+        color: #203650;
+        margin: 0;
+    }
+
     @media (max-width: 600px) {
         .hero p {
             font-size: 14px;
@@ -193,7 +236,7 @@
         <p><span>SISTEMA DE APOIO À BUSCA ATIVA ESCOLAR</span></p>
         <p>Olá, seja bem vindo(a) ao SABAE!</p>
         <div class="frases-animadas">
-  <p>...</p>
+            <p>...</p>
         </div>
     </div>
     <div class="alt-access">
@@ -205,7 +248,7 @@
         <div class="loginform">
             <div class="loginform-header">
                 <h2>Sou aluno</h2>
-                <p>Informe seu usuário e senha para acessar sua frequência.</p>
+                <p>Informe seu Nome Completo e Matrícula para acessar sua frequência.</p>
             </div>
             <form autocomplete="off" spellcheck="false" novalidate>
                 <!-- Campos ocultos para dificultar o autofill de navegadores -->
@@ -230,6 +273,14 @@
                 <button type="submit">Continuar</button>
             </form>
         </div>
+    </section>
+
+    <div id="loader-overlay" class="loader-overlay">
+        <div class="loader-box">
+            <div class="loader-spinner" id="loader-spinner"></div>
+            <p class="loader-text" id="loader-text">Validando dados...</p>
+        </div>
+    </div>
 
     </section>
     <footer class="footer">
@@ -238,6 +289,9 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./assets/lógica/supabase-config.js"></script>
+    <script src="./assets/lógica/auth.js"></script>
     <script>
         const frases = [
             "Estudar é o maior investimento que podes fazer em ti mesmo. — William Arthur Lewis",
@@ -268,7 +322,7 @@
 
         function trocarFrase() {
             gsap.to(fraseEl, {
-                duration: 0.4333,
+                duration: 0.4333666999333555222,
                 opacity: 0,
                 y: -12,
                 ease: 'power2.in',
@@ -280,8 +334,8 @@
                     }
                     fraseEl.textContent = ordemFrases[indiceFrase];
                     gsap.fromTo(fraseEl,
-                        {opacity: 0, y: 12},
-                        {duration: 0.8, opacity: 1, y: 0, ease: 'power2.out'});
+                        { opacity: 0, y: 12 },
+                        { duration: 0.8, opacity: 1, y: 0, ease: 'power2.out' });
                 }
             });
         }
@@ -296,6 +350,120 @@
         });
 
         setInterval(trocarFrase, 9000);
+    </script>
+
+    <script>
+        async function buscarAlunoPorMatriculaENome(matricula, nome) {
+            try {
+                const usuario = await obterUsuarioAtual().catch(() => null);
+                const emailUsuario = usuario?.email || '';
+
+                const { data, error } = await supabaseClient.rpc('buscar_aluno_por_matricula_nome_nativo', {
+                    p_email_usuario: emailUsuario,
+                    p_matricula: matricula,
+                    p_nome: nome
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                return data;
+            } catch (erro) {
+                console.error('Erro ao buscar aluno:', erro);
+                throw erro;
+            }
+        }
+
+        function mostrarLoader() {
+            const overlay = document.getElementById('loader-overlay');
+            const spinner = document.getElementById('loader-spinner');
+            overlay.classList.add('active');
+            gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.35 });
+            gsap.fromTo(spinner, { rotation: 0 }, { rotation: 360, duration: 1, repeat: -1, ease: 'linear' });
+        }
+
+        function esconderLoader() {
+            const overlay = document.getElementById('loader-overlay');
+            overlay.classList.remove('active');
+        }
+
+        const CACHE_KEY = 'sabae_aluno_cache';
+        const CACHE_TTL_MS = 5 * 60 * 60 * 1000; // 5 horas
+
+        function salvarAlunoNoCache(dadosAluno) {
+            const cache = {
+                timestamp: Date.now(),
+                aluno: dadosAluno
+            };
+            localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+        }
+
+        function obterAlunoDoCache() {
+            try {
+                const raw = localStorage.getItem(CACHE_KEY);
+                if (!raw) return null;
+                const cache = JSON.parse(raw);
+                if (!cache || !cache.timestamp || !cache.aluno) return null;
+                if (Date.now() - cache.timestamp > CACHE_TTL_MS) {
+                    localStorage.removeItem(CACHE_KEY);
+                    return null;
+                }
+                return cache.aluno;
+            } catch (erro) {
+                console.warn('Erro ao ler cache do aluno:', erro);
+                localStorage.removeItem(CACHE_KEY);
+                return null;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const formulario = document.querySelector('.loginform form');
+            if (!formulario) return;
+
+            formulario.addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                const nome = document.getElementById('username').value.trim();
+                const matricula = document.getElementById('password').value.trim();
+
+                if (!nome || !matricula) {
+                    alert('Por favor, informe Nome Completo e Matrícula.');
+                    return;
+                }
+
+                const alunoEmCache = obterAlunoDoCache();
+                if (alunoEmCache && alunoEmCache.matricula === matricula && alunoEmCache.nome.toLowerCase() === nome.toLowerCase()) {
+                    mostrarLoader();
+                    setTimeout(() => {
+                        window.location.href = 'página-estudante.html';
+                    }, 700);
+                    return;
+                }
+
+                mostrarLoader();
+
+                try {
+                    const resultado = await buscarAlunoPorMatriculaENome(matricula, nome);
+
+                    if (!resultado || !resultado.sucesso) {
+                        esconderLoader();
+                        alert(resultado?.mensagem || 'Aluno não encontrado. Verifique os dados.');
+                        return;
+                    }
+
+                    salvarAlunoNoCache(resultado.dados);
+                    gsap.to('#loader-overlay', {
+                        opacity: 0, duration: 0.3, delay: 0.5, onComplete() {
+                            window.location.href = 'página-estudante.html';
+                        }
+                    });
+                } catch (erro) {
+                    esconderLoader();
+                    alert('Erro ao consultar o aluno. Tente novamente mais tarde.');
+                }
+            });
+        });
     </script>
 </body>
 
