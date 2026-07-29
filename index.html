@@ -38,7 +38,7 @@
     }
 
     .hero span {
-    color: rgb(205, 177, 20);
+        color: rgb(205, 177, 20);
     }
 
     section {
@@ -120,9 +120,35 @@
         background-color: rgb(28, 108, 170);
     }
 
+    .alt-access {
+        display: flex;
+        justify-content: center;
+        margin: 0 20px 20px;
+    }
+
+    .alt-access button {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 3px;
+        background-color: #f1a82a;
+        color: #203650;
+        font-size: 15px;
+        cursor: pointer;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: -10px;
+    }
+
+    .alt-access button:hover {
+        background-color: #d99e28;
+    }
+
     @media (max-width: 600px) {
         .hero p {
             font-size: 14px;
+        }
+
+        .alt-access {
+            margin: 0 10px 20px;
         }
 
         .loginform {
@@ -137,14 +163,16 @@
         <p><span>SISTEMA DE APOIO À BUSCA ATIVA ESCOLAR</span></p>
         <p>Olá, seja bem vindo ao SABAE!<br> Você é muito especial!</p>
     </div>
+    <div class="alt-access">
+        <a href="login.html">
+            <button type="button">Acesso alternativo (Monitor)</button>
+        </a>
+    </div>
     <section>
         <div class="loginform">
             <div class="loginform-header">
                 <h2>Sou aluno</h2>
                 <p>Informe seu usuário e senha para acessar sua frequência.</p>
-            </div>
-            <div class="alt-access" style="margin-bottom: 18px; font-size: 14px; color: #3b5876; text-align: center;">
-                <span>Ou <a href="login.html" style="color: #2878c9; text-decoration: none; font-weight: 600;">entrar como monitor</a></span>
             </div>
             <form>
                 <label for="username"><i class="ri-user-line"></i> Usuário</label>
