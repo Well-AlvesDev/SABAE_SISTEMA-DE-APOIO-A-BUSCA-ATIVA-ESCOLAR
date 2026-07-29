@@ -9,9 +9,35 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <title>SABAE - CRUD</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .page-content {
+            flex: 1 0 auto;
+        }
+
+        .footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 16px 20px;
+            font-size: 13px;
+            color: #5a6370;
+            background: #ffffff;
+            border-top: 1px solid #d1d9e0;
+        }
+
+        .footer strong {
+            color: #203650;
+        }
+    </style>
 </head>
 
-<body style="overflow: hidden;">
+<body style="display:flex; flex-direction:column; min-height:100vh; overflow: hidden;">
 
     <div id="loader" class="loader-container">
         <img src="./assets/imagens/logos/sabae.png" alt="" style="width: 150px;">
@@ -247,6 +273,10 @@
             </div>
         </div>
     </div>
+    <footer class="footer">
+        Desenvolvido por <strong>Weslley Kholson Felintro Alves</strong> - Analista e Desenvolvedor de Sistemas |
+        Graduando na <a href="https://www.fiap.com.br" target="_blank">FIAP</a>
+    </footer>
     <script src="./assets/lógica/script.js"></script>
     <style>
         @keyframes spin {
