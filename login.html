@@ -27,7 +27,7 @@
         background: white;
         padding: 40px;
         border-radius: 10px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 10px 25px rgba(212, 212, 212, 0.2);
         width: 100%;
         max-width: 400px;
     }
@@ -46,11 +46,11 @@
         margin-bottom: 20px;
     }
 
-    label {
+    .login-container .form-group label {
         display: block;
         margin-bottom: 8px;
         color: #333;
-        font-weight: 500;
+        font-weight: 400;
     }
 
     input {
@@ -120,18 +120,17 @@
                 style="margin-top: -30px; margin-bottom: 0px;">
         </div>
         <div class="sobre" style="font-size: 13px; margin-bottom: 10px; margin-top: -50px; color: #3c3c3c;">
-            <p><strong>- Bem-vindo ao SABAE, Sr.(a) Monitor(a)!</strong></p>
-            <p>O SABAE é um sistema projetado para facilitar a
-                identificação, registro e acompanhamento da frequência dos estudantes. Aproveite! Você merece o melhor sempre!</p>
+            <p style="margin-bottom: 10px;"><strong>- Bem-vindo ao SABAE, Sr.(a) Monitor(a)!</strong></p>
+          <p>  Faça login e Aproveite! <br> Você merece o melhor sempre!</p>
         </div>
         <form id="loginForm">
             <div class="form-group">
-                <label for="usuario"><i class="ri-mail-line"></i> Email</label>
-                <input type="email" id="usuario" name="usuario" required placeholder="Digite seu email">
+                <label for="usuario"><i class="ri-user-line"></i> Usuário</label>
+                <input type="text" id="usuario" name="usuario" required placeholder="Digite seu usuário">
             </div>
 
             <div class="form-group">
-                <label for="senha"><i class="ri-lock-password-line"></i> Senha</label>
+                <label for="senha"><i class="ri-lock-line"></i> Senha</label>
                 <input type="password" id="senha" name="senha" required placeholder="Digite sua senha">
             </div>
 
