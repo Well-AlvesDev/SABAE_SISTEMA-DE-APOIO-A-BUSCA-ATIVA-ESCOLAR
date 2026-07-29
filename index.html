@@ -41,6 +41,24 @@
         color: rgb(205, 177, 20);
     }
 
+    .frases-animadas {
+        display: inline-block;
+        margin: 20px auto 0;
+        padding: 6px 22px;
+        background-color: #f8f6f0;
+        border: 1px solid #d1d9e0;
+        border-radius: 0;
+        color: #203650;
+        font-size: 18px;
+        max-width: 380px;
+        text-align: center;
+    }
+
+    .frases-animadas p {
+        margin: 0;
+        min-height: 1.4em;
+    }
+
     section {
         display: flex;
         justify-content: center;
@@ -174,7 +192,10 @@
     <div class="hero">
         <img src="./assets/imagens/logos/sabae-com.webp" alt="Logo SABAE">
         <p><span>SISTEMA DE APOIO À BUSCA ATIVA ESCOLAR</span></p>
-        <p>Olá, seja bem vindo(a) ao SABAE!<br> Você é muito especial!</p>
+        <p>Olá, seja bem vindo(a) ao SABAE!</p>
+        <div class="frases-animadas">
+  <p>...</p>
+        </div>
     </div>
     <div class="alt-access">
         <a href="login.html">
@@ -216,6 +237,67 @@
         Desenvolvido por <strong>Weslley Kholson Felintro Alves</strong> - Analista e Desenvolvedor de Sistemas |
         Graduando na <a href="https://www.fiap.com.br" target="_blank">FIAP</a>
     </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        const frases = [
+            "Estudar é o maior investimento que podes fazer em ti mesmo. — William Arthur Lewis",
+            "A coisa mais bonita sobre o aprendizado é que ninguém pode tirá-lo de você. — B.B. King",
+            "Juntos construímos um futuro melhor!",
+            "Investir em conhecimento rende sempre os melhores juros. — Benjamin Franklin",
+            "Eu não tenho nenhum talento especial. Sou apenas apaixonadamente curioso. — Albert Einstein"
+        ];
+
+        const fraseEl = document.querySelector('.frases-animadas p');
+        let ordemFrases = [];
+        let indiceFrase = 0;
+
+        function embaralhar(array) {
+            const copiada = [...array];
+            for (let i = copiada.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copiada[i], copiada[j]] = [copiada[j], copiada[i]];
+            }
+            return copiada;
+        }
+
+        function iniciarOrdemAleatoria() {
+            ordemFrases = embaralhar(frases);
+            indiceFrase = 0;
+            fraseEl.textContent = ordemFrases[indiceFrase];
+        }
+
+        function trocarFrase() {
+            gsap.to(fraseEl, {
+                duration: 0.4333,
+                opacity: 0,
+                y: -12,
+                ease: 'power2.in',
+                onComplete() {
+                    indiceFrase += 1;
+                    if (indiceFrase >= ordemFrases.length) {
+                        ordemFrases = embaralhar(frases);
+                        indiceFrase = 0;
+                    }
+                    fraseEl.textContent = ordemFrases[indiceFrase];
+                    gsap.fromTo(fraseEl,
+                        {opacity: 0, y: 12},
+                        {duration: 0.8, opacity: 1, y: 0, ease: 'power2.out'});
+                }
+            });
+        }
+
+        iniciarOrdemAleatoria();
+
+        gsap.from('.frases-animadas', {
+            duration: 1,
+            opacity: 0,
+            y: 20,
+            ease: 'power2.out'
+        });
+
+        setInterval(trocarFrase, 9000);
+    </script>
 </body>
 
 </html>
