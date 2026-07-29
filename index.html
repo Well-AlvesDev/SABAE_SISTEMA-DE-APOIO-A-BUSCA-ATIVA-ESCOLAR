@@ -174,7 +174,7 @@
     <div class="hero">
         <img src="./assets/imagens/logos/sabae-com.webp" alt="Logo SABAE">
         <p><span>SISTEMA DE APOIO À BUSCA ATIVA ESCOLAR</span></p>
-        <p>Olá, seja bem vindo ao SABAE!<br> Você é muito especial!</p>
+        <p>Olá, seja bem vindo(a) ao SABAE!<br> Você é muito especial!</p>
     </div>
     <div class="alt-access">
         <a href="login.html">
@@ -187,13 +187,19 @@
                 <h2>Sou aluno</h2>
                 <p>Informe seu usuário e senha para acessar sua frequência.</p>
             </div>
-            <form>
-                <label for="username"><i class="ri-user-line"></i> Usuário</label>
-                <input type="text" id="username" name="username" placeholder="Ex. João Guilherme" autocomplete="off"
-                    required>
+            <form autocomplete="off" spellcheck="false" novalidate>
+                <!-- Campos ocultos para dificultar o autofill de navegadores -->
+                <input type="text" name="fakeusernameremembered" id="fakeusernameremembered" autocomplete="off"
+                    style="display:none">
+                <input type="password" name="fakepasswordremembered" autocomplete="new-password" style="display:none">
 
-                <label for="password"><i class="ri-lock-line"></i> Senha</label>
-                <input type="password" id="password" name="password" placeholder="********" autocomplete="off" required>
+                <label for="username"><i class="ri-user-line"></i> Nome completo</label>
+                <input type="text" id="username" name="user_fullname" placeholder="Ex. João Guilherme Pereira da Silva"
+                    autocomplete="off" autocorrect="off" autocapitalize="off" required>
+
+                <label for="password"><i class="ri-lock-line"></i> Matrícula</label>
+                <input type="password" id="password" name="matricula" placeholder="Ex. 123456"
+                    autocomplete="new-password" autocorrect="off" autocapitalize="off" required>
 
                 <label for="modulo">Módulo - Escola</label>
                 <select id="modulo" name="modulo" required>
@@ -207,7 +213,8 @@
 
     </section>
     <footer class="footer">
-        Desenvolvido por <strong>Weslley Kholson Felintro Alves</strong> - Analista e Desenvolvedor de Sistemas | Graduando na <a href="https://www.fiap.com.br" target="_blank">FIAP</a>
+        Desenvolvido por <strong>Weslley Kholson Felintro Alves</strong> - Analista e Desenvolvedor de Sistemas |
+        Graduando na <a href="https://www.fiap.com.br" target="_blank">FIAP</a>
     </footer>
 </body>
 
