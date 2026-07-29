@@ -69,3 +69,4 @@ Otimizar o processo de busca ativa escolar através de:
 
 ---
 **Status:** Em Desenvolvimento ✨
+

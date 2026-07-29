@@ -3,91 +3,167 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#2c5aa0">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5108068051421110"
-        crossorigin="anonymous"></script>
-    <title>SABAE - Escolha seu perfil</title>
-    <link rel="shortcut icon" href="./assets/imagens/logos/sabae.png" type="image/x-icon">
-    <link rel="stylesheet" href="./assets/estilos/style.css">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SABAE - SISTEMA DE APOIO À BUSCA ATIVA ESCOLAR</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.min.css">
 </head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #f0f4f8;
+        color: #203650;
+    }
+
+    .hero {
+        text-align: center;
+        padding: 30px 20px 10px;
+    }
+
+    .hero img {
+        width: 240px;
+        margin: 0 auto;
+        display: block;
+    }
+
+    .hero p {
+        font-size: 16px;
+        margin-top: 10px;
+        color: #224f8e;
+    }
+
+    .hero span {
+    color: rgb(205, 177, 20);
+    }
+
+    section {
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .loginform {
+        width: 100%;
+        max-width: 360px;
+        background: white;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+        padding: 30px 25px;
+    }
+
+    .loginform-header {
+        margin-bottom: 24px;
+        text-align: center;
+    }
+
+    .loginform-header h2 {
+        font-size: 22px;
+        margin-bottom: 6px;
+        color: #284c74;
+    }
+
+    .loginform-header p {
+        font-size: 14px;
+        color: #5a6370;
+    }
+
+    .loginform label {
+        display: block;
+        font-size: 14px;
+        color: rgb(83, 86, 88);
+        font-weight: bold;
+        margin-top: 16px;
+    }
+
+    .loginform input,
+    .loginform select {
+        width: 100%;
+        padding: 10px 12px;
+        margin-top: 6px;
+        border: 1px solid #d1d9e0;
+        border-radius: 8px;
+        background: #f7fafc;
+        color: #203650;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .loginform select {
+        background-image: linear-gradient(45deg, transparent 50%, #203650 50%),
+            linear-gradient(135deg, #203650 50%, transparent 50%);
+        background-position: calc(100% - 18px) calc(50% - 4px), calc(100% - 14px) calc(50% - 4px);
+        background-size: 6px 6px, 6px 6px;
+        background-repeat: no-repeat;
+    }
+
+    .loginform button {
+        width: 100%;
+        margin-top: 22px;
+        padding: 12px 0;
+        background-color: rgb(40, 136, 201);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .loginform button:hover {
+        background-color: rgb(28, 108, 170);
+    }
+
+    @media (max-width: 600px) {
+        .hero p {
+            font-size: 14px;
+        }
+
+        .loginform {
+            margin: 0 10px;
+        }
+    }
+</style>
 
 <body>
-    <header class="pwa-header">
-        <div class="header-left">
-            <img src="./assets/imagens/logos/sabae2.webp" alt="Logo SABAE"
-                style="width: 42px; height: 42px; border-radius: 10px;">
-            <div>
-                <div class="header-title">SABAE</div>
-                <div class="header-datetime">Escolha seu perfil para continuar</div>
+    <div class="hero">
+        <img src="./assets/imagens/logos/sabae-com.webp" alt="Logo SABAE">
+        <p><span>SISTEMA DE APOIO À BUSCA ATIVA ESCOLAR</span></p>
+        <p>Olá, seja bem vindo ao SABAE!<br> Você é muito especial!</p>
+    </div>
+    <section>
+        <div class="loginform">
+            <div class="loginform-header">
+                <h2>Sou aluno</h2>
+                <p>Informe seu usuário e senha para acessar sua frequência.</p>
             </div>
+            <div class="alt-access" style="margin-bottom: 18px; font-size: 14px; color: #3b5876; text-align: center;">
+                <span>Ou <a href="login.html" style="color: #2878c9; text-decoration: none; font-weight: 600;">entrar como monitor</a></span>
+            </div>
+            <form>
+                <label for="username"><i class="ri-user-line"></i> Usuário</label>
+                <input type="text" id="username" name="username" placeholder="Ex. João Guilherme" autocomplete="off"
+                    required>
+
+                <label for="password"><i class="ri-lock-line"></i> Senha</label>
+                <input type="password" id="password" name="password" placeholder="********" autocomplete="off" required>
+
+                <label for="modulo">Módulo - Escola</label>
+                <select id="modulo" name="modulo" required>
+                    <option value="">Selecione a escola</option>
+                    <option value="Escola Dom Bosco - Ensino Fundamental e Médio">Escola Dom Bosco - Ensino Fundamental
+                        e Médio</option>
+                </select>
+                <button type="submit">Continuar</button>
+            </form>
         </div>
-    </header>
-
-    <main style="padding: 24px; max-width: 980px; margin: 0 auto;">
-        <section
-            style="text-align: center; margin-bottom: 28px; display: flex; flex-direction: column; gap: 16px; align-items: center;">
-            <h1 style="font-size: 28px; color: #1f325f; margin-bottom: 10px;">Bem-vindo ao SABAE</h1>
-            <p style="max-width: 720px; margin: 0 auto; color: #4d4d4d; line-height: 1.5; font-size: 13px;">
-                Este sistema foi desenvolvido para apoiar a Busca Ativa Escolar com uma navegação segura e clara.
-                Selecione abaixo o perfil que corresponde a você e acesse as funções corretas.
-            </p>
-
-        </section>
-
-        <section class="option-grid"
-            style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
-            <article class="option-card"
-                style="background: white; border-radius: 18px; box-shadow: 0 18px 50px rgba(38, 79, 143, 0.12); padding: 24px; display: flex; flex-direction: column; gap: 16px;">
-                <div style="display: flex; align-items: center; gap: 14px;">
-                    <div
-                        style="width: 56px; height: 56px; border-radius: 18px; background: #e7f0ff; display: grid; place-items: center; color: #235fbd; font-size: 24px;">
-                        <img src="./assets/imagens/ico/System-users-3.svg" alt="">
-                    </div>
-                    <div>
-                        <h2 style="font-size: 20px; margin: 0; color: #21325b;">Sou aluno</h2>
-                        <p style="margin: 6px 0 0; color: #5f6f8d; font-size: 14px;">
-                            Acompanhe sua frequência, gráficos e o ranking geral de alunos com maior presença nas aulas.
-                        </p>
-                    </div>
-                </div>
-
-                <a href="página-estudante.html" class="option-button"
-                    style="display: inline-flex; align-items: center; justify-content: center; padding: 14px 20px; background: #3e73bf; color: white; text-decoration: none; border-radius: 12px; font-weight: 600; transition: transform 0.2s ease, box-shadow 0.2s ease;">
-                    Entrar como aluno
-                </a>
-            </article>
-
-            <article class="option-card"
-                style="background: white; border-radius: 18px; box-shadow: 0 18px 50px rgba(38, 79, 143, 0.12); padding: 24px; display: flex; flex-direction: column; gap: 16px;">
-                <div style="display: flex; align-items: center; gap: 14px;">
-                    <div
-                        style="width: 56px; height: 56px; border-radius: 18px; background: #f0eef7; display: grid; place-items: center; color: #6e4bb2; font-size: 24px;">
-                        <img src="./assets/imagens/ico/User-library.svg" alt="" style="width: 40px;">
-                    </div>
-                    <div>
-                        <h2 style="font-size: 20px; margin: 0; color: #21325b;">Sou monitor</h2>
-                        <p style="margin: 6px 0 0; color: #5f6f8d; font-size: 14px;">
-                            Acesse o painel de gestão, relatórios e chamada.
-                        </p>
-                    </div>
-                </div>
-                <a href="login.html" class="option-button"
-                    style="display: inline-flex; align-items: center; justify-content: center; padding: 14px 20px; background: #2c5aa0; color: white; text-decoration: none; border-radius: 12px; font-weight: 600; transition: transform 0.2s ease, box-shadow 0.2s ease;">
-                    Entrar como monitor
-                </a>
-            </article>
-        </section>
-
-    </main>
-
-    <script>
-        document.querySelectorAll('.option-button').forEach(button => {
-            button.addEventListener('mouseover', () => button.style.transform = 'translateY(-1px)');
-            button.addEventListener('mouseout', () => button.style.transform = 'translateY(0)');
-        });
-    </script>
+    </section>
 </body>
 
 </html>
