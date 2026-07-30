@@ -260,8 +260,8 @@
                 <input type="text" id="username" name="user_fullname" placeholder="Ex. João Guilherme Pereira da Silva"
                     autocomplete="off" autocorrect="off" autocapitalize="off" required>
 
-                <label for="password"><i class="ri-lock-line"></i> Matrícula</label>
-                <input type="password" id="password" name="matricula" placeholder="Ex. 123456"
+                <label for="password"><i class="ri-lock-line"></i> Senha</label>
+                <input type="password" id="password" name="senha" placeholder="Digite sua senha"
                     autocomplete="new-password" autocorrect="off" autocapitalize="off" required>
 
                 <label for="modulo">Escola:</label>
@@ -353,14 +353,14 @@
     </script>
 
     <script>
-        async function buscarAlunoPorMatriculaENome(matricula, nome) {
+        async function buscarAlunoPorSenhaENome(senha, nome) {
             try {
                 const usuario = await obterUsuarioAtual().catch(() => null);
                 const emailUsuario = usuario?.email || '';
 
                 const { data, error } = await supabaseClient.rpc('buscar_aluno_por_matricula_nome_nativo', {
                     p_email_usuario: emailUsuario,
-                    p_matricula: matricula,
+                    p_matricula: senha,
                     p_nome: nome
                 });
 
@@ -425,15 +425,15 @@
                 event.preventDefault();
 
                 const nome = document.getElementById('username').value.trim();
-                const matricula = document.getElementById('password').value.trim();
+                const senha = document.getElementById('password').value.trim();
 
-                if (!nome || !matricula) {
-                    alert('Por favor, informe Nome Completo e Matrícula.');
+                if (!nome || !senha) {
+                    alert('Por favor, informe Nome Completo e Senha.');
                     return;
                 }
 
                 const alunoEmCache = obterAlunoDoCache();
-                if (alunoEmCache && alunoEmCache.matricula === matricula && alunoEmCache.nome.toLowerCase() === nome.toLowerCase()) {
+                if (alunoEmCache && alunoEmCache.senha === senha && alunoEmCache.nome.toLowerCase() === nome.toLowerCase()) {
                     mostrarLoader();
                     setTimeout(() => {
                         window.location.href = 'página-estudante.html';
@@ -444,7 +444,7 @@
                 mostrarLoader();
 
                 try {
-                    const resultado = await buscarAlunoPorMatriculaENome(matricula, nome);
+                    const resultado = await buscarAlunoPorSenhaENome(senha, nome);
 
                     if (!resultado || !resultado.sucesso) {
                         esconderLoader();
@@ -452,7 +452,7 @@
                         return;
                     }
 
-                    salvarAlunoNoCache(resultado.dados);
+                    salvarAlunoNoCache({ ...resultado.dados, senha });
                     gsap.to('#loader-overlay', {
                         opacity: 0, duration: 0.3, delay: 0.5, onComplete() {
                             window.location.href = 'página-estudante.html';

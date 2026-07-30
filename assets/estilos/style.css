@@ -1400,6 +1400,55 @@ main {
 }
 
 /* ========== MODAL DE CHAMADA ========== */
+
+/* Header action menu (três pontos) */
+.header-right {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-action-menu {
+    position: absolute;
+    top: 56px;
+    right: 20px;
+    background: #ffffff;
+    color: #2c3e50;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    overflow: hidden;
+    min-width: 220px;
+    z-index: 200;
+}
+
+.header-action-menu.hidden {
+    display: none;
+}
+
+.header-action-menu .menu-item {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    text-align: left;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.header-action-menu .menu-item:hover {
+    background: #f5f7fb;
+}
+
+@media (max-width: 600px) {
+    .header-action-menu {
+        right: 12px;
+        top: 52px;
+        min-width: 180px;
+    }
+}
+
 .modal-chamada {
     position: fixed;
     top: 0;

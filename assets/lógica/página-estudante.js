@@ -205,3 +205,50 @@ function montarHeaderEstudante() {
 }
 
 document.addEventListener('DOMContentLoaded', montarHeaderEstudante);
+
+// Header action menu handlers (três pontos)
+document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('menuToggle');
+    const headerMenu = document.getElementById('headerMenu');
+
+    if (!menuToggle || !headerMenu) return;
+
+    menuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        headerMenu.classList.toggle('hidden');
+        const expanded = headerMenu.classList.contains('hidden') ? 'false' : 'true';
+        headerMenu.setAttribute('aria-hidden', expanded === 'true' ? 'false' : 'true');
+    });
+
+    // Fecha o menu ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (!headerMenu.classList.contains('hidden')) {
+            if (!headerMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                headerMenu.classList.add('hidden');
+                headerMenu.setAttribute('aria-hidden', 'true');
+            }
+        }
+    });
+
+    headerMenu.addEventListener('click', (e) => {
+        const btn = e.target.closest('.menu-item');
+        if (!btn) return;
+        const action = btn.getAttribute('data-action');
+        headerMenu.classList.add('hidden');
+        headerMenu.setAttribute('aria-hidden', 'true');
+
+        if (action === 'request-justification') {
+            alert('Solicitação de justificativa de falta enviada (simulada).');
+        } else if (action === 'change-password') {
+            const nova = prompt('Digite a nova senha:');
+            if (nova !== null && nova.length > 0) {
+                alert('Senha alterada com sucesso (simulada).');
+            }
+        } else if (action === 'logout') {
+            if (confirm('Deseja realmente sair da conta?')) {
+                try { localStorage.removeItem('sabae_aluno_cache'); } catch (err) { }
+                window.location.href = './login.html';
+            }
+        }
+    });
+});

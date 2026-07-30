@@ -197,8 +197,14 @@ BEGIN
            "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"
     INTO v_aluno
     FROM "SABAE-DATA"
-    WHERE LOWER(TRIM("MAT")) = v_mat_limpo
-      AND LOWER(TRIM("NOME")) = v_nome_limpo;
+    WHERE LOWER(TRIM("NOME")) = v_nome_limpo
+      AND (
+          (LOWER(TRIM("passxy")) = LOWER(TRIM(p_matricula))
+           AND LOWER(TRIM("passxy")) <> 'senhapadraomatricula@kholson')
+          OR
+          (LOWER(TRIM("passxy")) = 'senhapadraomatricula@kholson'
+           AND LOWER(TRIM("MAT")) = v_mat_limpo)
+      );
 
     IF v_aluno IS NULL THEN
         RETURN jsonb_build_object(
