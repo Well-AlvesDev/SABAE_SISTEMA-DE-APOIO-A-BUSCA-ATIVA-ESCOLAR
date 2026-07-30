@@ -128,7 +128,33 @@ function renderizarBadgesDeFrequencia(aluno) {
     const anoAtual = new Date().getFullYear();
     const estatisticas = calcularEstatisticasFrequencia(aluno);
 
+    // Totais gerais (soma de todos os meses)
+    const totais = estatisticas.reduce((acc, s) => {
+        acc.p += Number(s.presencas || 0);
+        acc.fj += Number(s.faltasJustificadas || 0);
+        acc.fnj += Number(s.faltasNaoJustificadas || 0);
+        return acc;
+    }, { p: 0, fj: 0, fnj: 0 });
+
+    const totalGeral = totais.p + totais.fj + totais.fnj;
+    const pct = (n) => totalGeral ? Math.round((n / totalGeral) * 100) : 0;
+
     let html = `
+        <div class="summary-bars">
+            <div class="summary-bar">
+                <div class="summary-bar-left"><span class="summary-percent">${pct(totais.fnj)}%</span><span class="summary-label">FALTA (FNJ)</span></div>
+                <div class="summary-bar-track"><div class="summary-bar-fill fnj" style="width: ${pct(totais.fnj)}%"></div></div>
+            </div>
+            <div class="summary-bar">
+                <div class="summary-bar-left"><span class="summary-percent">${pct(totais.fj)}%</span><span class="summary-label">FALTA <br>JUSTIFICADA (FJ)</span></div>
+                <div class="summary-bar-track"><div class="summary-bar-fill fj" style="width: ${pct(totais.fj)}%"></div></div>
+            </div>
+            <div class="summary-bar">
+                <div class="summary-bar-left"><span class="summary-percent">${pct(totais.p)}%</span><span class="summary-label">PRESENÇA (P)</span></div>
+                <div class="summary-bar-track"><div class="summary-bar-fill p" style="width: ${pct(totais.p)}%"></div></div>
+            </div>
+        </div>
+
         <div class="month-badges-title">- Referente ao ano de ${anoAtual} -</div>
         <p class="month-badges-note">Aviso: Registros de chamadas de anos anteriores são apagados do sistema do SABAE para evitar sobrecarga no servidor. Mas os registros ainda podem ser encontrados no SIEPE ou secretaria da sua escola.</p>
     `;
@@ -166,17 +192,12 @@ function montarHeaderEstudante() {
     if (!container) return;
 
     if (!aluno) {
-        container.innerHTML = `
-            <div class="student-header-card">
-                <div class="student-header-avatar">
-                    <img src="./assets/imagens/ico/image.webp" alt="Foto do estudante">
-                </div>
-                <div class="student-header-info">
-                    <h1>Olá, estudante</h1>
-                    <p>Dados do aluno não encontrados. Faça login novamente.</p>
-                </div>
-            </div>
-        `;
+        // Exibir página em branco com mensagem quando não há dados em cache
+        try {
+            document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fff;"><h1>nada por aqui</h1></div>';
+        } catch (err) {
+            console.warn('Falha ao renderizar página vazia:', err);
+        }
         return;
     }
 
@@ -212,6 +233,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerMenu = document.getElementById('headerMenu');
 
     if (!menuToggle || !headerMenu) return;
+    // Elementos do modal de logout (se presentes no DOM)
+    const logoutModal = document.getElementById('logoutModal');
+    const confirmLogoutBtn = logoutModal ? logoutModal.querySelector('.confirm-logout') : null;
+    const cancelLogoutBtn = logoutModal ? logoutModal.querySelector('.cancel-logout') : null;
+
+    function showLogoutModal() {
+        if (!logoutModal) return null;
+        logoutModal.classList.remove('hidden');
+        logoutModal.setAttribute('aria-hidden', 'false');
+        if (confirmLogoutBtn) confirmLogoutBtn.focus();
+        return true;
+    }
+
+    function hideLogoutModal() {
+        if (!logoutModal) return;
+        logoutModal.classList.add('hidden');
+        logoutModal.setAttribute('aria-hidden', 'true');
+    }
+
+    if (logoutModal) {
+        // clicar no backdrop fecha o modal
+        logoutModal.addEventListener('click', (ev) => {
+            if (ev.target && ev.target.dataset && ev.target.dataset.dismiss === 'modal') {
+                hideLogoutModal();
+            }
+        });
+
+        // Esc fecha o modal
+        document.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape' && !logoutModal.classList.contains('hidden')) {
+                hideLogoutModal();
+            }
+        });
+
+        if (confirmLogoutBtn) {
+            confirmLogoutBtn.addEventListener('click', () => {
+                try { localStorage.removeItem('sabae_aluno_cache'); } catch (err) { }
+                window.location.href = './index.html';
+            });
+        }
+
+        if (cancelLogoutBtn) {
+            cancelLogoutBtn.addEventListener('click', hideLogoutModal);
+        }
+    }
 
     menuToggle.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -245,9 +311,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Senha alterada com sucesso (simulada).');
             }
         } else if (action === 'logout') {
-            if (confirm('Deseja realmente sair da conta?')) {
-                try { localStorage.removeItem('sabae_aluno_cache'); } catch (err) { }
-                window.location.href = './login.html';
+            // Preferir o modal customizado; se não existir, usar confirm()
+            if (logoutModal) {
+                showLogoutModal();
+            } else {
+                if (confirm('Deseja realmente sair da conta?')) {
+                    try { localStorage.removeItem('sabae_aluno_cache'); } catch (err) { }
+                    window.location.href = './index.html';
+                }
             }
         }
     });

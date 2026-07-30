@@ -8,6 +8,118 @@
     <link rel="shortcut icon" href="./assets/imagens/logos/sabae.png" type="image/x-icon">
     <link rel="stylesheet" href="./assets/estilos/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.css">
+    <style>
+        /* Modal de confirmação simples */
+        #logoutModal.hidden {
+            display: none;
+        }
+
+        #logoutModal {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            z-index: 1000;
+        }
+
+        #logoutModal .modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        #logoutModal .modal-content {
+            position: relative;
+            background: #fff;
+            padding: 1.25rem;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            max-width: 420px;
+            width: calc(100% - 32px);
+            z-index: 1;
+        }
+
+        #logoutModal .modal-actions {
+            display: flex;
+            gap: .5rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: .5rem .75rem;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .btn-danger {
+            background: #d9534f;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+        }
+
+        /* Resumo geral (barras horizontais) */
+        .summary-bars {
+            display: flex;
+            flex-direction: column;
+            gap: .75rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-bar {
+            display: flex;
+            gap: .75rem;
+            align-items: center;
+        }
+
+        .summary-bar-left {
+            width: 160px;
+            display: flex;
+            gap: .5rem;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .summary-percent {
+            font-weight: 700;
+            min-width: 48px;
+            text-align: right;
+        }
+
+        .summary-label {
+            font-size: .9rem;
+            color: #333;
+        }
+
+        .summary-bar-track {
+            flex: 1;
+            background: #eee;
+            height: 14px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .summary-bar-fill {
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        .summary-bar-fill.fnj {
+            background: #d9534f;
+        }
+
+        .summary-bar-fill.fj {
+            background: #007bff;
+        }
+
+        .summary-bar-fill.p {
+            background: #5cb85c;
+        }
+    </style>
 </head>
 
 <body>
@@ -143,6 +255,20 @@
             </div>
         </div>
     </section>
+
+    <!-- Modal de confirmação de logout -->
+    <div id="logoutModal" class="hidden" role="dialog" aria-hidden="true" aria-labelledby="logoutModalTitle"
+        aria-modal="true">
+        <div class="modal-backdrop" data-dismiss="modal"></div>
+        <div class="modal-content">
+            <h2 id="logoutModalTitle">Confirmar saída</h2>
+            <p>Deseja realmente sair da conta?</p>
+            <div class="modal-actions">
+                <button class="btn btn-danger confirm-logout">Sair</button>
+                <button class="btn btn-secondary cancel-logout">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
     <script src="./assets/lógica/página-estudante.js"></script>
 </body>

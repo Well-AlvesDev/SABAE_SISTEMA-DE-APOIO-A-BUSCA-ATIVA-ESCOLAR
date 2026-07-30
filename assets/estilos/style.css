@@ -112,7 +112,8 @@ body.modal-aberto {
     font-size: 24px;
     width: 40px;
     height: 40px;
-    border-radius: 8px;
+    border-radius: 50%;
+    border: 1px solid rgba(198, 198, 198, 0.211);
     cursor: pointer;
     display: flex;
     align-items: center;
