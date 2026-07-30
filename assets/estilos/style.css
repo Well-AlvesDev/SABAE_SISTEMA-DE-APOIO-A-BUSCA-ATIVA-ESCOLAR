@@ -134,6 +134,66 @@ body.modal-aberto {
     background: rgba(255, 255, 255, 0.4);
 }
 
+.header-logo {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
+}
+
+.pwa-navbar {
+    display: flex;
+    gap: 10px;
+    padding: 14px 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #e8edf4;
+    box-shadow: 0 1px 4px rgba(18, 38, 63, 0.08);
+    position: sticky;
+    top: 64px;
+    z-index: 90;
+}
+
+.pwa-navbar-link {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 12px 8px;
+    border-radius: 16px;
+    text-decoration: none;
+    color: #2f3f60;
+    background: #f8fafd;
+    font-size: 12px;
+    font-weight: 700;
+    transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+}
+
+.pwa-navbar-link i {
+    font-size: 20px;
+}
+
+.pwa-navbar-link:hover,
+.pwa-navbar-link.active {
+    background: linear-gradient(135deg, #3880e4 0%, #174ea1 100%);
+    color: white;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+    .pwa-navbar {
+        gap: 8px;
+        padding: 10px 12px;
+    }
+
+    .pwa-navbar-link {
+        padding: 10px 6px;
+        font-size: 11px;
+    }
+}
+
 /* User Info Bar */
 .user-info-bar {
     display: flex;
@@ -674,14 +734,13 @@ body.modal-aberto {
 }
 
 .student-header {
-    background: #ffffff;
+    background: #f5f5f5;
     border-radius: 14px;
     box-shadow: 0 12px 30px rgba(216, 216, 216, 0.126);
     margin: 5px auto;
     max-width: 980px;
     padding: 24px;
 }
-
 
 .student-header-card {
     display: flex;
@@ -750,6 +809,92 @@ body.modal-aberto {
     font-weight: 700;
     color: #0d2b66;
 }
+
+.month-badges {
+    max-width: 980px;
+    margin: 18px auto 0;
+    padding: 0 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.month-badges-title {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1f315d;
+    padding: 12px 0;
+}
+
+.month-badges-note {
+    text-align: center;
+    font-size: 13px;
+    font-style: italic;
+    color: #5c6d89;
+    margin: -15px 0 8px;
+}
+
+.month-badge {
+    background: linear-gradient(135deg, #ffffff 0%, #f3f7ff 100%);
+    border: 1px solid #d7e0f2;
+    border-radius: 14px;
+    padding: 16px 18px;
+    color: #1f315d;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 4px 12px rgba(44, 90, 160, 0.08);
+}
+
+.month-badge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.month-badge-value {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.badge-fnj {
+    color: #e74c3c;
+}
+
+.badge-fj {
+    color: #2a6eb8;
+}
+
+.badge-p {
+    color: #28a745;
+}
+
+.month-badge:hover {
+    border-color: #a0b7e0;
+}
+
+.month-badge.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    background: linear-gradient(135deg, #f8f9fb 0%, #eef2f7 100%);
+    border-color: #d7dce5;
+}
+
+.month-badge.disabled .month-badge-value {
+    color: #6b7690;
+}
+
+.month-badge.disabled .month-badge-fill {
+    background: #cfd6e2;
+}
+
 
 .atividades-list {
     max-height: 180px;
