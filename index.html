@@ -7,7 +7,7 @@
     <title>SABAE - SISTEMA DE APOIO À BUSCA ATIVA ESCOLAR</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.min.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5108068051421110"
-     crossorigin="anonymous"></script>
+        crossorigin="anonymous"></script>
 </head>
 <style>
     * {
@@ -276,7 +276,9 @@
             </form>
         </div>
     </section>
-
+    <div class="raking">
+        <h1 style="text-align: center;">Ranking de Alunos</h1>
+    </div>
     <div id="loader-overlay" class="loader-overlay">
         <div class="loader-box">
             <div class="loader-spinner" id="loader-spinner"></div>
@@ -294,6 +296,23 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./assets/lógica/supabase-config.js"></script>
     <script src="./assets/lógica/auth.js"></script>
+    <script>
+        async function atualizarRankingAlunos() {
+            if (!window.supabaseClient?.rpc) return;
+
+            try {
+                const { data, error } = await supabaseClient.rpc('atualizar_ranking_alunos');
+                if (error) throw error;
+                console.log('Ranking atualizado com sucesso:', data);
+            } catch (erro) {
+                console.error('Erro ao atualizar ranking:', erro);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            atualizarRankingAlunos();
+        });
+    </script>
     <script>
         const frases = [
             "Estudar é o maior investimento que podes fazer em ti mesmo. — William Arthur Lewis",

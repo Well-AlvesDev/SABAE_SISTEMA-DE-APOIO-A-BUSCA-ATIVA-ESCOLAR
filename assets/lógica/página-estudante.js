@@ -279,21 +279,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function showHeaderMenu() {
+        headerMenu.classList.remove('hidden');
+        headerMenu.setAttribute('aria-hidden', 'false');
+        gsap.fromTo(headerMenu,
+            { opacity: 0, y: -12, scale: 0.95 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.24, ease: 'power2.out' }
+        );
+    }
+
+    function hideHeaderMenu() {
+        if (headerMenu.classList.contains('hidden')) return;
+        gsap.to(headerMenu, {
+            opacity: 0,
+            y: -12,
+            duration: 0.18,
+            ease: 'power2.in',
+            onComplete: () => {
+                headerMenu.classList.add('hidden');
+                headerMenu.setAttribute('aria-hidden', 'true');
+            }
+        });
+    }
+
     menuToggle.addEventListener('click', (e) => {
         e.stopPropagation();
-        headerMenu.classList.toggle('hidden');
-        const expanded = headerMenu.classList.contains('hidden') ? 'false' : 'true';
-        headerMenu.setAttribute('aria-hidden', expanded === 'true' ? 'false' : 'true');
+        if (headerMenu.classList.contains('hidden')) {
+            showHeaderMenu();
+        } else {
+            hideHeaderMenu();
+        }
     });
 
     // Fecha o menu ao clicar fora
     document.addEventListener('click', (e) => {
         if (!headerMenu.classList.contains('hidden')) {
             if (!headerMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-                headerMenu.classList.add('hidden');
-                headerMenu.setAttribute('aria-hidden', 'true');
+                hideHeaderMenu();
             }
         }
+    });
+
+    // Fecha o menu quando o usuário rola a página
+    window.addEventListener('scroll', () => {
+        hideHeaderMenu();
     });
 
     headerMenu.addEventListener('click', (e) => {
