@@ -435,6 +435,297 @@ $$;
 
 GRANT EXECUTE ON FUNCTION obter_turmas_disponiveis_nativo(TEXT) TO authenticated;
 
+-- ========== FUNÇÃO 5.1: Obter Top 5 Alunos por Sala com Mais Presença no Mês Atual (Nativa) ==========
+
+DROP FUNCTION IF EXISTS obter_top_10_alunos_por_sala_presenca_nativo(TEXT);
+
+CREATE OR REPLACE FUNCTION obter_top_10_alunos_por_sala_presenca_nativo(
+    p_email_usuario TEXT
+)
+RETURNS TABLE (
+    nome TEXT,
+    turma TEXT,
+    presencas INTEGER
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_mes_atual TEXT := EXTRACT(MONTH FROM CURRENT_DATE)::TEXT;
+    v_padrao TEXT := 'P:' || v_mes_atual;
+    v_tamanho_padrao INTEGER := length(v_padrao);
+BEGIN
+    RETURN QUERY
+    SELECT sub.nome, sub.turma, sub.presencas
+    FROM (
+        SELECT
+            d."NOME" AS nome,
+            d."TURMA" AS turma,
+            (
+                COALESCE(
+                    (length(COALESCE(d."1", '')) - length(regexp_replace(COALESCE(d."1", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."2", '')) - length(regexp_replace(COALESCE(d."2", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."3", '')) - length(regexp_replace(COALESCE(d."3", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."4", '')) - length(regexp_replace(COALESCE(d."4", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."5", '')) - length(regexp_replace(COALESCE(d."5", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."6", '')) - length(regexp_replace(COALESCE(d."6", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."7", '')) - length(regexp_replace(COALESCE(d."7", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."8", '')) - length(regexp_replace(COALESCE(d."8", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."9", '')) - length(regexp_replace(COALESCE(d."9", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."10", '')) - length(regexp_replace(COALESCE(d."10", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."11", '')) - length(regexp_replace(COALESCE(d."11", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."12", '')) - length(regexp_replace(COALESCE(d."12", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."13", '')) - length(regexp_replace(COALESCE(d."13", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."14", '')) - length(regexp_replace(COALESCE(d."14", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."15", '')) - length(regexp_replace(COALESCE(d."15", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."16", '')) - length(regexp_replace(COALESCE(d."16", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."17", '')) - length(regexp_replace(COALESCE(d."17", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."18", '')) - length(regexp_replace(COALESCE(d."18", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."19", '')) - length(regexp_replace(COALESCE(d."19", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."20", '')) - length(regexp_replace(COALESCE(d."20", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."21", '')) - length(regexp_replace(COALESCE(d."21", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."22", '')) - length(regexp_replace(COALESCE(d."22", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."23", '')) - length(regexp_replace(COALESCE(d."23", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."24", '')) - length(regexp_replace(COALESCE(d."24", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."25", '')) - length(regexp_replace(COALESCE(d."25", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."26", '')) - length(regexp_replace(COALESCE(d."26", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."27", '')) - length(regexp_replace(COALESCE(d."27", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."28", '')) - length(regexp_replace(COALESCE(d."28", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."29", '')) - length(regexp_replace(COALESCE(d."29", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."30", '')) - length(regexp_replace(COALESCE(d."30", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."31", '')) - length(regexp_replace(COALESCE(d."31", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                )
+            ) AS presencas,
+            row_number() OVER (PARTITION BY d."TURMA" ORDER BY (
+                COALESCE(
+                    (length(COALESCE(d."1", '')) - length(regexp_replace(COALESCE(d."1", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."2", '')) - length(regexp_replace(COALESCE(d."2", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."3", '')) - length(regexp_replace(COALESCE(d."3", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."4", '')) - length(regexp_replace(COALESCE(d."4", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."5", '')) - length(regexp_replace(COALESCE(d."5", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."6", '')) - length(regexp_replace(COALESCE(d."6", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."7", '')) - length(regexp_replace(COALESCE(d."7", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."8", '')) - length(regexp_replace(COALESCE(d."8", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."9", '')) - length(regexp_replace(COALESCE(d."9", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."10", '')) - length(regexp_replace(COALESCE(d."10", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."11", '')) - length(regexp_replace(COALESCE(d."11", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."12", '')) - length(regexp_replace(COALESCE(d."12", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."13", '')) - length(regexp_replace(COALESCE(d."13", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."14", '')) - length(regexp_replace(COALESCE(d."14", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."15", '')) - length(regexp_replace(COALESCE(d."15", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."16", '')) - length(regexp_replace(COALESCE(d."16", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."17", '')) - length(regexp_replace(COALESCE(d."17", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."18", '')) - length(regexp_replace(COALESCE(d."18", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."19", '')) - length(regexp_replace(COALESCE(d."19", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."20", '')) - length(regexp_replace(COALESCE(d."20", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."21", '')) - length(regexp_replace(COALESCE(d."21", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."22", '')) - length(regexp_replace(COALESCE(d."22", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."23", '')) - length(regexp_replace(COALESCE(d."23", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."24", '')) - length(regexp_replace(COALESCE(d."24", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."25", '')) - length(regexp_replace(COALESCE(d."25", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."26", '')) - length(regexp_replace(COALESCE(d."26", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."27", '')) - length(regexp_replace(COALESCE(d."27", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."28", '')) - length(regexp_replace(COALESCE(d."28", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."29", '')) - length(regexp_replace(COALESCE(d."29", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."30", '')) - length(regexp_replace(COALESCE(d."30", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                ) +
+                COALESCE(
+                    (length(COALESCE(d."31", '')) - length(regexp_replace(COALESCE(d."31", ''), v_padrao, '', 'g'))) / NULLIF(v_tamanho_padrao, 0),
+                    0
+                )
+            ) DESC,
+            random()
+        ) AS rn
+        FROM "SABAE-DATA" d
+        WHERE COALESCE(d."NOME", '') <> ''
+    ) sub
+    WHERE sub.rn <= 10
+    ORDER BY sub.turma ASC, sub.presencas DESC, random();
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION obter_top_10_alunos_por_sala_presenca_nativo(TEXT) TO authenticated;
+
 -- ========== FUNÇÃO 6: Deletar Aluno (BONUS) ==========
 
 DROP FUNCTION IF EXISTS deletar_aluno_nativo(TEXT, TEXT);

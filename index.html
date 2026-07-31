@@ -230,6 +230,99 @@
             margin: 0 10px;
         }
     }
+
+    /* Ranking Vue component styles */
+    .ranking-container {
+        max-width: 780px;
+        margin: 18px auto 28px;
+        background: #fff;
+        border: 1px solid #e6eef6;
+        padding: 12px 16px;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(13, 40, 64, 0.04);
+    }
+
+    .ranking-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .ranking-select {
+        padding: 8px 10px;
+        border: 1px solid #d1d9e0;
+        border-radius: 6px;
+        background: #f7fafc;
+        color: #203650;
+    }
+
+    .ranking-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .ranking-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        border-bottom: 1px solid #f1f6fb;
+    }
+
+    .ranking-item .left {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .rank-badge {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #eaf4ff;
+        color: #084a8a;
+        font-weight: 700;
+    }
+
+    .student-name {
+        font-weight: 600;
+        color: #16384f;
+    }
+
+    .student-turma {
+        color: #5a6370;
+        font-size: 13px
+    }
+
+    .student-presenca {
+        font-weight: 700;
+        color: #0b5e2b
+    }
+
+    /* Transition group */
+    .list-enter-from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    .list-enter-active {
+        transition: all 360ms cubic-bezier(.2, .9, .3, 1);
+    }
+
+    .list-leave-to {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    .list-leave-active {
+        transition: all 280ms ease;
+    }
 </style>
 
 <body>
@@ -277,7 +370,38 @@
         </div>
     </section>
     <div class="raking">
-        <h1 style="text-align: center;">Ranking de Alunos</h1>
+        <h1 style="text-align: center;">Ranking de Frequência</h1>
+    </div>
+
+    <div id="ranking-app" class="ranking-container" aria-live="polite">
+        <div class="ranking-header">
+            <div>
+                <strong>Ranking de Presença (mês atual)</strong>
+                <div style="font-size:13px;color:#5a6370">Escolha uma sala para visualizar os top 10</div>
+            </div>
+            <div>
+                <select class="ranking-select" v-model="selectedSala">
+                    <option v-for="s in salas" :key="s" :value="s">{{ s }}</option>
+                </select>
+            </div>
+        </div>
+
+        <div v-if="loading" style="text-align:center;padding:18px;color:#5a6370">Carregando...</div>
+        <div v-else>
+            <div v-if="salas.length === 0" style="text-align:center;padding:18px;color:#5a6370">Nenhuma turma
+                disponível.</div>
+            <transition-group name="list" tag="ul" class="ranking-list">
+                <li class="ranking-item" v-for="(aluno, idx) in filtered" :key="aluno.nome + '-' + idx">
+                    <div class="left">
+                        <div class="rank-badge" aria-hidden="true">{{ idx + 1 }}</div>
+                        <div>
+                            <div class="student-name">{{ aluno.nome }}</div>
+                            <div class="student-turma">{{ aluno.turma }}</div>
+                        </div>
+                    </div>
+                </li>
+            </transition-group>
+        </div>
     </div>
     <div id="loader-overlay" class="loader-overlay">
         <div class="loader-box">
@@ -293,15 +417,23 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./assets/lógica/supabase-config.js"></script>
     <script src="./assets/lógica/auth.js"></script>
     <script>
+        const CACHE_KEY_TOP10_POR_SALA_PRESENCA = 'sabae_top10_por_sala_presenca_cache';
+        const CACHE_TTL_TOP10_POR_SALA_MS = 12 * 60 * 60 * 1000; // 12 horas
+
         async function atualizarRankingAlunos() {
-            if (!window.supabaseClient?.rpc) return;
+            const client = window.supabaseClient || supabaseClient;
+            if (!client?.rpc) {
+                console.warn('Supabase client não disponível para atualizar ranking.');
+                return;
+            }
 
             try {
-                const { data, error } = await supabaseClient.rpc('atualizar_ranking_alunos');
+                const { data, error } = await client.rpc('atualizar_ranking_alunos');
                 if (error) throw error;
                 console.log('Ranking atualizado com sucesso:', data);
             } catch (erro) {
@@ -309,9 +441,109 @@
             }
         }
 
+        function salvarTop10PorSalaPresencaNoCache(dados) {
+            const cache = {
+                timestamp: Date.now(),
+                top10PorSala: dados
+            };
+            localStorage.setItem(CACHE_KEY_TOP10_POR_SALA_PRESENCA, JSON.stringify(cache));
+        }
+
+        function obterTop10PorSalaPresencaDoCache() {
+            try {
+                const raw = localStorage.getItem(CACHE_KEY_TOP10_POR_SALA_PRESENCA);
+                if (!raw) return null;
+                const cache = JSON.parse(raw);
+                if (!cache || !cache.timestamp || !Array.isArray(cache.top10PorSala)) return null;
+                if (Date.now() - cache.timestamp > CACHE_TTL_TOP10_POR_SALA_MS) {
+                    localStorage.removeItem(CACHE_KEY_TOP10_POR_SALA_PRESENCA);
+                    return null;
+                }
+                return cache.top10PorSala;
+            } catch (erro) {
+                console.warn('Erro ao ler cache Top 10 por sala de presença:', erro);
+                localStorage.removeItem(CACHE_KEY_TOP10_POR_SALA_PRESENCA);
+                return null;
+            }
+        }
+
+        async function carregarTop10PorSalaAlunosComMaisPresenca() {
+            const cache = obterTop10PorSalaPresencaDoCache();
+            if (cache) {
+                console.log('Top 10 por sala com mais presença carregado do cache:', cache);
+                return cache;
+            }
+
+            const client = window.supabaseClient || supabaseClient;
+            if (!client?.rpc) {
+                console.warn('Supabase client não disponível para carregar top 5 por sala de presença.');
+                return [];
+            }
+
+            try {
+                const usuario = await obterUsuarioAtual().catch(() => null);
+                const emailUsuario = usuario?.email || '';
+                const { data, error } = await client.rpc('obter_top_10_alunos_por_sala_presenca_nativo', {
+                    p_email_usuario: emailUsuario
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                if (!data) {
+                    return [];
+                }
+
+                salvarTop10PorSalaPresencaNoCache(data);
+                console.log('Top 10 por sala com mais presença obtido do servidor:', data);
+                return data;
+            } catch (erro) {
+                console.error('Erro ao carregar top 10 por sala com mais presença:', erro);
+                return [];
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             atualizarRankingAlunos();
+            carregarTop10PorSalaAlunosComMaisPresenca();
         });
+    </script>
+    <script>
+        (function () {
+            const { createApp } = Vue;
+
+            createApp({
+                data() {
+                    return {
+                        rankings: [],
+                        salas: [],
+                        selectedSala: '',
+                        loading: true
+                    };
+                },
+                computed: {
+                    filtered() {
+                        if (!this.selectedSala) return [];
+                        return this.rankings
+                            .filter(r => r.turma === this.selectedSala)
+                            .sort((a, b) => (b.presencas || 0) - (a.presencas || 0));
+                    }
+                },
+                async mounted() {
+                    try {
+                        const data = await carregarTop10PorSalaAlunosComMaisPresenca();
+                        this.rankings = Array.isArray(data) ? data : [];
+                        this.salas = Array.from(new Set(this.rankings.map(r => r.turma))).sort();
+                        this.selectedSala = this.salas[0] || '';
+                    } catch (e) {
+                        console.error('Erro ao inicializar ranking Vue:', e);
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }).mount('#ranking-app');
+        })();
     </script>
     <script>
         const frases = [
