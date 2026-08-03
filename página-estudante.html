@@ -58,6 +58,12 @@
             color: #fff;
         }
 
+        .btn-success {
+            margin-top: 20px;
+            background: #28a745;
+            color: #fff;
+        }
+
         .btn-secondary {
             background: #f0f0f0;
         }
@@ -184,6 +190,125 @@
             font-weight: 600;
             text-decoration: underline;
         }
+
+        .month-badge {
+            cursor: pointer;
+        }
+
+        #monthDetailModal.hidden {
+            display: none;
+        }
+
+        #monthDetailModal {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            z-index: 1000;
+        }
+
+        #monthDetailModal .modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .month-detail-modal-content {
+            position: relative;
+            background: #fff;
+            padding: 1.25rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            max-width: 760px;
+            width: calc(100% - 32px);
+            z-index: 1;
+            max-height: 80vh;
+            overflow: auto;
+        }
+
+        .month-detail-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .month-detail-close-btn {
+            border: none;
+            background: #f0f4ff;
+            color: #1f315d;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .month-detail-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .month-detail-days {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+            gap: 0.6rem;
+        }
+
+        .month-day-bubble {
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            font-weight: 700;
+            color: #fff;
+            background: #d1d5db;
+            margin: 0 auto;
+        }
+
+        .month-day-bubble.p {
+            background: #28a745;
+        }
+
+        .month-day-bubble.fnj {
+            background: #d9534f;
+        }
+
+        .month-day-bubble.fj {
+            background: #1f77d0;
+        }
+
+        .month-day-bubble.empty {
+            background: #e5e7eb;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            opacity: 0.45;
+            filter: grayscale(0.25);
+        }
+
+        .month-detail-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            font-size: 0.95rem;
+            color: #4b5563;
+        }
+
+        .month-detail-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .month-detail-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
     </style>
 </head>
 
@@ -199,10 +324,6 @@
         <div class="header-right">
             <button id="menuToggle" class="header-menu" aria-label="Mais opções"><i class="ri-more-2-fill"></i></button>
             <div id="headerMenu" class="header-action-menu hidden" role="menu" aria-hidden="true">
-                <button class="menu-item" data-action="request-justification"><i class="ri-message-ai-3-line"></i>
-                    Solicitar justificativa de falta</button>
-                <button class="menu-item" data-action="change-password"><i class="ri-key-2-line"></i> Alterar minha
-                    senha</button>
                 <button class="menu-item" data-action="logout"><i class="ri-logout-box-r-line"></i> Sair da
                     conta</button>
             </div>
@@ -335,9 +456,22 @@
             </div>
             <input type="file" id="photoInput" accept="image/*">
             <div class="modal-actions">
-                <button class="btn btn-danger" id="savePhotoBtn" disabled>Salvar foto</button>
+                <button class="btn btn-success" id="savePhotoBtn" disabled>Salvar foto</button>
                 <button class="btn btn-secondary" id="cancelPhotoBtn">Cancelar</button>
             </div>
+        </div>
+    </div>
+
+    <div id="monthDetailModal" class="hidden" role="dialog" aria-hidden="true" aria-labelledby="monthDetailModalTitle"
+        aria-modal="true">
+        <div class="modal-backdrop" data-dismiss="month-detail-modal"></div>
+        <div class="month-detail-modal-content">
+            <div class="month-detail-modal-header">
+                <h2 id="monthDetailModalTitle">Detalhes do mês</h2>
+                <button type="button" class="month-detail-close-btn" id="closeMonthDetailBtn"
+                    aria-label="Fechar">×</button>
+            </div>
+            <div id="monthDetailBody" class="month-detail-body"></div>
         </div>
     </div>
 

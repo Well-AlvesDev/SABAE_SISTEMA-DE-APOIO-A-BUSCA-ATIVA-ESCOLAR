@@ -315,6 +315,77 @@ function classeBadgePorEstatistica(stats) {
     return 'green';
 }
 
+function obterDetalhesDoMes(aluno, mesIndex) {
+    const detalhes = [];
+    const diasNoMes = 31;
+
+    for (let dia = 1; dia <= diasNoMes; dia++) {
+        const valor = obterValorColunaDia(aluno, dia);
+        const registros = extrairRegistrosDeFrequencia(valor);
+        const registroDoMes = registros.find(registro => registro.mes === mesIndex + 1);
+
+        let status = '';
+        let titulo = 'Sem registro';
+
+        if (registroDoMes?.tipo === 'P') {
+            status = 'p';
+            titulo = 'Presença';
+        } else if (registroDoMes?.tipo === 'FNJ') {
+            status = 'fnj';
+            titulo = 'Falta não justificada';
+        } else if (registroDoMes?.tipo === 'FJ') {
+            status = 'fj';
+            titulo = 'Falta justificada';
+        }
+
+        detalhes.push({
+            dia,
+            status,
+            titulo
+        });
+    }
+
+    return detalhes;
+}
+
+function abrirDetalhesDoMes(aluno, mesIndex) {
+    const modal = document.getElementById('monthDetailModal');
+    const title = document.getElementById('monthDetailModalTitle');
+    const body = document.getElementById('monthDetailBody');
+
+    if (!modal || !title || !body) return;
+
+    const detalhes = obterDetalhesDoMes(aluno, mesIndex);
+    const nomeMes = mesesNomes[mesIndex] || 'Mês';
+    const diasComRegistro = detalhes.filter(item => item.status).length;
+
+    title.textContent = `${nomeMes} · ${diasComRegistro} registro${diasComRegistro === 1 ? '' : 's'}`;
+    body.innerHTML = `
+        <div class="month-detail-days">
+            ${detalhes.map(item => {
+        const classe = item.status ? `month-day-bubble ${item.status}` : 'month-day-bubble empty';
+        const titulo = item.status ? `${item.titulo} · Dia ${item.dia}` : `Sem registro · Dia ${item.dia}`;
+        return `<div class="${classe}" title="${titulo}">${item.dia}</div>`;
+    }).join('')}
+        </div>
+        <div class="month-detail-legend">
+            <span class="month-detail-legend-item"><span class="month-detail-dot" style="background:#28a745"></span> Presença (P)</span>
+            <span class="month-detail-legend-item"><span class="month-detail-dot" style="background:#d9534f"></span> Falta não justificada (FNJ)</span>
+            <span class="month-detail-legend-item"><span class="month-detail-dot" style="background:#1f77d0"></span> Falta justificada (FJ)</span>
+        </div>
+    `;
+
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+function fecharDetalhesDoMes() {
+    const modal = document.getElementById('monthDetailModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+}
+
 function renderizarBadgesDeFrequencia(aluno) {
     const container = document.querySelector('.month-badges');
     if (!container) return;
@@ -367,7 +438,7 @@ function renderizarBadgesDeFrequencia(aluno) {
         `;
 
         html += `
-            <div class="month-badge">
+            <div class="month-badge" data-mes-index="${index}">
                 <div class="month-badge-header">
                     <span>${mesNome}</span>
                     <span class="month-badge-value">${valorTexto}</span>
@@ -377,6 +448,14 @@ function renderizarBadgesDeFrequencia(aluno) {
     });
 
     container.innerHTML = html;
+
+    container.querySelectorAll('.month-badge').forEach((badge) => {
+        badge.addEventListener('click', () => {
+            const mesIndex = Number(badge.getAttribute('data-mes-index'));
+            if (!Number.isInteger(mesIndex)) return;
+            abrirDetalhesDoMes(aluno, mesIndex);
+        });
+    });
 }
 
 function montarHeaderEstudante() {
@@ -422,7 +501,26 @@ function montarHeaderEstudante() {
     renderizarBadgesDeFrequencia(aluno);
 }
 
-document.addEventListener('DOMContentLoaded', montarHeaderEstudante);
+document.addEventListener('DOMContentLoaded', () => {
+    montarHeaderEstudante();
+
+    const monthModal = document.getElementById('monthDetailModal');
+    const closeMonthBtn = document.getElementById('closeMonthDetailBtn');
+
+    closeMonthBtn?.addEventListener('click', fecharDetalhesDoMes);
+
+    monthModal?.addEventListener('click', (event) => {
+        if (event.target?.dataset?.dismiss === 'month-detail-modal') {
+            fecharDetalhesDoMes();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && monthModal && !monthModal.classList.contains('hidden')) {
+            fecharDetalhesDoMes();
+        }
+    });
+});
 
 // Header action menu handlers (três pontos)
 document.addEventListener('DOMContentLoaded', () => {
