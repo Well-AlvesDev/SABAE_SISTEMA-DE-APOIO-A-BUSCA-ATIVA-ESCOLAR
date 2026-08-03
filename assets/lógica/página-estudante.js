@@ -17,6 +17,200 @@ function obterAlunoDoCacheEstudante() {
     }
 }
 
+const FOTO_PERFIL_CACHE_KEY = 'sabae_foto_perfil_cache';
+
+function normalizarTextoValor(valor) {
+    return String(valor ?? '').trim();
+}
+
+function obterMatriculaDoAluno(aluno) {
+    return normalizarTextoValor(
+        aluno?.matricula || aluno?.mat || aluno?.MAT || aluno?.matricula_aluno || aluno?.matriculaAluno || aluno?.senha || ''
+    );
+}
+
+function obterNomeDoAluno(aluno) {
+    return normalizarTextoValor(
+        aluno?.nome || aluno?.nome_completo || aluno?.nomeCompleto || ''
+    );
+}
+
+function montarChaveDaConta(conta) {
+    const matricula = normalizarTextoValor(
+        conta?.matricula || conta?.mat || conta?.MAT || conta?.matricula_aluno || conta?.matriculaAluno || conta?.senha || ''
+    );
+    const nome = normalizarTextoValor(
+        conta?.nome || conta?.nome_completo || conta?.nomeCompleto || ''
+    );
+    const chave = `${matricula}::${nome}`.trim().toLowerCase();
+    return chave || 'conta-sem-identidade';
+}
+
+function obterMapaFotosPerfilDoCache() {
+    try {
+        const raw = localStorage.getItem(FOTO_PERFIL_CACHE_KEY);
+        if (!raw) return {};
+
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            return {};
+        }
+
+        if (parsed.dataUrl && parsed.metadata) {
+            const chave = montarChaveDaConta(parsed.metadata);
+            return { [chave]: parsed };
+        }
+
+        return Object.fromEntries(
+            Object.entries(parsed).filter(([, valor]) => valor && typeof valor === 'object' && valor.dataUrl)
+        );
+    } catch (erro) {
+        console.warn('Erro ao ler fotos de perfil do cache:', erro);
+        localStorage.removeItem(FOTO_PERFIL_CACHE_KEY);
+        return {};
+    }
+}
+
+function obterFotoPerfilDoCache(aluno) {
+    const mapa = obterMapaFotosPerfilDoCache();
+    const chave = montarChaveDaConta(aluno);
+    return mapa[chave] || null;
+}
+
+function salvarFotoPerfilNoCache(dataUrl, metadata) {
+    const mapa = obterMapaFotosPerfilDoCache();
+    const chave = montarChaveDaConta(metadata);
+    const cache = {
+        dataUrl,
+        metadata: {
+            matricula: normalizarTextoValor(metadata?.matricula || ''),
+            nome: normalizarTextoValor(metadata?.nome || '')
+        },
+        timestamp: Date.now()
+    };
+
+    mapa[chave] = cache;
+    localStorage.setItem(FOTO_PERFIL_CACHE_KEY, JSON.stringify(mapa));
+    return cache;
+}
+
+function fotoPerfilEhValidaParaAluno(fotoCache, aluno) {
+    if (!fotoCache?.dataUrl || !fotoCache?.metadata) return false;
+
+    const matriculaEsperada = obterMatriculaDoAluno(aluno);
+    const nomeEsperado = obterNomeDoAluno(aluno);
+
+    return (
+        normalizarTextoValor(fotoCache.metadata.matricula) === matriculaEsperada &&
+        normalizarTextoValor(fotoCache.metadata.nome) === nomeEsperado
+    );
+}
+
+function aplicarFotoPerfilDoCache(aluno) {
+    const img = document.getElementById('studentProfileImage');
+    if (!img) return;
+
+    const fotoCache = obterFotoPerfilDoCache(aluno);
+    if (fotoCache && fotoPerfilEhValidaParaAluno(fotoCache, aluno)) {
+        img.src = fotoCache.dataUrl;
+        img.alt = `Foto de ${obterNomeDoAluno(aluno) || 'estudante'}`;
+        return;
+    }
+
+    img.src = './assets/imagens/ico/image.png';
+    img.alt = 'Foto do estudante';
+}
+
+function configurarModalFotoPerfil(aluno) {
+    const openBtn = document.getElementById('changePhotoBtn');
+    const modal = document.getElementById('photoModal');
+    const input = document.getElementById('photoInput');
+    const preview = document.getElementById('photoPreview');
+    const saveBtn = document.getElementById('savePhotoBtn');
+    const cancelBtn = document.getElementById('cancelPhotoBtn');
+    const backdrop = modal ? modal.querySelector('.modal-backdrop') : null;
+
+    if (!modal || !openBtn || !input || !preview || !saveBtn) return;
+
+    let fotoSelecionadaDataUrl = '';
+
+    function fecharModal() {
+        modal.classList.add('hidden');
+        modal.setAttribute('aria-hidden', 'true');
+        input.value = '';
+        fotoSelecionadaDataUrl = '';
+        preview.src = './assets/imagens/ico/image.png';
+        saveBtn.disabled = true;
+    }
+
+    function abrirModal() {
+        modal.classList.remove('hidden');
+        modal.setAttribute('aria-hidden', 'false');
+        input.value = '';
+        fotoSelecionadaDataUrl = '';
+        preview.src = './assets/imagens/ico/image.png';
+        saveBtn.disabled = true;
+        setTimeout(() => input.focus(), 50);
+    }
+
+    openBtn.addEventListener('click', abrirModal);
+    cancelBtn?.addEventListener('click', fecharModal);
+
+    backdrop?.addEventListener('click', (evento) => {
+        if (evento.target?.dataset?.dismiss === 'photo-modal') {
+            fecharModal();
+        }
+    });
+
+    input.addEventListener('change', (evento) => {
+        const arquivo = evento.target.files?.[0];
+        if (!arquivo) {
+            saveBtn.disabled = true;
+            return;
+        }
+
+        if (!arquivo.type.startsWith('image/')) {
+            alert('Selecione um arquivo de imagem válido.');
+            saveBtn.disabled = true;
+            return;
+        }
+
+        const leitor = new FileReader();
+        leitor.onload = () => {
+            fotoSelecionadaDataUrl = leitor.result;
+            preview.src = fotoSelecionadaDataUrl;
+            saveBtn.disabled = false;
+        };
+        leitor.onerror = () => {
+            alert('Não foi possível ler a imagem selecionada.');
+        };
+        leitor.readAsDataURL(arquivo);
+    });
+
+    saveBtn.addEventListener('click', () => {
+        if (!fotoSelecionadaDataUrl) return;
+
+        salvarFotoPerfilNoCache(fotoSelecionadaDataUrl, {
+            matricula: obterMatriculaDoAluno(aluno),
+            nome: obterNomeDoAluno(aluno)
+        });
+
+        const img = document.getElementById('studentProfileImage');
+        if (img) {
+            img.src = fotoSelecionadaDataUrl;
+            img.alt = `Foto de ${obterNomeDoAluno(aluno) || 'estudante'}`;
+        }
+
+        fecharModal();
+    });
+
+    document.addEventListener('keydown', (evento) => {
+        if (evento.key === 'Escape' && !modal.classList.contains('hidden')) {
+            fecharModal();
+        }
+    });
+}
+
 const mesesNomes = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
@@ -209,8 +403,9 @@ function montarHeaderEstudante() {
     container.innerHTML = `
         <div class="student-header-card">
             <div class="student-header-avatar">
-                <img src="./assets/imagens/ico/image.webp" alt="Foto do estudante">
+                <img id="studentProfileImage" src="./assets/imagens/ico/image.png" alt="Foto do estudante">
             </div>
+            <button type="button" class="profile-photo-action" id="changePhotoBtn">Alterar foto de perfil</button>
             <div class="student-header-info">
                 <h1>${nome}</h1>
                 <div class="student-header-meta">
@@ -222,6 +417,8 @@ function montarHeaderEstudante() {
         </div>
     `;
 
+    aplicarFotoPerfilDoCache(aluno);
+    configurarModalFotoPerfil(aluno);
     renderizarBadgesDeFrequencia(aluno);
 }
 

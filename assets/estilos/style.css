@@ -1440,7 +1440,7 @@ main {
 }
 
 .header-action-menu .menu-item:hover {
-    background: #f5f7fb4b;
+    background: #cccccc4b;
 }
 
 @media (max-width: 600px) {
