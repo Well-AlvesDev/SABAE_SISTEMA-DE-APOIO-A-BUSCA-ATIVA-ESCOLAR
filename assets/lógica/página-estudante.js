@@ -421,7 +421,7 @@ function renderizarBadgesDeFrequencia(aluno) {
         </div>
 
         <div class="month-badges-title">- Referente ao ano de ${anoAtual} -</div>
-        <p class="month-badges-note">Aviso: Registros de chamadas de anos anteriores são apagados do sistema do SABAE para evitar sobrecarga no servidor. Mas os registros ainda podem ser encontrados no SIEPE ou secretaria da sua escola.</p>
+        <p class="month-badges-note">Clique no card de mês desejado para visualizar informações detalhadas sobre sua frequência.</p>
     `;
 
     estatisticas.forEach((stats, index) => {
@@ -441,7 +441,10 @@ function renderizarBadgesDeFrequencia(aluno) {
             <div class="month-badge" data-mes-index="${index}">
                 <div class="month-badge-header">
                     <span>${mesNome}</span>
-                    <span class="month-badge-value">${valorTexto}</span>
+                    <div class="month-badge-right">
+                        <span class="month-badge-value">${valorTexto}</span>
+                        <i class="ri-arrow-right-s-line month-badge-arrow" aria-hidden="true"></i>
+                    </div>
                 </div>
             </div>
         `;

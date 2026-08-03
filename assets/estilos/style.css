@@ -865,6 +865,18 @@ body.modal-aberto {
     font-weight: 600;
 }
 
+.month-badge-right {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    justify-content: flex-end;
+}
+
+.month-badge-arrow {
+    font-size: 1.55rem;
+    color: #4b5563;
+}
+
 .badge-fnj {
     color: #e74c3c;
 }
